@@ -200,6 +200,47 @@ $user_name = ''; // укажите здесь ваше имя
                 </ul>
             </div>
         </div>
+<?php
+$posts = [
+    [
+    'title' => 'Цитата',
+    'type' => 'post-quote',
+    'content' => 'Мы в жизни любим только раз, а после ищем лишь похожих',
+    'author' => 'Лариса',
+    'avatar' => 'userpic-larisa-small.jpg'
+    ],
+    [
+    'title' => 'Игра престолов',
+    'type' => 'post-text',
+    'content' => 'Не могу дождаться начала финального сезона своего любимого сериала!',
+    'author' => 'Владик',
+    'avatar' => 'userpic.jpg'
+    ],
+    [
+    'title' => 'Наконец, обработал фотки!',
+    'type' => 'post-photo',
+    'content' => 'rock-medium.jpg',
+    'author' => 'Виктор',
+    'avatar' => 'userpic-mark.jpg'
+    ],
+    [
+    'title' => 'Моя мечта',
+    'type' => 'post-photo',
+    'content' => 'coast-medium.jpg',
+    'author' => 'Лариса',
+    'avatar' => 'userpic-larisa-small.jpg'
+    ],
+    [
+    'title' => 'Лучшие курсы',
+    'type' => 'post-link',
+    'content' => 'www.htmlacademy.ru',
+    'author' => 'Владик',
+    'avatar' => 'userpic.jpg'
+    ]
+];
+
+?>
+
         <div class="popular__posts">
             <div class="visually-hidden" id="donor">
                 <!--содержимое для поста-цитаты-->
@@ -248,9 +289,11 @@ $user_name = ''; // укажите здесь ваше имя
                 <p><!--здесь текст--></p>
             </div>
 
+
+<?php foreach ($posts as $key => $val): ?>
             <article class="popular__post post">
                 <header class="post__header">
-                    <h2><!--здесь заголовок--></h2>
+                    <h2><?=$val['title'];?><!--здесь заголовок--></h2>
                 </header>
                 <div class="post__main">
                     <!--здесь содержимое карточки-->
@@ -291,6 +334,7 @@ $user_name = ''; // укажите здесь ваше имя
                     </div>
                 </footer>
             </article>
+<?php endforeach; ?>
         </div>
     </div>
 </section>
