@@ -1,7 +1,7 @@
 <?php
 $is_auth = rand(0, 1);
 
-$user_name = ''; // укажите здесь ваше имя
+$user_name = 'Стас';
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -41,6 +41,7 @@ $user_name = ''; // укажите здесь ваше имя
         </form>
         <div class="header__nav-wrapper">
             <!-- здесь должен быть PHP код, который показывает следующий тег по условию -->
+            <?php if ($is_auth == 1): ?>
             <nav class="header__nav">
                 <ul class="header__my-nav">
                     <li class="header__my-page header__my-page--popular">
@@ -110,6 +111,7 @@ $user_name = ''; // укажите здесь ваше имя
                     </li>
                 </ul>
             </nav>
+            <?php endif; ?>
         </div>
     </div>
 </header>
@@ -201,86 +203,81 @@ $user_name = ''; // укажите здесь ваше имя
             </div>
         </div>
 
-<?php $posts = [
+<?php
+$cards = [
     [
     'title' => 'Цитата',
     'type' => 'post-quote',
     'content' => 'Мы в жизни любим только раз, а после ищем лишь похожих',
-    'author' => 'Лариса',
+    'user_name' => 'Лариса',
     'avatar' => 'userpic-larisa-small.jpg'
     ],
     [
     'title' => 'Игра престолов',
     'type' => 'post-text',
     'content' => 'Не могу дождаться начала финального сезона своего любимого сериала!',
-    'author' => 'Владик',
+    'user_name' => 'Владик',
     'avatar' => 'userpic.jpg'
-    ],
+    ], 
     [
     'title' => 'Наконец, обработал фотки!',
     'type' => 'post-photo',
     'content' => 'rock-medium.jpg',
-    'author' => 'Виктор',
+    'user_name' => 'Виктор',
     'avatar' => 'userpic-mark.jpg'
     ],
     [
     'title' => 'Моя мечта',
     'type' => 'post-photo',
     'content' => 'coast-medium.jpg',
-    'author' => 'Лариса',
+    'user_name' => 'Лариса',
     'avatar' => 'userpic-larisa-small.jpg'
     ],
     [
     'title' => 'Лучшие курсы',
     'type' => 'post-link',
     'content' => 'www.htmlacademy.ru',
-    'author' => 'Владик',
+    'user_name' => 'Владик',
     'avatar' => 'userpic.jpg'
     ]
 ];
-
 ?>
 
-<?php foreach ($posts as $key => $val): ?>
-            <article class="popular__post post">
+<?php foreach ($cards as $card): ?>
+        <article class="popular__post post <?= ($card['type']) ?>">
                 <header class="post__header">
-                    <h2><?php echo $val['title']; ?><!--здесь заголовок--></h2>
+                    <h2><?= ($card['title']) ?></h2>
                 </header>
                 <div class="post__main">
-                <!--здесь содержимое карточки-->
-<?php if ($val['type']=="post-quote"): ?>
-                <!--содержимое для поста-цитаты-->
+        <?php if ($card['type'] == 'post-quote'): ?>
                 <blockquote>
                     <p>
-                        <!--здесь текст--><?php echo $val['content']; ?>
+                        <?= ($card['content']) ?>
                     </p>
                     <cite>Неизвестный Автор</cite>
                 </blockquote>
-<?php elseif ($val['type']=="post-link"): ?>
-                <!--содержимое для поста-ссылки-->
+        <?php elseif ($card['type'] == 'post-link'): ?>
                 <div class="post-link__wrapper">
-                    <a class="post-link__external" href="http://<?php echo $val['content']; ?>" title="Перейти по ссылке">
+                    <a class="post-link__external" href="http://<?= $card['content'] ?>" title="Перейти по ссылке"> 
                         <div class="post-link__info-wrapper">
                             <div class="post-link__icon-wrapper">
-                                <img src="https://www.google.com/s2/favicons?domain=vitadental.ru" alt="Иконка">
+                            <img src="https://www.google.com/s2/favicons?domain=<?=  $card['content'] ?>" alt="Иконка">
                             </div>
                             <div class="post-link__info">
-                                <h3><?php echo $val['title']; ?><!--здесь заголовок--></h3>
+                                <h3><?= $card['title'] ?></h3>
                             </div>
                         </div>
-                        <span><?php echo $val['content']; ?><!--здесь ссылка--></span>
+                        <span><?= $card['content'] ?></span>
                     </a>
                 </div>
-<?php elseif ($val['type']=="post-photo"): ?>
-                <!--содержимое для поста-фото-->
+        <?php elseif ($card['type'] == 'post-photo'): ?>
                 <div class="post-photo__image-wrapper">
-                    <img src="img/<?php echo $val['content']; ?>" alt="Фото от пользователя" width="360" height="240">
+                    <img src="img/<?= $card['content'] ?>" alt="Фото от пользователя" width="360" height="240">
                 </div>
-<?php elseif ($val['type']=="post-video"): ?>
-                <!--содержимое для поста-видео-->
+        <?php elseif ($card['type'] == 'post-video'): ?>
                 <div class="post-video__block">
                     <div class="post-video__preview">
-                        <? /* вставьте ссылку на видео */  ?>
+                    <?=  $card['content'] ?>
                         <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
                     </div>
                     <a href="post-details.html" class="post-video__play-big button">
@@ -290,20 +287,18 @@ $user_name = ''; // укажите здесь ваше имя
                         <span class="visually-hidden">Запустить проигрыватель</span>
                     </a>
                 </div>
-<?php elseif ($val['type']=="post-text"): ?>
-                <!--содержимое для поста-текста-->
-                <p><?php echo $val['content']; ?><!--здесь текст--></p>
-<?php endif; ?> 
+        <?php elseif ($card['type'] == 'post-text'): ?>
+                <p><?= $card['content'] ?></p>
+    <?php endif; ?> 
                 </div>
                 <footer class="post__footer">
                     <div class="post__author">
                         <a class="post__author-link" href="#" title="Автор">
                             <div class="post__avatar-wrapper">
-                                <!--укажите путь к файлу аватара-->
-                                <img class="post__author-avatar" src="img/<?php echo $val['avatar']; ?>" alt="Аватар пользователя">
+                                <img class="post__author-avatar" src="img/<?= ($card['avatar']) ?>" alt="Аватар пользователя">
                             </div>
                             <div class="post__info">
-                                <b class="post__author-name"><!--здесь имя пользоателя--></b>
+                            <b class="post__author-name"><?= ($card['user_name']) ?></b>
                                 <time class="post__time" datetime="">дата</time>
                             </div>
                         </a>

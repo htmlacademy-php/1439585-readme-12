@@ -1,7 +1,7 @@
 # Личный проект «Readme»
 
-* Студент: [Станислав Киселёв](https://up.htmlacademy.ru/php/12/user/1439585).
-* Наставник: Николай Янкин.
+* Студент: [Наталья Киселева](https://up.htmlacademy.ru/php/12/user/1439585).
+* Наставник: [Владислав Зайко] (https://htmlacademy.ru/profile/id1318369)
 
 ---
 
