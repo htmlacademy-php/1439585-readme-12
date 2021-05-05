@@ -2,6 +2,44 @@
 $is_auth = rand(0, 1);
 
 $user_name = 'Стас';
+
+$cards = [
+    [
+    'title' => 'Цитата',
+    'type' => 'post-quote',
+    'content' => 'Мы в жизни любим только раз, а после ищем лишь похожих',
+    'user_name' => 'Лариса',
+    'avatar' => 'userpic-larisa-small.jpg'
+    ],
+    [
+    'title' => 'Игра престолов',
+    'type' => 'post-text',
+    'content' => 'Не могу дождаться начала финального сезона своего любимого сериала!',
+    'user_name' => 'Владик',
+    'avatar' => 'userpic.jpg'
+    ], 
+    [
+    'title' => 'Наконец, обработал фотки!',
+    'type' => 'post-photo',
+    'content' => 'rock-medium.jpg',
+    'user_name' => 'Виктор',
+    'avatar' => 'userpic-mark.jpg'
+    ],
+    [
+    'title' => 'Моя мечта',
+    'type' => 'post-photo',
+    'content' => 'coast-medium.jpg',
+    'user_name' => 'Лариса',
+    'avatar' => 'userpic-larisa-small.jpg'
+    ],
+    [
+    'title' => 'Лучшие курсы',
+    'type' => 'post-link',
+    'content' => 'www.htmlacademy.ru',
+    'user_name' => 'Владик',
+    'avatar' => 'userpic.jpg'
+    ]
+];
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -41,7 +79,6 @@ $user_name = 'Стас';
         </form>
         <div class="header__nav-wrapper">
             <!-- здесь должен быть PHP код, который показывает следующий тег по условию -->
-            <?php if ($is_auth == 1): ?>
             <nav class="header__nav">
                 <ul class="header__my-nav">
                     <li class="header__my-page header__my-page--popular">
@@ -60,6 +97,7 @@ $user_name = 'Стас';
                         </a>
                     </li>
                 </ul>
+                <?php if ($is_auth == 1): ?>
                 <!-- здесь должен быть PHP код, который показывает следующий тег по условию -->
                 <ul class="header__user-nav">
                     <li class="header__profile">
@@ -94,7 +132,6 @@ $user_name = 'Стас';
                           </span>
                                         </a>
                                     </li>
-
                                     <li class="header__profile-nav-item">
                                         <a class="header__profile-nav-link" href="#">
                           <span class="header__profile-nav-text">
@@ -110,8 +147,8 @@ $user_name = 'Стас';
                         <a class="header__post-button button button--transparent" href="adding-post.html">Пост</a>
                     </li>
                 </ul>
+                <?php endif; ?>
             </nav>
-            <?php endif; ?>
         </div>
     </div>
 </header>
@@ -202,66 +239,26 @@ $user_name = 'Стас';
                 </ul>
             </div>
         </div>
-
-<?php
-$cards = [
-    [
-    'title' => 'Цитата',
-    'type' => 'post-quote',
-    'content' => 'Мы в жизни любим только раз, а после ищем лишь похожих',
-    'user_name' => 'Лариса',
-    'avatar' => 'userpic-larisa-small.jpg'
-    ],
-    [
-    'title' => 'Игра престолов',
-    'type' => 'post-text',
-    'content' => 'Не могу дождаться начала финального сезона своего любимого сериала!',
-    'user_name' => 'Владик',
-    'avatar' => 'userpic.jpg'
-    ], 
-    [
-    'title' => 'Наконец, обработал фотки!',
-    'type' => 'post-photo',
-    'content' => 'rock-medium.jpg',
-    'user_name' => 'Виктор',
-    'avatar' => 'userpic-mark.jpg'
-    ],
-    [
-    'title' => 'Моя мечта',
-    'type' => 'post-photo',
-    'content' => 'coast-medium.jpg',
-    'user_name' => 'Лариса',
-    'avatar' => 'userpic-larisa-small.jpg'
-    ],
-    [
-    'title' => 'Лучшие курсы',
-    'type' => 'post-link',
-    'content' => 'www.htmlacademy.ru',
-    'user_name' => 'Владик',
-    'avatar' => 'userpic.jpg'
-    ]
-];
-?>
-
-<?php foreach ($cards as $card): ?>
-        <article class="popular__post post <?= ($card['type']) ?>">
+        <div class="popular__posts"> 
+        <?php foreach ($cards as $card): ?>
+            <article class="popular__post post <?= $card['type'] ?>">
                 <header class="post__header">
-                    <h2><?= ($card['title']) ?></h2>
+                    <h2><?= $card['title'] ?></h2>
                 </header>
                 <div class="post__main">
-        <?php if ($card['type'] == 'post-quote'): ?>
-                <blockquote>
-                    <p>
-                        <?= ($card['content']) ?>
-                    </p>
-                    <cite>Неизвестный Автор</cite>
-                </blockquote>
-        <?php elseif ($card['type'] == 'post-link'): ?>
+                <?php if ($card['type'] == 'post-quote'): ?>
+                    <blockquote>
+                        <p>
+                            <?= $card['content'] ?>
+                        </p>
+                        <cite>Неизвестный Автор</cite>
+                    </blockquote>
+                <?php elseif ($card['type'] == 'post-link'): ?>
                 <div class="post-link__wrapper">
                     <a class="post-link__external" href="http://<?= $card['content'] ?>" title="Перейти по ссылке"> 
                         <div class="post-link__info-wrapper">
                             <div class="post-link__icon-wrapper">
-                            <img src="https://www.google.com/s2/favicons?domain=<?=  $card['content'] ?>" alt="Иконка">
+                                <img src="https://www.google.com/s2/favicons?domain=<?=  $card['content'] ?>" alt="Иконка">
                             </div>
                             <div class="post-link__info">
                                 <h3><?= $card['title'] ?></h3>
@@ -270,14 +267,14 @@ $cards = [
                         <span><?= $card['content'] ?></span>
                     </a>
                 </div>
-        <?php elseif ($card['type'] == 'post-photo'): ?>
+                <?php elseif ($card['type'] == 'post-photo'): ?>
                 <div class="post-photo__image-wrapper">
                     <img src="img/<?= $card['content'] ?>" alt="Фото от пользователя" width="360" height="240">
                 </div>
-        <?php elseif ($card['type'] == 'post-video'): ?>
+                <?php elseif ($card['type'] == 'post-video'): ?>
                 <div class="post-video__block">
                     <div class="post-video__preview">
-                    <?=  $card['content'] ?>
+                    <?= $card['content'] ?>
                         <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
                     </div>
                     <a href="post-details.html" class="post-video__play-big button">
@@ -287,18 +284,18 @@ $cards = [
                         <span class="visually-hidden">Запустить проигрыватель</span>
                     </a>
                 </div>
-        <?php elseif ($card['type'] == 'post-text'): ?>
-                <p><?= $card['content'] ?></p>
-    <?php endif; ?> 
+                <?php elseif ($card['type'] == 'post-text'): ?>
+                    <p><?= $card['content'] ?></p>
+                <?php endif; ?>
                 </div>
                 <footer class="post__footer">
                     <div class="post__author">
                         <a class="post__author-link" href="#" title="Автор">
                             <div class="post__avatar-wrapper">
-                                <img class="post__author-avatar" src="img/<?= ($card['avatar']) ?>" alt="Аватар пользователя">
+                                <img class="post__author-avatar" src="img/<?= $card['avatar'] ?>" alt="Аватар пользователя">
                             </div>
                             <div class="post__info">
-                            <b class="post__author-name"><?= ($card['user_name']) ?></b>
+                                <b class="post__author-name"><?= $card['user_name'] ?></b>
                                 <time class="post__time" datetime="">дата</time>
                             </div>
                         </a>
@@ -326,7 +323,7 @@ $cards = [
                     </div>
                 </footer>
             </article>
-<?php endforeach; ?>
+        <?php endforeach; ?>
         </div>
     </div>
 </section>
