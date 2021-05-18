@@ -38,8 +38,40 @@ $cards = [
     'content' => 'www.htmlacademy.ru',
     'user_name' => 'Владик',
     'avatar' => 'userpic.jpg'
+    ],
+    [
+    'title' => 'Все лгут. Поисковики, Big Data и Интернет',
+    'type' => 'post-text',
+    'content' => 'Однако этот набор данных – не единственный инструмент для понимания нашего мира, предоставляемый интернетом. Вскоре я понял, что есть и другие золотоносные цифровые жилы. Я скачал всю Википедию, покопался в профилях Facebook и прошерстил Stormfront. Кроме того, PornHub, один из крупнейших порнографических сайтов интернета, дал мне свои полные данные по анонимному поиску и просмотрам видео, которые совершали люди со всего мира.',
+    'user_name' => 'Владик',
+    'avatar' => 'userpic.jpg'
+    ],
+    [
+    'title' => 'Все лгут. Поисковики, Big Data',
+    'type' => 'post-text',
+    'content' => 'Сначала должен признаться: я не собираюсь давать точное определение того, что такое «большие данные». Почему? Потому что это, по сути, довольно расплывчатое понятие',
+    'user_name' => 'Владик',
+    'avatar' => 'userpic.jpg'
     ]
 ];
+
+function cut_text($text, $lenght = 300) {
+    $arr_text=explode(' ', $text);
+	$count=0;
+    foreach ($arr_text as $key=>$a_text) {
+		$count=$count+(iconv_strlen($a_text));
+		if ($count > $lenght) {
+        	break; 
+		}
+    }
+	if ($count < $lenght) {
+        return '<p>'.implode(' ',$arr_text).'</p>';
+		}
+    else {
+        return '<p>'.implode(' ',array_slice($arr_text,0,$key)).'...'.'</p> <a class="post-text__more-link" href="#">Читать далее</a>';
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -119,24 +151,24 @@ $cards = [
                                     <ul class="header__profile-nav">
                                         <li class="header__profile-nav-item">
                                             <a class="header__profile-nav-link" href="#">
-                            <span class="header__profile-nav-text">
-                                Мой профиль
-                            </span>
+                                                <span class="header__profile-nav-text">
+                                                    Мой профиль
+                                                </span>
                                             </a>
                                         </li>
                                         <li class="header__profile-nav-item">
                                             <a class="header__profile-nav-link" href="#">
-                            <span class="header__profile-nav-text">
-                                Сообщения
-                                <i class="header__profile-indicator">2</i>
-                            </span>
+                                                <span class="header__profile-nav-text">
+                                                    Сообщения
+                                                    <i class="header__profile-indicator">2</i>
+                                                </span>
                                             </a>
                                         </li>
                                         <li class="header__profile-nav-item">
                                             <a class="header__profile-nav-link" href="#">
-                            <span class="header__profile-nav-text">
-                                Выход
-                            </span>
+                                                <span class="header__profile-nav-text">
+                                                    Выход
+                                                </span>
                                             </a>
                                         </li>
                                     </ul>
@@ -285,7 +317,7 @@ $cards = [
                                 </a>
                             </div>
                         <?php elseif ($card['type'] == 'post-text'): ?>
-                            <p><?= $card['content'] ?></p>
+                            <p><?= cut_text($card['content']) ?></p>
                         <?php endif; ?>
                     </div>
                     <footer class="post__footer">
