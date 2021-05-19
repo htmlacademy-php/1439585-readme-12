@@ -55,20 +55,20 @@ $cards = [
     ]
 ];
 
-function cut_text($text, $lenght = 300) {
-    $arr_text=explode(' ', $text);
+function cutCardContent($cardContent, $lenght = 300) {
+    $words=explode(' ', $cardContent);
 	$count=0;
-    foreach ($arr_text as $key=>$a_text) {
-		$count=$count+(iconv_strlen($a_text));
+    foreach ($words as $key=>$nextWord) {
+		$count=$count+(iconv_strlen($nextWord));
 		if ($count > $lenght) {
         	break; 
 		}
     }
 	if ($count < $lenght) {
-        return '<p>'.implode(' ',$arr_text).'</p>';
+        return '<p>'.implode(' ',$words).'</p>';
 		}
     else {
-        return '<p>'.implode(' ',array_slice($arr_text,0,$key)).'...'.'</p> <a class="post-text__more-link" href="#">Читать далее</a>';
+        return '<p>'.implode(' ',array_slice($words,0,$key)).'...'.'</p> <a class="post-text__more-link" href="#">Читать далее</a>';
     }
 }
 
@@ -317,7 +317,7 @@ function cut_text($text, $lenght = 300) {
                                 </a>
                             </div>
                         <?php elseif ($card['type'] == 'post-text'): ?>
-                            <p><?= cut_text($card['content']) ?></p>
+                            <p><?= cutCardContent($card['content']) ?></p>
                         <?php endif; ?>
                     </div>
                     <footer class="post__footer">
