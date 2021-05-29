@@ -1,5 +1,5 @@
 <?php
-
+$is_auth = rand(0, 1);
 $user_name = 'Стас';
 
 $cards = [
@@ -65,9 +65,9 @@ function cutCardContent($cardContent, $lenght = 300)
         }
     }
     if ($count < $lenght) {
-        return '<p>' . implode(' ', $words) . '</p>';
+        return htmlspecialchars(implode(' ', $words));
     } else {
-        return '<p>' . implode(' ', array_slice($words, 0, $key)) . '...' . '</p> <a class="post-text__more-link" href="#">Читать далее</a>';
+        return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
     }
 }
 
@@ -75,6 +75,6 @@ require_once('helpers.php');
 
 $mainContent = include_template('main.php', ['cards' => $cards]);
 
-$popularPage = include_template('layout.php', ['mainContent' => $mainContent, 'user_name' => $user_name, 'titleName' => 'readme: популярное']);
+$popularPage = include_template('layout.php', ['mainContent' => $mainContent, 'user_name' => $user_name, 'titleName' => 'readme: популярное', 'is_auth' => $is_auth]);
 
 print_r($popularPage);

@@ -129,7 +129,7 @@
                             </a>
                         </div>
                     <?php elseif ($card['type'] == 'post-text') : ?>
-                        <p><?= cutCardContent(htmlspecialchars($card['content'])) ?></p>
+                        <p><?= cutCardContent($card['content']) ?></p>
                     <?php endif; ?>
                 </div>
                 <footer class="post__footer">

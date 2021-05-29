@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
@@ -54,7 +54,6 @@
                         </a>
                     </li>
                 </ul>
-                <?php $is_auth = rand(0, 1) ?>
                 <?php if ($is_auth == 1): ?>
                     <!-- здесь должен быть PHP код, который показывает следующий тег по условию -->
                     <ul class="header__user-nav">
