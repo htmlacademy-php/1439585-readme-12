@@ -83,26 +83,26 @@
             </ul>
         </div>
     </div>
-    <div class="popular__posts"> 
-        <?php foreach ($cards as $card): ?>
+    <div class="popular__posts">
+        <?php foreach ($cards as $card) : ?>
             <article class="popular__post post <?= $card['type'] ?>">
                 <header class="post__header">
                     <h2><?= htmlspecialchars($card['title']) ?></h2>
                 </header>
                 <div class="post__main">
-                    <?php if ($card['type'] == 'post-quote'): ?>
+                    <?php if ($card['type'] == 'post-quote') : ?>
                         <blockquote>
                             <p>
                                 <?= htmlspecialchars($card['content']) ?>
                             </p>
                             <cite>Неизвестный Автор</cite>
                         </blockquote>
-                    <?php elseif ($card['type'] == 'post-link'): ?>
+                    <?php elseif ($card['type'] == 'post-link') : ?>
                         <div class="post-link__wrapper">
-                            <a class="post-link__external" href="http://<?= htmlspecialchars($card['content']) ?>" title="Перейти по ссылке"> 
+                            <a class="post-link__external" href="http://<?= htmlspecialchars($card['content']) ?>" title="Перейти по ссылке">
                                 <div class="post-link__info-wrapper">
                                     <div class="post-link__icon-wrapper">
-                                        <img src="https://www.google.com/s2/favicons?domain=<?=  $card['content'] ?>" alt="Иконка">
+                                        <img src="https://www.google.com/s2/favicons?domain=<?= $card['content'] ?>" alt="Иконка">
                                     </div>
                                     <div class="post-link__info">
                                         <h3><?= htmlspecialchars($card['title']) ?></h3>
@@ -111,14 +111,14 @@
                                 <span><?= htmlspecialchars($card['content']) ?></span>
                             </a>
                         </div>
-                    <?php elseif ($card['type'] == 'post-photo'): ?>
+                    <?php elseif ($card['type'] == 'post-photo') : ?>
                         <div class="post-photo__image-wrapper">
                             <img src="img/<?= $card['content'] ?>" alt="Фото от пользователя" width="360" height="240">
                         </div>
-                    <?php elseif ($card['type'] == 'post-video'): ?>
+                    <?php elseif ($card['type'] == 'post-video') : ?>
                         <div class="post-video__block">
                             <div class="post-video__preview">
-                            <?= htmlspecialchars($card['content']) ?>
+                                <?= $card['content'] ?>
                                 <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
                             </div>
                             <a href="post-details.html" class="post-video__play-big button">
@@ -128,7 +128,7 @@
                                 <span class="visually-hidden">Запустить проигрыватель</span>
                             </a>
                         </div>
-                    <?php elseif ($card['type'] == 'post-text'): ?>
+                    <?php elseif ($card['type'] == 'post-text') : ?>
                         <p><?= cutCardContent(htmlspecialchars($card['content'])) ?></p>
                     <?php endif; ?>
                 </div>
@@ -167,6 +167,6 @@
                     </div>
                 </footer>
             </article>
-        <?php endforeach; ?> 
+        <?php endforeach; ?>
     </div>
 </div>
