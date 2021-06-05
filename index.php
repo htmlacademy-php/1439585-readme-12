@@ -73,6 +73,33 @@ function cutCardContent($cardContent, $lenght = 300)
 
 require_once('helpers.php');
 
+function showPostDate($key)
+{
+    $postsDate = generate_random_date($key);
+    $tmstPostsDate = strtotime($postsDate);
+    $titleDate = date('Y-m-d H:i', $tmstPostsDate);
+    $currentDate = date_format(date_create(), 'U');
+    $dateDiffer = $currentDate - $tmstPostsDate;
+
+    if ($dateDiffer < 60 * 60) {
+        $humPostsDate = ceil($dateDiffer / 60);
+        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'минута', 'минуты', 'минут') . " назад";
+    } elseif ($dateDiffer >= 60 * 60 && $dateDiffer < 60 * 60 * 24) {
+        $humPostsDate = ceil($dateDiffer / (60 * 60));
+        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'час', 'часа', 'часов') . " назад";
+    } elseif ($dateDiffer >= 60 * 60 * 24 && $dateDiffer < 60 * 60 * 24 * 7) {
+        $humPostsDate = ceil($dateDiffer / (60 * 60 * 24));
+        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'день', 'дня', 'дней') . " назад";
+    } elseif ($dateDiffer >= 60 * 60 * 24 * 7 && $dateDiffer < 60 * 60 * 24 * 7 * 5) {
+        $humPostsDate = ceil($dateDiffer / (60 * 60 * 24 * 7));
+        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'неделя', 'недели', 'недель') . " назад";
+    } else {
+        $humPostsDate = ceil($dateDiffer / (60 * 60 * 24 * 5));
+        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'месяц', 'месяца', 'месяцев') . " назад";
+    }
+    return $arr = ['for_datetime' => $postsDate, 'title_date' => $titleDate, 'relative_time' => $relative_time];
+}
+
 $mainContent = include_template('main.php', ['cards' => $cards]);
 
 $popularPage = include_template('layout.php', ['mainContent' => $mainContent, 'user_name' => $user_name, 'titleName' => 'readme: популярное', 'is_auth' => $is_auth]);
