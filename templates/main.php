@@ -141,7 +141,7 @@
                             <div class="post__info">
                                 <b class="post__author-name"><?= htmlspecialchars($card['user_name']) ?></b>
                                 <?php $postDate = showPostDate($key); ?>
-                                <time class="post__time" title=" <?= $postDate['title_date'] ?>" datetime="<?= $postDate['for_datetime'] ?>">
+                                <time class="post__time" title=" <?= $postDate['title'] ?>" datetime="<?= $postDate['datetime'] ?>">
                                     <?= $postDate['relative_time'] ?>
                                 </time>
                             </div>

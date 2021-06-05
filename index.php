@@ -82,22 +82,22 @@ function showPostDate($key)
     $dateDiffer = $currentDate - $tmstPostsDate;
 
     if ($dateDiffer < 60 * 60) {
-        $humPostsDate = ceil($dateDiffer / 60);
-        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'минута', 'минуты', 'минут') . " назад";
+        $humanTime = ceil($dateDiffer / 60);
+        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'минута', 'минуты', 'минут') . " назад";
     } elseif ($dateDiffer >= 60 * 60 && $dateDiffer < 60 * 60 * 24) {
-        $humPostsDate = ceil($dateDiffer / (60 * 60));
-        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'час', 'часа', 'часов') . " назад";
+        $humanTime = ceil($dateDiffer / (60 * 60));
+        $relativeTime=  "{$humanTime} " . get_noun_plural_form($humanTime, 'час', 'часа', 'часов') . " назад";
     } elseif ($dateDiffer >= 60 * 60 * 24 && $dateDiffer < 60 * 60 * 24 * 7) {
-        $humPostsDate = ceil($dateDiffer / (60 * 60 * 24));
-        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'день', 'дня', 'дней') . " назад";
+        $humanTime = ceil($dateDiffer / (60 * 60 * 24));
+        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'день', 'дня', 'дней') . " назад";
     } elseif ($dateDiffer >= 60 * 60 * 24 * 7 && $dateDiffer < 60 * 60 * 24 * 7 * 5) {
-        $humPostsDate = ceil($dateDiffer / (60 * 60 * 24 * 7));
-        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'неделя', 'недели', 'недель') . " назад";
+        $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7));
+        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'неделя', 'недели', 'недель') . " назад";
     } else {
-        $humPostsDate = ceil($dateDiffer / (60 * 60 * 24 * 5));
-        $relative_time =  "{$humPostsDate} " . get_noun_plural_form($humPostsDate, 'месяц', 'месяца', 'месяцев') . " назад";
+        $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 5));
+        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'месяц', 'месяца', 'месяцев') . " назад";
     }
-    return $arr = ['for_datetime' => $postsDate, 'title_date' => $titleDate, 'relative_time' => $relative_time];
+    return $arr = ['datetime' => $postsDate, 'title' => $titleDate, 'relative_time' => $relativeTime];
 }
 
 $mainContent = include_template('main.php', ['cards' => $cards]);
