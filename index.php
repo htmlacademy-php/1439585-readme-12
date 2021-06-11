@@ -1,4 +1,8 @@
 <?php
+date_default_timezone_set('Europe/Moscow');
+require_once('helpers.php');
+require_once('functions.php');
+
 $is_auth = rand(0, 1);
 $user_name = 'Стас';
 
@@ -53,25 +57,6 @@ $cards = [
         'avatar' => 'userpic.jpg'
     ]
 ];
-
-function cutCardContent($cardContent, $lenght = 300)
-{
-    $words = explode(' ', $cardContent);
-    $count = 0;
-    foreach ($words as $key => $nextWord) {
-        $count = $count + (iconv_strlen($nextWord));
-        if ($count > $lenght) {
-            break;
-        }
-    }
-    if ($count < $lenght) {
-        return htmlspecialchars(implode(' ', $words));
-    } else {
-        return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
-    }
-}
-
-require_once('helpers.php');
 
 $mainContent = include_template('main.php', ['cards' => $cards]);
 
