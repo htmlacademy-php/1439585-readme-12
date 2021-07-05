@@ -19,6 +19,7 @@ CREATE TABLE subscribes (
   autor_id INT UNSIGNED NOT NULL,
   CONSTRAINT subscriber
   FOREIGN KEY (subscriber_id) REFERENCES users (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 );
 
@@ -27,15 +28,16 @@ CREATE TABLE messeges (
   sender_id INT UNSIGNED NOT NULL,
   recipient_id INT UNSIGNED NOT NULL,
   date_send TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  message_content VARCHAR(255) NOT NULL,
+  content VARCHAR(255) NOT NULL,
   CONSTRAINT sender
   FOREIGN KEY (sender_id) REFERENCES users (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 );
 
 CREATE TABLE categories (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  post_category VARCHAR(15) NOT NULL,
+  name VARCHAR(15) NOT NULL,
   class_name VARCHAR(12) NOT NULL
 );
 
@@ -47,15 +49,17 @@ CREATE TABLE posts (
   title VARCHAR(64) NOT NULL,
   content TEXT,
   quote_autor VARCHAR(128),
-  image VARCHAR(128),
-  video VARCHAR(128),
-  link VARCHAR(255),
-  show_count INT UNSIGNED,
+  image_path VARCHAR(128),
+  video_link VARCHAR(128),
+  website_link VARCHAR(255),
+  show_count INT UNSIGNED DEFAULT 0,
   CONSTRAINT post_autor
   FOREIGN KEY (autor_id) REFERENCES users (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT,
   CONSTRAINT post_category
   FOREIGN KEY (category_id) REFERENCES categories (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 );
 
@@ -70,9 +74,11 @@ CREATE TABLE posts_hashtags (
   hashtag_id INT UNSIGNED NOT NULL,
   CONSTRAINT post_hashtag
   FOREIGN KEY (post_id) REFERENCES posts (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT,
   CONSTRAINT hashtags_id
   FOREIGN KEY (hashtag_id) REFERENCES hashtags (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 );
 
@@ -82,9 +88,11 @@ CREATE TABLE likes (
   post_id INT UNSIGNED NOT NULL,
   CONSTRAINT user_like
   FOREIGN KEY (user_id) REFERENCES users (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT,
   CONSTRAINT liked_post
   FOREIGN KEY (post_id) REFERENCES posts (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 );
 
@@ -96,8 +104,10 @@ CREATE TABLE comments (
   content VARCHAR(128) NOT NULL,
   CONSTRAINT comment_user
   FOREIGN KEY (user_id) REFERENCES users (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT,
   CONSTRAINT commented_post
   FOREIGN KEY (post_id) REFERENCES posts (id)
+	ON UPDATE RESTRICT
 	ON DELETE RESTRICT
 );
