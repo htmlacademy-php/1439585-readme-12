@@ -14,9 +14,9 @@ function cutCardContent($cardContent, $lenght = 300)
     }
     if ($count < $lenght) {
         return htmlspecialchars(implode(' ', $words));
-    } else {
-        return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
     }
+        return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
+    
 }
 
 function showPostDate($key)

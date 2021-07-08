@@ -28,7 +28,7 @@ CREATE TABLE messeges (
   sender_id INT UNSIGNED NOT NULL,
   recipient_id INT UNSIGNED NOT NULL,
   date_send TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  content VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
   CONSTRAINT sender
   FOREIGN KEY (sender_id) REFERENCES users (id)
 	ON UPDATE RESTRICT
