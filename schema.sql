@@ -9,6 +9,7 @@ CREATE TABLE users (
   date_registration TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   email VARCHAR(128) NOT NULL UNIQUE,
   login VARCHAR(64) NOT NULL,
+  full_name VARCHAR(128),
   password CHAR(64) NOT NULL,
   avatar VARCHAR(128)
 );
@@ -16,7 +17,7 @@ CREATE TABLE users (
 CREATE TABLE subscribes (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
   subscriber_id INT UNSIGNED NOT NULL,
-  autor_id INT UNSIGNED NOT NULL,
+  author_id INT UNSIGNED NOT NULL,
   CONSTRAINT subscriber
   FOREIGN KEY (subscriber_id) REFERENCES users (id)
 	ON UPDATE RESTRICT
@@ -28,7 +29,7 @@ CREATE TABLE messeges (
   sender_id INT UNSIGNED NOT NULL,
   recipient_id INT UNSIGNED NOT NULL,
   date_send TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  content VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
   CONSTRAINT sender
   FOREIGN KEY (sender_id) REFERENCES users (id)
 	ON UPDATE RESTRICT
@@ -43,18 +44,18 @@ CREATE TABLE categories (
 
 CREATE TABLE posts (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  autor_id INT UNSIGNED NOT NULL,
+  author_id INT UNSIGNED NOT NULL,
   category_id INT UNSIGNED NOT NULL,
   date_add TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  title VARCHAR(64) NOT NULL,
+  title VARCHAR(255) NOT NULL,
   content TEXT,
-  quote_autor VARCHAR(128),
+  quote_author VARCHAR(128),
   image_path VARCHAR(128),
   video_link VARCHAR(128),
-  website_link VARCHAR(255),
+  website_link VARCHAR(2048),
   show_count INT UNSIGNED DEFAULT 0,
-  CONSTRAINT post_autor
-  FOREIGN KEY (autor_id) REFERENCES users (id)
+  CONSTRAINT post_author
+  FOREIGN KEY (author_id) REFERENCES users (id)
 	ON UPDATE RESTRICT
 	ON DELETE RESTRICT,
   CONSTRAINT post_category
