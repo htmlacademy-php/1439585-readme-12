@@ -5,17 +5,25 @@ require_once('functions.php');
 
 $connect = new mysqli("sbrt", "root", "root", "readme");
 if ($connect->connect_error) {
-    echo "SHIT HAPPENS: " . $connect->connect_error;;
+    echo "Ошибка подключения: " . $connect->connect_error;;
 }
 $connect->set_charset('utf8');
 
 $sqlCategories = "SELECT id, name, class_name FROM categories";
 $resultSqlCategories = $connect->query($sqlCategories);
-$categories = $resultSqlCategories->fetch_all(MYSQLI_ASSOC);
+if ($resultSqlCategories) {
+    $categories = $resultSqlCategories->fetch_all(MYSQLI_ASSOC);
+} else {
+    echo "Ошибка получения данных: " . $connect->errno . $connect->error;
+}
 
 $sqlСards = "SELECT users.id, login, full_name, avatar, title, category_id, content, quote_author, image_path, video_link, website_link, date_add, show_count FROM users JOIN posts ON users.id = posts.author_id ORDER BY show_count DESC;";
 $resultSqlСards = $connect->query($sqlСards);
-$cards = $resultSqlСards->fetch_all(MYSQLI_ASSOC);
+if ($resultSqlСards) {
+    $cards = $resultSqlСards->fetch_all(MYSQLI_ASSOC);
+} else {
+    echo "Ошибка получения данных: " . $connect->errno . $connect->error;
+}
 
 $is_auth = rand(0, 1);
 $user_name = 'Стас';
