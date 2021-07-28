@@ -43,3 +43,9 @@ function showPostDate($key, $dateAdd)
     }
     return ['datetime' => $dateAdd, 'title' => $titleDate, 'relative_time' => $relativeTime];
 }
+
+function showError($link)
+{
+    $form = "Ошибка получения данных. %d %s";
+    return sprintf($form, $link->errno, $link->error);
+}
