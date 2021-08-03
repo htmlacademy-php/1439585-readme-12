@@ -44,8 +44,14 @@ function showPostDate($key, $dateAdd)
     return ['datetime' => $dateAdd, 'title' => $titleDate, 'relative_time' => $relativeTime];
 }
 
-function showError($link)
+function fetchAll($sqlQuery, $connect)
 {
-    $form = "Ошибка получения данных. %d %s";
-    return sprintf($form, $link->errno, $link->error);
+    $resultSqlQuery = $connect->query($sqlQuery);
+    if ($resultSqlQuery) {
+        $resultFetch = $resultSqlQuery->fetch_all(MYSQLI_ASSOC);
+    } else {
+        $form = "Ошибка получения данных. %d %s";
+        $resultFetch = sprintf($form, $connect->errno, $connect->error);
+    }
+    return $resultFetch;
 }
