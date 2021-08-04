@@ -48,10 +48,8 @@ function fetchAll($sqlQuery, $connect)
 {
     $resultSqlQuery = $connect->query($sqlQuery);
     if ($resultSqlQuery) {
-        $resultFetch = $resultSqlQuery->fetch_all(MYSQLI_ASSOC);
-    } else {
-        $form = "Ошибка получения данных. %d %s";
-        $resultFetch = sprintf($form, $connect->errno, $connect->error);
+        return $resultSqlQuery->fetch_all(MYSQLI_ASSOC);
     }
-    return $resultFetch;
+    echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
+    die;
 }
