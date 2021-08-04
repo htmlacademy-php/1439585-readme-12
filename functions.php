@@ -15,14 +15,12 @@ function cutCardContent($cardContent, $lenght = 300)
     if ($count < $lenght) {
         return htmlspecialchars(implode(' ', $words));
     }
-        return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
-    
+    return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
 }
 
-function showPostDate($key)
+function showPostDate($key, $dateAdd)
 {
-    $postsDate = generate_random_date($key);
-    $tmstPostsDate = strtotime($postsDate);
+    $tmstPostsDate = strtotime($dateAdd);
     $titleDate = date('Y-m-d H:i', $tmstPostsDate);
     $currentDate = date_format(date_create(), 'U');
     $dateDiffer = $currentDate - $tmstPostsDate;
@@ -40,8 +38,18 @@ function showPostDate($key)
         $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7));
         $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'неделя', 'недели', 'недель') . " назад";
     } else {
-        $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 5));
+        $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7 * 5));
         $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'месяц', 'месяца', 'месяцев') . " назад";
     }
-    return ['datetime' => $postsDate, 'title' => $titleDate, 'relative_time' => $relativeTime];
+    return ['datetime' => $dateAdd, 'title' => $titleDate, 'relative_time' => $relativeTime];
+}
+
+function fetchAll($sqlQuery, $connect)
+{
+    $resultSqlQuery = $connect->query($sqlQuery);
+    if ($resultSqlQuery) {
+        return $resultSqlQuery->fetch_all(MYSQLI_ASSOC);
+    }
+    echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
+    die;
 }

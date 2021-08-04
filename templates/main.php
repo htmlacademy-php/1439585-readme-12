@@ -85,40 +85,46 @@
     </div>
     <div class="popular__posts">
         <?php foreach ($cards as $key => $card) : ?>
-            <article class="popular__post post <?= $card['type'] ?>">
+            <?php foreach ($categories as $category) {
+                if ($card['category_id'] == $category['id']) {
+                    $postType = $category['class_name'];
+                }
+            }
+            ?>
+            <article class="popular__post post <?= $postType ?>">
                 <header class="post__header">
                     <h2><?= htmlspecialchars($card['title']) ?></h2>
                 </header>
                 <div class="post__main">
-                    <?php if ($card['type'] == 'post-quote') : ?>
+                    <?php if ($postType == 'post-quote') : ?>
                         <blockquote>
                             <p>
                                 <?= htmlspecialchars($card['content']) ?>
                             </p>
                             <cite>Неизвестный Автор</cite>
                         </blockquote>
-                    <?php elseif ($card['type'] == 'post-link') : ?>
+                    <?php elseif ($postType == 'post-link') : ?>
                         <div class="post-link__wrapper">
-                            <a class="post-link__external" href="http://<?= htmlspecialchars($card['content']) ?>" title="Перейти по ссылке">
+                            <a class="post-link__external" href="http://<?= htmlspecialchars($card['website_link']) ?>" title="Перейти по ссылке">
                                 <div class="post-link__info-wrapper">
                                     <div class="post-link__icon-wrapper">
-                                        <img src="https://www.google.com/s2/favicons?domain=<?= $card['content'] ?>" alt="Иконка">
+                                        <img src="https://www.google.com/s2/favicons?domain=<?= $card['website_link'] ?>" alt="Иконка">
                                     </div>
                                     <div class="post-link__info">
                                         <h3><?= htmlspecialchars($card['title']) ?></h3>
                                     </div>
                                 </div>
-                                <span><?= htmlspecialchars($card['content']) ?></span>
+                                <span><?= htmlspecialchars($card['website_link']) ?></span>
                             </a>
                         </div>
-                    <?php elseif ($card['type'] == 'post-photo') : ?>
+                    <?php elseif ($postType == 'post-photo') : ?>
                         <div class="post-photo__image-wrapper">
-                            <img src="img/<?= $card['content'] ?>" alt="Фото от пользователя" width="360" height="240">
+                            <img src="img/<?= $card['image_path'] ?>" alt="Фото от пользователя" width="360" height="240">
                         </div>
-                    <?php elseif ($card['type'] == 'post-video') : ?>
+                    <?php elseif ($postType == 'post-video') : ?>
                         <div class="post-video__block">
                             <div class="post-video__preview">
-                                <?= $card['content'] ?>
+                                <?= $card['video_link'] ?>
                                 <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
                             </div>
                             <a href="post-details.html" class="post-video__play-big button">
@@ -128,7 +134,7 @@
                                 <span class="visually-hidden">Запустить проигрыватель</span>
                             </a>
                         </div>
-                    <?php elseif ($card['type'] == 'post-text') : ?>
+                    <?php elseif ($postType == 'post-text') : ?>
                         <p><?= cutCardContent($card['content']) ?></p>
                     <?php endif; ?>
                 </div>
@@ -139,8 +145,8 @@
                                 <img class="post__author-avatar" src="img/<?= $card['avatar'] ?>" alt="Аватар пользователя">
                             </div>
                             <div class="post__info">
-                                <b class="post__author-name"><?= htmlspecialchars($card['user_name']) ?></b>
-                                <?php $postDate = showPostDate($key); ?>
+                                <b class="post__author-name"><?= htmlspecialchars($card['full_name']) ?></b>
+                                <?php $postDate = showPostDate($key, $card['date_add']); ?>
                                 <time class="post__time" title=" <?= $postDate['title'] ?>" datetime="<?= $postDate['datetime'] ?>">
                                     <?= $postDate['relative_time'] ?>
                                 </time>
