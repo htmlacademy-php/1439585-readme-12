@@ -110,9 +110,7 @@
     </div>
 </header>
 
-<section class="page__main page__main--popular">
-    <?= $mainContent ?>
-</section>
+<?= $pageContent ?>
 
 <footer class="footer">
     <div class="footer__wrapper">

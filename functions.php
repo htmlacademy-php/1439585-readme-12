@@ -2,7 +2,7 @@
 
 require_once('helpers.php');
 
-function cutCardContent($cardContent, $lenght = 300)
+function cutCardContent(string $cardContent, int $lenght = 300) : string
 {
     $words = explode(' ', $cardContent);
     $count = 0;
@@ -18,7 +18,7 @@ function cutCardContent($cardContent, $lenght = 300)
     return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
 }
 
-function showPostDate($key, $dateAdd)
+function showPostDate(int $key, string $dateAdd) : array
 {
     $tmstPostsDate = strtotime($dateAdd);
     $titleDate = date('Y-m-d H:i', $tmstPostsDate);
