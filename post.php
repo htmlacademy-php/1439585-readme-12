@@ -1,56 +1,39 @@
 <?php
 
-declare(strict_types=1);
 require_once('helpers.php');
 require_once('functions.php');
-require_once('config/dbConnect.php');
+require_once('config/db_connect.php');
 
 $is_auth = rand(0, 1);
 $user_name = 'Стас';
 
-if (isset($_GET['postId'])) {
-    $postId = $_GET['postId'];
-} else {
-    header('Location: /nothing-to-show.php');
-}
+$postId = filter_input(INPUT_GET, 'postId', FILTER_SANITIZE_NUMBER_INT) ?: header('Location: /nothing-to-show.php');
 
 $isPostExsist = fetchAll("SELECT * from posts WHERE id={$postId};", $connect);
 if (count($isPostExsist) == 0) {
     header('Location: /nothing-to-show.php');
 }
 
-/* запрос типов категорий */
-$sqlCategories = "SELECT id, name, class_name FROM categories;";
-$categories = fetchAll($sqlCategories, $connect);
-
-/* запрос поста*/
-$sqlPostPage = "SELECT author_id, full_name, avatar, date_registration, category_id, title, posts.content, image_path, video_link, website_link, show_count FROM posts
-JOIN users ON users.id = posts.author_id WHERE posts.id = {$postId};";
+/* запрос поста объединенный с категорией*/
+$sqlPostPage = "SELECT author_id AS 'author_id',  category_id AS 'category_id', categories.class_name, title, posts.content, image_path, video_link, website_link, show_count FROM posts JOIN users ON users.id = posts.author_id JOIN categories ON posts.category_id = categories.id WHERE posts.id = {$postId};";
 $post = fetchAll($sqlPostPage, $connect);
 
 $authouId = $post[0]['author_id'];
 
-/* Количество лайков к посту*/
-$sqlLikes = "SELECT * FROM posts  JOIN users ON users.id = posts.author_id  JOIN likes ON posts.id = likes.post_id WHERE posts.id = {$postId};";
-$likesCount = count(fetchAll($sqlLikes, $connect));
+/* запрос на количество лайков и комментов к конкретному посту*/
+$sqlPostRating = "SELECT COUNT(DISTINCT likes.id) AS 'likes', COUNT(DISTINCT comments.id) AS 'count_comment' FROM posts JOIN users ON users.id = posts.author_id LEFT JOIN likes ON posts.id = likes.post_id LEFT JOIN comments ON comments.post_id = posts.id WHERE posts.id = {$postId};";
+$postRating = fetchAll($sqlPostRating, $connect);
 
-/* Количество комментов к посту*/
-$sqlComments = "SELECT * FROM comments JOIN posts ON comments.post_id = posts.id JOIN users ON users.id = posts.author_id  WHERE posts.id = {$postId};";
-$commentsCount = count(fetchAll($sqlComments, $connect));
-
-/* данные по пользователю*/
-$sqlAuthorData = "SELECT users.id, users.full_name, users.avatar, users.date_registration FROM users JOIN posts ON users.id = posts.author_id WHERE posts.id = {$postId};";
+/* объеденила данные по пользователю, число подписчиков и кол-во публикаций */
+$sqlAuthorData = "SELECT users.id AS 'users_id', users.full_name, users.avatar, users.date_registration, COUNT(DISTINCT subscribes.id) AS 'subscribes', COUNT(DISTINCT posts.id) AS 'count_posts' FROM users LEFT JOIN subscribes ON users.id = subscribes.author_id LEFT JOIN posts ON users.id = posts.author_id WHERE users.id = {$authouId};";
 $authorData = fetchAll($sqlAuthorData, $connect);
 
-/* число подписчиков*/
-$sqlSubscribers = "SELECT* FROM users JOIN subscribes ON users.id = subscribes.author_id WHERE users.id = {$authouId};";
-$subscribersCount = count(fetchAll($sqlSubscribers, $connect));
+/* получить комменты к посту */
+$sqlPostComments = "SELECT posts.id AS 'posts_id', users.id AS 'comment_author', users.full_name, users.avatar, comments.date_add AS 'comment_date', comments.content AS 'comment' FROM posts LEFT JOIN comments  ON comments.post_id = posts.id JOIN users ON users.id = comments.user_id WHERE posts.id  = {$postId};";
+$postComments = fetchAll($sqlPostComments, $connect);
 
-/* кол-во публикаций*/
-$sqlPublishedPosts = "SELECT * FROM users  JOIN posts ON users.id = posts.author_id  WHERE users.id = {$authouId};";
-$postsCount = count(fetchAll($sqlPublishedPosts, $connect));
-
-$pageContent = include_template('post-details.php', ['post' => $post, 'authorData' => $authorData, 'categories' => $categories, 'likesCount' => $likesCount, 'commentsCount' => $commentsCount, 'subscribersCount' => $subscribersCount, 'postsCount' => $postsCount]);
+/* формирование страницы */
+$pageContent = include_template('post-details.php', ['post' => $post, 'postRating' => $postRating, 'postComments' => $postComments, 'authorData' => $authorData]);
 $postPage = include_template('layout.php', ['pageContent' => $pageContent, 'user_name' => $user_name, 'titleName' => 'Публикация', 'is_auth' => $is_auth]);
 
 print_r($postPage);

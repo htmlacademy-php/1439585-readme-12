@@ -9,15 +9,15 @@ INSERT INTO categories(name,class_name)
 
 /*придумайте пару пользователей*/
 INSERT INTO users
-	SET email = 'katewho@test.ru', login = 'Kate', full_name = 'Катерина', password = SHA2('pass1kate', 224);
+	SET email = 'katewho@test.ru', login = 'Kate', full_name = 'Катерина', password = SHA2('pass1kate', 224), avatar = 'cat_02.jpg';
 INSERT INTO users
-	SET email = 'muha@test.ru', login = 'Muha', full_name = 'Andrei Muha', password = SHA2('pass2muha', 224);
+	SET email = 'muha@test.ru', login = 'Muha', full_name = 'Andrei Muha', password = SHA2('pass2muha', 224), avatar = 'cat_01.jpg';
 
 /*добавление пользователей из существующего массива с постами*/
 INSERT INTO users
-	SET id = 3, email = 'larisa@test.ru', login = 'larisa', full_name = 'Лариса', password = SHA2('pass3larisa', 224), avatar = 'userpic-larisa-small.jpg';
+	SET id = 3, email = 'larisa@test.ru', login = 'larisa', full_name = 'Лариса', password = SHA2('pass3larisa', 224), avatar = 'userpic-larisa.jpg';
 INSERT INTO users
-	SET id = 4, email = 'vladik@test.ru', login = 'vladik', full_name = 'Владик', password = SHA2('pass4vladik', 224), avatar = 'userpic.jpg';
+	SET id = 4, email = 'vladik@test.ru', login = 'vladik', full_name = 'Владик', password = SHA2('pass4vladik', 224), avatar = 'userpic-medium.jpg';
 INSERT INTO users
 	SET id = 5, email = 'viktor@test.ru', login = 'viktor', full_name ='Виктор', password = SHA2('pass5viktor', 224), avatar = 'userpic-mark.jpg';
 
@@ -42,6 +42,8 @@ INSERT INTO posts
   SET author_id = 3, category_id = 4, title = 'Видосик', video_link = 'https://youtu.be/dnIX06dmNts', show_count = 25;
 INSERT INTO posts
   SET author_id = 5, category_id = 5, title = 'Мануал', website_link = 'https://www.php.net/manual/ru/', show_count = 5;
+INSERT INTO posts
+  SET author_id = 2, category_id = 5, title = 'Вагонетки можно купить тут', website_link = 'maxmaster.ru', show_count = 6;
 
 /*придумайте пару комментариев к разным постам*/
 INSERT INTO comments
@@ -50,6 +52,18 @@ INSERT INTO comments
 	SET user_id = 2, post_id = 7, content = 'А из какой это книги или статьи?';
 	INSERT INTO comments
 	SET user_id = 5, post_id = 7, content = 'Это ты где прочел?';
+
+/*дополнительный список комментов, добавленный для тестирования*/
+INSERT INTO comments
+	SET user_id = 1, post_id = 4, content = 'Я бы с удовольствием там побывала!';
+INSERT INTO comments
+	SET user_id = 3, post_id = 7, content = 'Опять ты за свое...';
+INSERT INTO comments
+	SET user_id = 2, post_id = 7, content = 'Блин, заждался уже их';
+INSERT INTO comments
+	SET user_id = 1, post_id = 10, content = 'Очень интересно, но временами непонятно';
+INSERT INTO comments
+	SET user_id = 4, post_id = 10, content = 'Согласен';
 
 /*получить список постов с сортировкой по популярности и вместе с именами авторов и типом контента;*/
 SELECT login, title, name, class_name, content, quote_author, image_path, video_link, website_link, date_add, show_count
@@ -76,6 +90,13 @@ INSERT INTO likes SET user_id = 5, post_id = 4;
 INSERT INTO likes SET user_id = 1, post_id = 6;
 INSERT INTO likes SET user_id = 3, post_id = 3;
 INSERT INTO likes SET user_id = 2, post_id = 2;
+
+/*дополнительный список лайков, добавленный для тестирования*/
+INSERT INTO likes SET user_id = 2, post_id = 3;
+INSERT INTO likes SET user_id = 2, post_id = 4;
+INSERT INTO likes SET user_id = 1, post_id = 5;
+INSERT INTO likes SET user_id = 1, post_id = 7;
+INSERT INTO likes SET user_id = 3, post_id = 7;
 
 /*подписаться на пользователя*/
 INSERT INTO subscribes SET subscriber_id = 1, author_id = 4;

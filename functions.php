@@ -2,7 +2,7 @@
 
 require_once('helpers.php');
 
-function cutCardContent(string $cardContent, int $lenght = 300) : string
+function cutCardContent(string $cardContent, int $lenght = 300): string
 {
     $words = explode(' ', $cardContent);
     $count = 0;
@@ -18,28 +18,41 @@ function cutCardContent(string $cardContent, int $lenght = 300) : string
     return htmlspecialchars(implode(' ', array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
 }
 
-function showPostDate(int $key, string $dateAdd) : array
+/**переделанная функция(бывшая showPostDate) для показа даты  в относительном формате
+ * подходит как для показа даты у поста, так и для показа, как давно пользователь на сайте зарегистрирован
+ */
+function showDate(string $dateAdd): array
 {
     $tmstPostsDate = strtotime($dateAdd);
     $titleDate = date('Y-m-d H:i', $tmstPostsDate);
     $currentDate = date_format(date_create(), 'U');
     $dateDiffer = $currentDate - $tmstPostsDate;
 
-    if ($dateDiffer < 60 * 60) {
-        $humanTime = ceil($dateDiffer / 60);
-        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'минута', 'минуты', 'минут') . " назад";
-    } elseif ($dateDiffer >= 60 * 60 && $dateDiffer < 60 * 60 * 24) {
-        $humanTime = ceil($dateDiffer / (60 * 60));
-        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'час', 'часа', 'часов') . " назад";
-    } elseif ($dateDiffer >= 60 * 60 * 24 && $dateDiffer < 60 * 60 * 24 * 7) {
-        $humanTime = ceil($dateDiffer / (60 * 60 * 24));
-        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'день', 'дня', 'дней') . " назад";
-    } elseif ($dateDiffer >= 60 * 60 * 24 * 7 && $dateDiffer < 60 * 60 * 24 * 7 * 5) {
-        $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7));
-        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'неделя', 'недели', 'недель') . " назад";
-    } else {
-        $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7 * 5));
-        $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'месяц', 'месяца', 'месяцев') . " назад";
+    switch (true) {
+        case ($dateDiffer < 60 * 60):
+            $humanTime = ceil($dateDiffer / 60);
+            $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'минута', 'минуты', 'минут');
+            break;
+        case ($dateDiffer >= 60 * 60 && $dateDiffer < 60 * 60 * 24):
+            $humanTime = ceil($dateDiffer / (60 * 60));
+            $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'час', 'часа', 'часов');
+            break;
+        case ($dateDiffer >= 60 * 60 * 24 && $dateDiffer < 60 * 60 * 24 * 7):
+            $humanTime = ceil($dateDiffer / (60 * 60 * 24));
+            $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'день', 'дня', 'дней');
+            break;
+        case ($dateDiffer >= 60 * 60 * 24 * 7 && $dateDiffer < 60 * 60 * 24 * 7 * 5):
+            $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7));
+            $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'неделя', 'недели', 'недель');
+            break;
+        case ($dateDiffer >= 60 * 60 * 24 * 7 * 5 && $dateDiffer < 60 * 60 * 24 * 7 * 52):
+            $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 7 * 5));
+            $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'месяц', 'месяца', 'месяцев');
+            break;
+        case ($dateDiffer >= 60 * 60 * 24 * 7 * 52):
+            $humanTime = ceil($dateDiffer / (60 * 60 * 24 * 365 + 172800));
+            $relativeTime =  "{$humanTime} " . get_noun_plural_form($humanTime, 'год', 'года', 'лет');
+            break;
     }
     return ['datetime' => $dateAdd, 'title' => $titleDate, 'relative_time' => $relativeTime];
 }
