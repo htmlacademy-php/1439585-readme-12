@@ -10,7 +10,7 @@ $user_name = 'Стас';
 $postId = filter_input(INPUT_GET, 'postId', FILTER_SANITIZE_NUMBER_INT) ?: header('Location: /nothing-to-show.php');
 
 $isPostExsist = fetchAll("SELECT * from posts WHERE id={$postId};", $connect);
-if (count($isPostExsist) == 0) {
+if ($isPostExsist == NULL) {
     header('Location: /nothing-to-show.php');
 }
 
