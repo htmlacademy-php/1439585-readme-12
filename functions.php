@@ -66,3 +66,35 @@ function fetchAll($sqlQuery, $connect)
     echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
     die;
 }
+
+/**получение массива данных из подготовленного sql-выражения с использованием db_get_prepare_stmt
+ * из helpers как для выражения с 1 плейсхолдером, так и с несколькими
+ */
+function fetchPrepareStmt($connect, $sqlQuery, $val)
+{
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, (array) $val);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result) {
+        $stmtResult = $result->fetch_all(MYSQLI_ASSOC);
+        return $stmtResult;
+    }
+    echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
+    die;
+}
+
+/**подсчет рейтинга */
+function ratingCount($connect, $sqlQuery, $cards): array
+{
+    $ratings = [];
+    $k = 0;
+
+    foreach ($cards as $card) {
+        $stmtResult = fetchPrepareStmt($connect, $sqlQuery, $card['id']);
+        $ratings[$k]['post_id'] = $card['id'];
+        $ratings[$k]['likes'] = $stmtResult[0]['likes'];
+        $ratings[$k]['count_comment'] = $stmtResult[0]['count_comment'];
+        $k++;
+    }
+    return $ratings;
+}

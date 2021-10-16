@@ -34,7 +34,7 @@
                 </ul>
             </div>
             <div class="popular__filters filters">
-                <?php $contentCategory = $_GET['categoryname'] ?? 'popular';
+                <?php $contentCategory = filter_input(INPUT_GET, 'categoryid', FILTER_SANITIZE_NUMBER_INT) ?? 'popular';
                 ?>
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
@@ -53,7 +53,7 @@
                             if ($contentCategory == $category['id']) {
                                 $buttonActive = "filters__button--active";
                             } ?>
-                            <a class="filters__button filters__button--<?= $category['class_name'] ?> <?= $buttonActive ?>" href="index.php?categoryname=<?= $category['id'] ?>">
+                            <a class="filters__button filters__button--<?= $category['class_name'] ?> <?= $buttonActive ?>" href="index.php?categoryid=<?= $category['id'] ?>">
                                 <span class="visually-hidden"><?= $category['name'] ?></span>
                                 <svg class="filters__icon" width="22" height="18">
                                     <use xlink:href="#icon-filter-<?= $category['class_name'] ?>"></use>

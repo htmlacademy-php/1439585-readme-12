@@ -8,23 +8,13 @@
                     <?php $postType = "post-" . $post['class_name']; ?>
                     <div class="post-details__wrapper <?= $postType ?>">
                         <div class="post-details__main-block post post--details">
-                            <?php
-                            switch ($postType) {
-                                case 'post-quote':
-                                    require_once('templates/post-quote.php');
-                                    break;
-                                case 'post-text':
-                                    require_once('templates/post-text.php');
-                                    break;
-                                case 'post-photo':
-                                    require_once('templates/post-photo.php');
-                                    break;
-                                case 'post-video':
-                                    require_once('templates/post-video.php');
-                                    break;
-                                case 'post-link':
-                                    require_once('templates/post-link.php');
-                                    break;
+                        <?php
+                            $filename = $postType . '.php';
+                            $filePath = "templates/{$filename}";
+                            if (file_exists($filePath)) {
+                                require_once($filePath);
+                            } else {
+                                echo "Sorry, there is not such file :(";
                             } ?>
                             <div class="post__indicators">
                                 <?php foreach ($postRating as $postRating) : ?>
