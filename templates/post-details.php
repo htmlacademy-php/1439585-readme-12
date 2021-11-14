@@ -8,7 +8,7 @@
                     <?php $postType = "post-" . $post['class_name']; ?>
                     <div class="post-details__wrapper <?= $postType ?>">
                         <div class="post-details__main-block post post--details">
-                        <?php
+                            <?php
                             $filename = $postType . '.php';
                             $filePath = "templates/{$filename}";
                             if (file_exists($filePath)) {

@@ -83,11 +83,15 @@
                                 <p>
                                     <?= htmlspecialchars($card['content']) ?>
                                 </p>
-                                <cite>Неизвестный Автор</cite>
+                                <cite>
+                                    <?php if (!empty($card['quote_author'])) {
+                                        echo htmlspecialchars($card['quote_author']);
+                                    } else echo 'Неизвестный автор'; ?>
+                                </cite>
                             </blockquote>
                         <?php elseif ($postType == 'post-link') : ?>
                             <div class="post-link__wrapper">
-                                <a class="post-link__external" href="http://<?= htmlspecialchars($card['website_link']) ?>" title="Перейти по ссылке">
+                                <a class="post-link__external" href="<?= correctSiteUrl(htmlspecialchars($card['website_link'])) ?>" title="Перейти по ссылке">
                                     <div class="post-link__info-wrapper">
                                         <div class="post-link__icon-wrapper">
                                             <img src="https://www.google.com/s2/favicons?domain=<?= $card['website_link'] ?>" alt="Иконка">
@@ -96,12 +100,12 @@
                                             <h3><?= htmlspecialchars($card['title']) ?></h3>
                                         </div>
                                     </div>
-                                    <span><?= htmlspecialchars($card['website_link']) ?></span>
+                                    <span><?= cutPreviewLink($card['website_link']) ?></span>
                                 </a>
                             </div>
                         <?php elseif ($postType == 'post-photo') : ?>
                             <div class="post-photo__image-wrapper">
-                                <img src="img/<?= $card['image_path'] ?>" alt="Фото от пользователя" width="360" height="240">
+                                <img src="<?= $card['image_path'] ?>" alt="Фото от пользователя" width="360" height="240">
                             </div>
                         <?php elseif ($postType == 'post-video') : ?>
                             <div class="post-video__block">
@@ -135,29 +139,25 @@
                             </a>
                         </div>
                         <div class="post__indicators">
-                            <?php foreach ($ratings as $rating) : ?>
-                                <?php if ($card['id'] == $rating['post_id']) : ?>
-                                    <div class="post__buttons">
-                                        <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
-                                            <svg class="post__indicator-icon" width="20" height="17">
-                                                <use xlink:href="#icon-heart"></use>
-                                            </svg>
-                                            <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
-                                                <use xlink:href="#icon-heart-active"></use>
-                                            </svg>
-                                            <span><?= $rating['likes'] ?></span>
-                                            <span class="visually-hidden">количество лайков</span>
-                                        </a>
-                                        <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
-                                            <svg class="post__indicator-icon" width="19" height="17">
-                                                <use xlink:href="#icon-comment"></use>
-                                            </svg>
-                                            <span><?= $rating['count_comment'] ?></span>
-                                            <span class="visually-hidden">количество комментариев</span>
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                            <div class="post__buttons">
+                                <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+                                    <svg class="post__indicator-icon" width="20" height="17">
+                                        <use xlink:href="#icon-heart"></use>
+                                    </svg>
+                                    <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
+                                        <use xlink:href="#icon-heart-active"></use>
+                                    </svg>
+                                    <span><?= $card['likes_count'] ?></span>
+                                    <span class="visually-hidden">количество лайков</span>
+                                </a>
+                                <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
+                                    <svg class="post__indicator-icon" width="19" height="17">
+                                        <use xlink:href="#icon-comment"></use>
+                                    </svg>
+                                    <span><?= $card['comment_count'] ?></span>
+                                    <span class="visually-hidden">количество комментариев</span>
+                                </a>
+                            </div>
                         </div>
                     </footer>
                 </article>
