@@ -27,9 +27,9 @@ INSERT INTO posts
 INSERT INTO posts
 	SET author_id = 4, category_id = 1, title = 'Игра престолов', content = 'Не могу дождаться начала финального сезона своего любимого сериала!', show_count = 11;
 INSERT INTO posts
-	SET author_id = 5, category_id = 3, title = 'Наконец, обработал фотки!', image_path = 'rock-medium.jpg', show_count = 9;
+	SET author_id = 5, category_id = 3, title = 'Наконец, обработал фотки!', image_path = '/img/rock-medium.jpg', show_count = 9;
 INSERT INTO posts
-	SET author_id = 3, category_id = 3, title = 'Моя мечта', image_path = 'coast-medium.jpg', show_count = 10;
+	SET author_id = 3, category_id = 3, title = 'Моя мечта', image_path = '/img/coast-medium.jpg', show_count = 10;
 INSERT INTO posts
 	SET author_id = 4, category_id = 5, title = 'Лучшие курсы', website_link = 'www.htmlacademy.ru', show_count = 12;
 INSERT INTO posts
