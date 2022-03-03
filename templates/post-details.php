@@ -76,7 +76,7 @@
                                                 <div class="comments__info">
                                                     <div class="comments__name-wrapper">
                                                         <a class="comments__user-name" href="#">
-                                                            <span><?= htmlspecialchars($comment['full_name']) ?></span>
+                                                            <span><?= htmlspecialchars($comment['login']) ?></span>
                                                         </a>
                                                         <?php $commentDate = showDate($comment['comment_date']); ?>
                                                         <time class="comments__time" datetime="<?= $commentDate['datetime'] ?>"><?= $commentDate['relative_time'] . ' назад' ?></time>
@@ -106,7 +106,7 @@
                                 </div>
                                 <div class="post-details__name-wrapper user__name-wrapper">
                                     <a class="post-details__name user__name" href="#">
-                                        <span><?= $author['full_name'] ?></span>
+                                        <span><?= $author['login'] ?></span>
                                     </a>
                                     <?php $userDate = showDate($author['date_registration']); ?>
                                     <time class="post-details__time user__time" datetime="<?= $userDate['datetime'] ?>"><?= $userDate['relative_time'] . ' на сайте' ?> </time>

@@ -22,7 +22,7 @@ $authouId = $post[0]['author_id'];
 $sqlPostRating = "SELECT COUNT(DISTINCT likes.id) AS 'likes', COUNT(DISTINCT comments.id) AS 'count_comment' FROM posts JOIN users ON users.id = posts.author_id LEFT JOIN likes ON posts.id = likes.post_id LEFT JOIN comments ON comments.post_id = posts.id WHERE posts.id = ?;";
 $postRating = ratingCount($connect, $sqlPostRating, $post);
 
-$sqlAutor = "SELECT users.id, users.full_name, users.avatar, users.date_registration FROM users JOIN posts ON users.id = posts.author_id WHERE posts.id = ?;";
+$sqlAutor = "SELECT users.id, users.login, users.avatar, users.date_registration FROM users JOIN posts ON users.id = posts.author_id WHERE posts.id = ?;";
 $author = fetchPrepareStmt($connect, $sqlAutor, $postId);
 
 $sqlAuthorRating = "SELECT COUNT(DISTINCT subscribes.id) AS 'subscribes', COUNT(DISTINCT posts.id) AS 'count_posts' FROM users LEFT JOIN posts ON users.id = posts.author_id LEFT JOIN subscribes ON users.id = subscribes.author_id WHERE users.id = ?;";
@@ -30,7 +30,7 @@ $authorRating = fetchPrepareStmt($connect, $sqlAuthorRating, $authouId);
 
 $authorData[] = call_user_func_array('array_merge', (array_merge($author, $authorRating)));
 
-$sqlPostComments = "SELECT posts.id AS 'posts_id', users.id AS 'comment_author', users.full_name, users.avatar, comments.date_add AS 'comment_date', comments.content AS 'comment' FROM posts LEFT JOIN comments  ON comments.post_id = posts.id JOIN users ON users.id = comments.user_id WHERE posts.id  = ?;";
+$sqlPostComments = "SELECT posts.id AS 'posts_id', users.id AS 'comment_author', users.login, users.avatar, comments.date_add AS 'comment_date', comments.content AS 'comment' FROM posts LEFT JOIN comments  ON comments.post_id = posts.id JOIN users ON users.id = comments.user_id WHERE posts.id  = ?;";
 $postComments = fetchPrepareStmt($connect, $sqlPostComments, $postId);
 
 /**формирование страницы */
