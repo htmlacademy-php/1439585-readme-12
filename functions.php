@@ -603,7 +603,7 @@ function redirectOnPage(string $page)
  * @param string $userEmail email нового пользователя
  * @return bool False если такого пользователя еще не существует
  */
-function checkUserExists($connect, string $userEmail): bool
+function checkEmailExists($connect, string $userEmail): bool
 {
     $sqlQuery = 'SELECT email FROM users WHERE email = ?';
     $userExists = fetchPrepareStmt($connect, $sqlQuery, $userEmail);
@@ -622,10 +622,7 @@ function checkUserExists($connect, string $userEmail): bool
  */
 function validateEmail(string $userEmail): bool
 {
-
-    $checkedEmail = filter_var($userEmail, FILTER_VALIDATE_EMAIL);
-
-    if ($checkedEmail == false) {
+    if (filter_var($userEmail, FILTER_VALIDATE_EMAIL) == false) {
         return false;
     }
 
@@ -661,7 +658,7 @@ function isPasswordCorrect(string $password): bool
     $passwordWhithoutNumbers = preg_replace("/[^a-z]/i", '', $password);
 
     // Если пароль только в верхнем регистре или только в нижнем return false
-    if (ctype_upper($passwordWhithoutNumbers) == true || ctype_lower($passwordWhithoutNumbers) == true) {
+    if (ctype_upper($passwordWhithoutNumbers) === true || ctype_lower($passwordWhithoutNumbers) === true) {
         return false;
     }
 
@@ -676,7 +673,7 @@ function isPasswordCorrect(string $password): bool
  */
 function checkPasswordMatch(string $password, string $repeatPassword): bool
 {
-    if (strcmp($password, $repeatPassword) != 0) {
+    if (strcmp($password, $repeatPassword) !== 0) {
         return false;
     }
 
@@ -691,7 +688,23 @@ function checkPasswordMatch(string $password, string $repeatPassword): bool
  */
 function addNewUser($connect, array $userData)
 {
-    $sqlQuery = "INSERT INTO users (date_registration, email, login, password, avatar)  VALUES (NOW(), ?, ?, ?, ?);";
+    $sqlQuery = "INSERT INTO users (date_registration, email, login, password) VALUES (NOW(), ?, ?, ?);";
+
     $stmt = db_get_prepare_stmt($connect, $sqlQuery, $userData);
+    mysqli_stmt_execute($stmt);
+}
+
+/**
+ * Добавление ссылки на аватар в таблицу users
+ * @param $connect mysqli Ресурс соединения
+ * @param string $avatarPath Путь к аватару
+ * @param int $post_id Id последнего добавленного поста
+ * @return void
+ */
+function addUserAvatar($connect, string $avatarPath, int $post_id)
+{
+    $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?';
+
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $post_id]);
     mysqli_stmt_execute($stmt);
 }

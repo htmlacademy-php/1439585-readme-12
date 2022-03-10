@@ -22,18 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errorFields = validateEmptyField($_POST, $requiredFields);
 
     /* Валидация емейла*/
-    $userEmail = mysqli_real_escape_string($connect, $_POST['email']);
-
-    if (checkUserExists($connect, $userEmail) !== false) {
-        $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $userEmail . ', уже зарегистрирован.'], $errorFields);
+    if (checkEmailExists($connect, $_POST['email']) !== false) {
+        $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $_POST['email'] . ', уже зарегистрирован.'], $errorFields);
     }
 
-    if (empty($errorFields) & (validateEmail($userEmail) === false)) {
+    if (empty($errorFields) && (validateEmail($_POST['email']) === false)) {
         $errorFields = array_merge(['email' => 'Вы указали некорректный email.'], $errorFields);
     }
 
     /* Валидация паролей*/
-    if (isPasswordCorrect($_POST['password']) != true) {
+    if (isPasswordCorrect($_POST['password']) !== true) {
         $errorFields['password'] = 'Пароль должен содержать не менее 6 символов. В нем должны быть цифры и буквы латинского алфавита верхнего и нижнего регистров.';
     }
 
@@ -55,19 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
+        addNewUser($connect, [$_POST['email'], $_POST['login'], $hashedPassword]);
+        $user_id = mysqli_insert_id($connect);
+
         if (!empty($avatarImageName)) {
             $avatarPath = getPicturePath($avatarImageName);
+            addUserAvatar($connect, $avatarPath, $user_id);
         }
-
-        addNewUser($connect, [$userEmail, $_POST['login'], $hashedPassword, $avatarPath]);
-        $post_id = mysqli_insert_id($connect);
 
         /* Если данные были записаны, т.е. получен id записи в БД, то переадресовываем пользователя на главную */
-        if (!empty($post_id)) {
-            $redirectPage = "main.html";
-            redirectOnPage($redirectPage);
+        if (!empty($user_id)) {
+             redirectOnPage("main.html");
         }
     }
+
 }
 
 /* формирование страницы, разделение на шаблоны с баннером ошибок и самой формой */
