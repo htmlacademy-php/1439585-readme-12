@@ -9,6 +9,7 @@ require_once('functions.php');
 
 $errorFields = [];
 $userData = [];
+$avatarImageName = '';
 $requiredFields = [
     'email' => "Электронная почта.",
     'login' => "Логин.",

@@ -698,13 +698,13 @@ function addNewUser($connect, array $userData)
  * Добавление ссылки на аватар в таблицу users
  * @param $connect mysqli Ресурс соединения
  * @param string $avatarPath Путь к аватару
- * @param int $post_id Id последнего добавленного поста
+ * @param int $user_id Id последнего добавленного пользователя
  * @return void
  */
-function addUserAvatar($connect, string $avatarPath, int $post_id)
+function addUserAvatar($connect, string $avatarPath, int $user_id)
 {
     $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?';
 
-    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $post_id]);
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $user_id]);
     mysqli_stmt_execute($stmt);
 }
