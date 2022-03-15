@@ -508,7 +508,7 @@ function getAllCardsContent($connect): array
     $sqlCardsContent = "SELECT *
                         FROM
                             (SELECT posts.id AS post_id,
-                                full_name,
+                                login,
                                 avatar,
                                 title,
                                 category_id,
@@ -554,7 +554,7 @@ function getCardsByCategory($categoryId, $connect): array
     $sqlCardsOnCategory = "SELECT *
     FROM
         (SELECT posts.id AS post_id,
-                full_name,
+                login,
                 avatar,
                 title,
                 category_id,
@@ -595,4 +595,116 @@ function redirectOnPage(string $page)
 {
     header("Location: /{$page}");
     exit();
+}
+
+/**
+ * Проверка существования пользователя в БД.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $userEmail email нового пользователя
+ * @return bool False если такого пользователя еще не существует
+ */
+function checkEmailExists($connect, string $userEmail): bool
+{
+    $sqlQuery = 'SELECT email FROM users WHERE email = ?';
+    $userExists = fetchPrepareStmt($connect, $sqlQuery, $userEmail);
+
+    if (!empty($userExists)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Проверяет, является ли введенный email корректным
+ * @param string $userEmail email нового пользователя
+ * @return bool False если мейл не корректен
+ */
+function validateEmail(string $userEmail): bool
+{
+    if (filter_var($userEmail, FILTER_VALIDATE_EMAIL) == false) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Проверка на соответствие пароля условиям ТЗ:
+ * пароль должен быть не менее 6 символов, а также содержать в себе цифры и латинские буквы, в верхннем и нижнем регистре.
+ * @param string $password Проверяеммый пароль
+ * @return bool False если не пароль не соответствует требованиям
+ */
+function isPasswordCorrect(string $password): bool
+{
+    // Условия, по которым пароль должен соответствовать взяты из видео в ТЗ на сайте: https://www.youtube.com/watch?v=NexC8QPTNpM
+
+    $passwordLength = iconv_strlen($password, 'UTF-8');
+    if ($passwordLength < 6) {
+        return false;
+    }
+
+    // Убеждаемся, что пароль содержит буквы и только латинского алфавита
+    if (!preg_match("/[a-z]/i", $password)) {
+        return false;
+    }
+
+    // Содержит цифры
+    if (!preg_match("/[0-9]/i", $password)) {
+        return false;
+    }
+
+    // Перед проверкой, что строка не состоит только нижнего или верхнего регистра, нужно удалить из нее цифры
+    $passwordWhithoutNumbers = preg_replace("/[^a-z]/i", '', $password);
+
+    // Если пароль только в верхнем регистре или только в нижнем return false
+    if (ctype_upper($passwordWhithoutNumbers) === true || ctype_lower($passwordWhithoutNumbers) === true) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Проверка на совпадение паролей
+ * @param string $password Пароль
+ * @param string $repeatPassword Повтор пароля
+ * @return bool False в случае несовпадения паролей
+ */
+function checkPasswordMatch(string $password, string $repeatPassword): bool
+{
+    if (strcmp($password, $repeatPassword) !== 0) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Добавление нового пользователя в таблицу users.
+ * @param $connect mysqli Ресурс соединения
+ * @param array $userData Данные для добавления
+ * @return void
+ */
+function addNewUser($connect, array $userData)
+{
+    $sqlQuery = "INSERT INTO users (date_registration, email, login, password) VALUES (NOW(), ?, ?, ?);";
+
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, $userData);
+    mysqli_stmt_execute($stmt);
+}
+
+/**
+ * Добавление ссылки на аватар в таблицу users
+ * @param $connect mysqli Ресурс соединения
+ * @param string $avatarPath Путь к аватару
+ * @param int $user_id Id последнего добавленного пользователя
+ * @return void
+ */
+function addUserAvatar($connect, string $avatarPath, int $user_id)
+{
+    $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?';
+
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $user_id]);
+    mysqli_stmt_execute($stmt);
 }

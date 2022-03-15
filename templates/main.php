@@ -130,7 +130,7 @@
                                     <img class="post__author-avatar" src="img/<?= $card['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
                                 </div>
                                 <div class="post__info">
-                                    <b class="post__author-name"><?= htmlspecialchars($card['full_name']) ?></b>
+                                    <b class="post__author-name"><?= htmlspecialchars($card['login']) ?></b>
                                     <?php $postDate = showDate($card['date_add']); ?>
                                     <time class="post__time" title=" <?= $postDate['title'] ?>" datetime="<?= $postDate['datetime'] ?>">
                                         <?= $postDate['relative_time'] . ' назад' ?>

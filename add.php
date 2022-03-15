@@ -8,7 +8,6 @@ require_once('helpers.php');
 require_once('functions.php');
 
 $categories = getCategoryList($connect);
-$AddPostContent = [];
 $errorFields = [];
 
 /* допустим у нас id пользователя храниться в переменной $user_id */
@@ -129,8 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* формирование страницы, разделение на пару шаблонов с баннером ошибок и самой формой */
-$redErrorBanner = include_template('/adding-post/error-fields.php', ['errorFields' => $errorFields]);
-
+$redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
 $pageContent = include_template('adding-post.php', ['categories' => $categories, 'user_name' => USER_NAME, 'titleName' => 'Добавление публикации', 'is_auth' => IS_AUTH, 'postType' => $postType, 'errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
 
 print_r($pageContent);

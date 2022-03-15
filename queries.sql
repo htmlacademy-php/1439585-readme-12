@@ -9,17 +9,17 @@ INSERT INTO categories(name,class_name)
 
 /*придумайте пару пользователей*/
 INSERT INTO users
-	SET email = 'katewho@test.ru', login = 'Kate', full_name = 'Катерина', password = SHA2('pass1kate', 224), avatar = 'cat_02.jpg';
+	SET email = 'katewho@test.ru', login = 'Катерина', password = SHA2('pass1kate', 224), avatar = 'cat_02.jpg';
 INSERT INTO users
-	SET email = 'muha@test.ru', login = 'Muha', full_name = 'Andrei Muha', password = SHA2('pass2muha', 224), avatar = 'cat_01.jpg';
+	SET email = 'muha@test.ru', login = 'Andrei Muha', password = SHA2('pass2muha', 224), avatar = 'cat_01.jpg';
 
 /*добавление пользователей из существующего массива с постами*/
 INSERT INTO users
-	SET id = 3, email = 'larisa@test.ru', login = 'larisa', full_name = 'Лариса', password = SHA2('pass3larisa', 224), avatar = 'userpic-larisa.jpg';
+	SET id = 3, email = 'larisa@test.ru', login = 'Лариса', password = SHA2('pass3larisa', 224), avatar = 'userpic-larisa.jpg';
 INSERT INTO users
-	SET id = 4, email = 'vladik@test.ru', login = 'vladik', full_name = 'Владик', password = SHA2('pass4vladik', 224), avatar = 'userpic-medium.jpg';
+	SET id = 4, email = 'vladik@test.ru', login = 'Владик', password = SHA2('pass4vladik', 224), avatar = 'userpic-medium.jpg';
 INSERT INTO users
-	SET id = 5, email = 'viktor@test.ru', login = 'viktor', full_name ='Виктор', password = SHA2('pass5viktor', 224), avatar = 'userpic-mark.jpg';
+	SET id = 5, email = 'viktor@test.ru', login = 'Виктор', password = SHA2('pass5viktor', 224), avatar = 'userpic-mark.jpg';
 
 /*существующий список постов*/
 INSERT INTO posts
