@@ -70,7 +70,9 @@
                                             <li class="comments__item user">
                                                 <div class="comments__avatar">
                                                     <a class="user__avatar-link" href="#">
-                                                        <img class="comments__picture" src="img/<?= $comment['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
+                                                        <?php if (!empty($comment['avatar'])): ?>
+                                                            <img class="comments__picture" src="<?= $comment['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
+                                                        <?php endif; ?>
                                                     </a>
                                                 </div>
                                                 <div class="comments__info">
@@ -101,7 +103,9 @@
                             <div class="post-details__user-info user__info">
                                 <div class="post-details__avatar user__avatar">
                                     <a class="post-details__avatar-link user__avatar-link" href="#">
-                                        <img class="post-details__picture user__picture" src="img/<?= $author['avatar'] ?>" width="60" height="60" alt="Аватар пользователя">
+                                        <?php if (!empty($author['avatar'])): ?>
+                                            <img class="post-details__picture user__picture" src="<?= $author['avatar'] ?>" width="60" height="60" alt="Аватар пользователя">
+                                        <?php endif; ?>
                                     </a>
                                 </div>
                                 <div class="post-details__name-wrapper user__name-wrapper">

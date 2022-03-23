@@ -1,17 +1,16 @@
 <?php
 
 declare(strict_types=1);
+session_start();
 
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
-require_once('helpers.php');
 require_once('functions.php');
+
+isUserLoggedIn();
 
 $categories = getCategoryList($connect);
 $errorFields = [];
-
-/* допустим у нас id пользователя храниться в переменной $user_id */
-$userId = '1';
 
 /* Если была отправлена форма, то выполняем дальнейшие действия на проверку и отправку данных в БД */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errorFields)) {
                 /* Добавляем непосредственно сам пост в таблицу с постами */
-                addNewTextPost($connect, $requiredFields, $userId, $categoryId);
+                addNewTextPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
             }
 
             break;
@@ -42,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorFields = validateEmptyField($_POST, $requiredFields);
 
             if (empty($errorFields)) {
-                addNewQuotePost($connect, $requiredFields, $userId, $categoryId);
+                addNewQuotePost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
             }
 
             break;
@@ -74,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errorFields)) {
                 $imagePath = getPicturePath($imageName);
-                addNewPhotoPost($connect, $requiredFields, $userId, $categoryId, $imagePath);
+                addNewPhotoPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId, $imagePath);
             }
 
             break;
@@ -89,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errorFields)) {
-                addNewVideoPost($connect, $requiredFields, $userId, $categoryId);
+                addNewVideoPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
             }
 
             break;
@@ -103,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errorFields)) {
-                addNewLinkPost($connect, $requiredFields, $userId, $categoryId);
+                addNewLinkPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
             }
 
             break;
@@ -129,6 +128,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /* формирование страницы, разделение на пару шаблонов с баннером ошибок и самой формой */
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
-$pageContent = include_template('adding-post.php', ['categories' => $categories, 'user_name' => USER_NAME, 'titleName' => 'Добавление публикации', 'is_auth' => IS_AUTH, 'postType' => $postType, 'errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
+$pageContent = include_template('adding-post.php', ['categories' => $categories, 'titleName' => 'Добавление публикации', 'is_auth' => AUTH, 'postType' => $postType, 'errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
 
 print_r($pageContent);

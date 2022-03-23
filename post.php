@@ -1,11 +1,14 @@
 <?php
 
 declare(strict_types=1);
+session_start();
 
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
 require_once('helpers.php');
 require_once('functions.php');
+
+isUserLoggedIn();
 
 $postId = filter_input(INPUT_GET, 'postId', FILTER_SANITIZE_NUMBER_INT) ?: header('Location: /nothing-to-show.php');
 
@@ -33,8 +36,8 @@ $authorData[] = call_user_func_array('array_merge', (array_merge($author, $autho
 $sqlPostComments = "SELECT posts.id AS 'posts_id', users.id AS 'comment_author', users.login, users.avatar, comments.date_add AS 'comment_date', comments.content AS 'comment' FROM posts LEFT JOIN comments  ON comments.post_id = posts.id JOIN users ON users.id = comments.user_id WHERE posts.id  = ?;";
 $postComments = fetchPrepareStmt($connect, $sqlPostComments, $postId);
 
-/**формирование страницы */
+/*формирование страницы */
 $pageContent = include_template('post-details.php', ['post' => $post, 'postRating' => $postRating, 'postComments' => $postComments, 'authorData' => $authorData]);
-$postPage = include_template('layout.php', ['pageContent' => $pageContent, 'user_name' => USER_NAME, 'titleName' => 'Публикация', 'is_auth' => IS_AUTH]);
+$postPage = include_template('layout.php', ['pageContent' => $pageContent, 'titleName' => 'Публикация', 'is_auth' => AUTH]);
 
 print_r($postPage);

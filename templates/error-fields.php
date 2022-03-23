@@ -1,10 +1,10 @@
 <?php if (!empty($errorFields)) {
-    $visualHudden = '';
+    $visualHidden = '';
 } else {
-    $visualHudden = 'visually-hidden';
+    $visualHidden = 'visually-hidden';
 } ?>
 
-<div class="form__invalid-block <?= $visualHudden ?>">
+<div class="form__invalid-block <?= $visualHidden ?>">
     <b class="form__invalid-slogan">Пожалуйста, исправьте следующие ошибки:</b>
     <ul class="form__invalid-list">
         <?php foreach ($errorFields as $key => $error) : ?>
