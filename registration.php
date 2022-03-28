@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* Убедиться, что заполнены все обязательные поля*/
     $errorFields = validateEmptyField($_POST, $requiredFields);
 
-    /* Валидация емейла*/
+    /* Валидация email*/
     if (checkEmailExists($connect, $_POST['email']) !== false) {
         $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $_POST['email'] . ', уже зарегистрирован.'], $errorFields);
     }

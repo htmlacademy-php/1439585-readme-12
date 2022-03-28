@@ -1,11 +1,11 @@
 <main class="page__main page__main--publication">
     <div class="container">
-        <?php foreach ($post as $post) : ?>
-            <?php foreach ($authorData as $author) : ?>
+        <?php foreach ($postContent as $post) : ?>
+            <?php foreach ($postAuthorData as $author) : ?>
                 <h1 class="page__title page__title--publication"><?= htmlspecialchars($post['title']) ?></h1>
                 <section class="post-details">
                     <h2 class="visually-hidden">Публикация</h2>
-                    <?php $postType = "post-" . $post['class_name']; ?>
+                    <?php $postType = "post-" . $post['category_name']; ?>
                     <div class="post-details__wrapper <?= $postType ?>">
                         <div class="post-details__main-block post post--details">
                             <?php
@@ -17,40 +17,40 @@
                                 echo "Sorry, there is not such file :(";
                             } ?>
                             <div class="post__indicators">
-                                <?php foreach ($postRating as $postRating) : ?>
-                                    <div class="post__buttons">
-                                        <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
-                                            <svg class="post__indicator-icon" width="20" height="17">
-                                                <use xlink:href="#icon-heart"></use>
-                                            </svg>
-                                            <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
-                                                <use xlink:href="#icon-heart-active"></use>
-                                            </svg>
-                                            <span><?= $postRating['likes'] ?></span>
-                                            <span class="visually-hidden">количество лайков</span>
-                                        </a>
-                                        <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
-                                            <svg class="post__indicator-icon" width="19" height="17">
-                                                <use xlink:href="#icon-comment"></use>
-                                            </svg>
-                                            <span><?= $postRating['count_comment'] ?></span>
-                                            <span class="visually-hidden">количество комментариев</span>
-                                        </a>
-                                        <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
-                                            <svg class="post__indicator-icon" width="19" height="17">
-                                                <use xlink:href="#icon-repost"></use>
-                                            </svg>
-                                            <span>5</span>
-                                            <span class="visually-hidden">количество репостов</span>
-                                        </a>
-                                    </div>
-                                    <span class="post__view"><?= $post['show_count'] ?> просмотров</span>
-                                <?php endforeach; ?>
+                                <div class="post__buttons">
+                                    <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+                                        <svg class="post__indicator-icon" width="20" height="17">
+                                            <use xlink:href="#icon-heart"></use>
+                                        </svg>
+                                        <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
+                                            <use xlink:href="#icon-heart-active"></use>
+                                        </svg>
+                                        <span><?= $post['likes_count'] ?></span>
+                                        <span class="visually-hidden">количество лайков</span>
+                                    </a>
+                                    <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
+                                        <svg class="post__indicator-icon" width="19" height="17">
+                                            <use xlink:href="#icon-comment"></use>
+                                        </svg>
+                                        <span><?= $post['comment_count'] ?></span>
+                                        <span class="visually-hidden">количество комментариев</span>
+                                    </a>
+                                    <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
+                                        <svg class="post__indicator-icon" width="19" height="17">
+                                            <use xlink:href="#icon-repost"></use>
+                                        </svg>
+                                        <span>5</span>
+                                        <span class="visually-hidden">количество репостов</span>
+                                    </a>
+                                </div>
+                                <span class="post__view"><?= $post['show_count'] ?> просмотров</span>
                             </div>
                             <div class="comments">
                                 <form class="comments__form form" action="#" method="post">
                                     <div class="comments__my-avatar">
-                                        <img class="comments__picture" src="img/userpic-medium.jpg" width="40" height="40" alt="Аватар пользователя">
+                                        <?php if (!empty($_SESSION['user']['avatar'])): ?>
+                                            <img class="comments__picture" src="<?= $_SESSION['user']['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
+                                        <?php endif; ?>
                                     </div>
                                     <div class="form__input-section form__input-section--error">
                                         <textarea class="comments__textarea form__textarea form__input" placeholder="Ваш комментарий"></textarea>
@@ -64,8 +64,9 @@
                                     <button class="comments__submit button button--green" type="submit">Отправить</button>
                                 </form>
                                 <div class="comments__list-wrapper">
-                                    <?php foreach ($postComments as $comment) : ?>
-                                        <?php if ($comment['comment_author'] == $author['users_id']) ?>
+                                    <?php $i = 0 ?>
+                                    <?php foreach ($postsComments as $comment) : ?>
+                                        <?php $i++ ?>
                                         <ul class="comments__list">
                                             <li class="comments__item user">
                                                 <div class="comments__avatar">
@@ -89,11 +90,12 @@
                                                 </div>
                                             </li>
                                         </ul>
+                                        <?php if ($i == 2) { break; } ?>
                                     <?php endforeach; ?>
-                                    <?php if ($postRating['count_comment'] > 2) : ?>
+                                    <?php if ($post['comment_count'] > 2) : ?>
                                         <a class="comments__more-link" href="#">
                                             <span>Показать все комментарии</span>
-                                            <sup class="comments__amount"><?= $postRating['count_comment'] ?></sup>
+                                            <sup class="comments__amount"><?= (int)$post['comment_count'] - 2 ?></sup>
                                         </a>
                                     <?php endif; ?>
                                 </div>
@@ -103,28 +105,28 @@
                             <div class="post-details__user-info user__info">
                                 <div class="post-details__avatar user__avatar">
                                     <a class="post-details__avatar-link user__avatar-link" href="#">
-                                        <?php if (!empty($author['avatar'])): ?>
-                                            <img class="post-details__picture user__picture" src="<?= $author['avatar'] ?>" width="60" height="60" alt="Аватар пользователя">
+                                        <?php if (!empty($postAuthorData[0]['avatar'])): ?>
+                                            <img class="post-details__picture user__picture" src="<?= $postAuthorData[0]['avatar'] ?>" width="60" height="60" alt="Аватар пользователя">
                                         <?php endif; ?>
                                     </a>
                                 </div>
                                 <div class="post-details__name-wrapper user__name-wrapper">
                                     <a class="post-details__name user__name" href="#">
-                                        <span><?= $author['login'] ?></span>
+                                        <span><?= $postAuthorData[0]['login'] ?></span>
                                     </a>
-                                    <?php $userDate = showDate($author['date_registration']); ?>
+                                    <?php $userDate = showDate($postAuthorData[0]['date_registration']); ?>
                                     <time class="post-details__time user__time" datetime="<?= $userDate['datetime'] ?>"><?= $userDate['relative_time'] . ' на сайте' ?> </time>
                                 </div>
                             </div>
                             <div class="post-details__rating user__rating">
 
                                 <p class="post-details__rating-item user__rating-item user__rating-item--subscribers">
-                                    <span class="post-details__rating-amount user__rating-amount"><?= $author['subscribes'] ?></span>
-                                    <span class="post-details__rating-text user__rating-text">подписчиков</span>
+                                    <span class="post-details__rating-amount user__rating-amount"><?= $postAuthorData[0]['subscribers'] ?></span>
+                                    <span class="post-details__rating-text user__rating-text"><?= showSubscribersCount($postAuthorData[0]['subscribers']) ?></span>
                                 </p>
                                 <p class="post-details__rating-item user__rating-item user__rating-item--publications">
-                                    <span class="post-details__rating-amount user__rating-amount"><?= $author['count_posts'] ?></span>
-                                    <span class="post-details__rating-text user__rating-text">публикаций</span>
+                                    <span class="post-details__rating-amount user__rating-amount"><?= $postAuthorData[0]['count_posts'] ?></span>
+                                    <span class="post-details__rating-text user__rating-text"><?= showAuthorPostsCount($postAuthorData[0]['count_posts']) ?></span>
                                 </p>
 
                             </div>

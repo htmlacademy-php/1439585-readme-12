@@ -6,20 +6,20 @@ require_once('config/site_config.php');
 /**
  * Обрезает текст до указанной длины и добавляет в конце троеточие и ссылку на полный текст.
  * @param string $cardContent Текст для обрезания
- * @param integer $lenght Длина строки, установленная по умолчанию
+ * @param integer $length Длина строки, установленная по умолчанию
  * @return string
  */
-function cutCardContent(string $cardContent, int $lenght = 300): string
+function cutCardContent(string $cardContent, int $length = 300): string
 {
     $words = explode(' ', $cardContent);
     $count = 0;
     foreach ($words as $key => $nextWord) {
         $count = $count + (iconv_strlen($nextWord));
-        if ($count > $lenght) {
+        if ($count > $length) {
             break;
         }
     }
-    if ($count < $lenght) {
+    if ($count < $length) {
         return htmlspecialchars(implode(' ', $words));
     }
 
@@ -64,6 +64,7 @@ function correctSiteUrl(string $siteLink): string
  */
 function showDate(string $dateAdd): array
 {
+    $relativeTime = '';
     $tmstPostsDate = strtotime($dateAdd);
     $titleDate = date('Y-m-d H:i', $tmstPostsDate);
     $currentDate = date_format(date_create(), 'U');
@@ -210,6 +211,7 @@ function validateEmptyField(array $allFields, array $requiredFields): array
  */
 function prepareTags(string $hashtags): array
 {
+    $tags = [];
     $trimHashtags = trim($_POST[$hashtags]);
 
     if (!empty($trimHashtags)) {
@@ -398,13 +400,12 @@ function addMainPostContent($connect, array $requiredFields, string $sql, string
  */
 function addPostsHashtags($connect, int $post_id, array $hashtags)
 {
-
-    $sqlHashtags = 'INSERT INTO hashtags (hashtag_content) VALUES (?);';
-    $sqlPostsHashtags = 'INSERT INTO posts_hashtags (post_id, hashtag_id) VALUES (?, ?);';
+    $sqlHashtags = "INSERT INTO hashtags (hashtag_content) VALUES (?);";
+    $sqlPostsHashtags = "INSERT INTO posts_hashtags (post_id, hashtag_id) VALUES (?, ?);";
 
     foreach ($hashtags as $tags) {
 
-        $isTagExsist = fetchPrepareStmt($connect, "SELECT * FROM hashtags WHERE hashtag_content=?;", $tags);
+        $isTagExsist = fetchPrepareStmt($connect, "SELECT * FROM hashtags WHERE hashtag_content = ?;", $tags);
 
         if (!empty($isTagExsist)) {
             $tags_id = $isTagExsist[0]['id'];
@@ -433,7 +434,7 @@ function addNewTextPost($connect, array $requiredFields, int $userId, string $ca
 {
     $sql = "INSERT INTO posts (author_id, category_id, date_add, title, content ) VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
-    return addMainPostContent($connect, $requiredFields, $sql);
+    addMainPostContent($connect, $requiredFields, $sql);
 }
 
 /**
@@ -448,7 +449,7 @@ function addNewQuotePost($connect, array $requiredFields, int $userId, string $c
 {
     $sql = "INSERT INTO posts (author_id, category_id, date_add, title, content, quote_author) VALUES ($userId, $categoryId, NOW(), ?, ?, ?);";
 
-    return addMainPostContent($connect, $requiredFields, $sql);
+    addMainPostContent($connect, $requiredFields, $sql);
 }
 
 /**
@@ -464,7 +465,7 @@ function addNewPhotoPost($connect, array $requiredFields, int $userId, string $c
 {
     $sql = "INSERT INTO posts (author_id, category_id, date_add, title, image_path) VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
-    return addMainPostContent($connect, $requiredFields, $sql, $imageName);
+    addMainPostContent($connect, $requiredFields, $sql, $imageName);
 }
 
 /**
@@ -477,10 +478,9 @@ function addNewPhotoPost($connect, array $requiredFields, int $userId, string $c
  */
 function addNewVideoPost($connect, array $requiredFields, int $userId, string $categoryId)
 {
-
     $sql = "INSERT INTO posts (author_id, category_id, date_add, title, video_link) VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
-    return addMainPostContent($connect, $requiredFields, $sql);
+    addMainPostContent($connect, $requiredFields, $sql);
 }
 
 /**
@@ -495,7 +495,7 @@ function addNewLinkPost($connect, array $requiredFields, int $userId, string $ca
 {
     $sql = "INSERT INTO posts (author_id, category_id, date_add, title, website_link) VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
-    return addMainPostContent($connect, $requiredFields, $sql);
+    addMainPostContent($connect, $requiredFields, $sql);
 }
 
 /**
@@ -507,7 +507,6 @@ function getCategoryList($connect): array
 {
     $sqlCategories = "SELECT * FROM categories;";
     return fetchAll($connect, $sqlCategories);
-
 }
 
 /**
@@ -517,7 +516,6 @@ function getCategoryList($connect): array
  */
 function getAllCardsContent($connect): array
 {
-    // sql-запрос на получение всех постов объединенный с рейтингом
     $sqlCardsContent = "SELECT *
                         FROM
                             (SELECT posts.id AS post_id,
@@ -538,7 +536,8 @@ function getAllCardsContent($connect): array
                             ORDER BY  show_count DESC) AS cards
                         JOIN
                             (SELECT posts.id,
-                                COUNT(DISTINCT likes.id) AS 'likes_count', COUNT(DISTINCT comments.id) AS 'comment_count'
+                                    COUNT(DISTINCT likes.id) AS 'likes_count',
+                                    COUNT(DISTINCT comments.id) AS 'comment_count'
                             FROM posts
                             JOIN users
                                 ON users.id = posts.author_id
@@ -551,7 +550,6 @@ function getAllCardsContent($connect): array
                         ORDER BY  show_count DESC;";
 
     return fetchAll($connect, $sqlCardsContent);
-
 }
 
 /**
@@ -560,41 +558,39 @@ function getAllCardsContent($connect): array
  * @param int $categoryId Id категории, по которой происходит выборка
  * @return array
  */
-function getCardsByCategory(int $categoryId, $connect): array
+function getCardsByCategory($connect, int $categoryId): array
 {
-    // sql-запрос на получение постов по конкретной категории объединенный с рейтингом
     $sqlCardsOnCategory = "SELECT *
-    FROM
-        (SELECT posts.id AS post_id,
-                login,
-                avatar,
-                title,
-                category_id,
-                content,
-                quote_author,
-                image_path,
-                video_link,
-                website_link,
-                date_add,
-                show_count
-        FROM users
-            JOIN posts ON users.id = posts.author_id
-        ORDER BY show_count DESC) AS cards
-    JOIN
-        (SELECT posts.id,
-                COUNT(DISTINCT likes.id) AS 'likes_count',
-                COUNT(DISTINCT comments.id) AS 'comment_count'
-        FROM posts
-            JOIN users ON users.id = posts.author_id
-            LEFT JOIN likes ON posts.id = likes.post_id
-            LEFT JOIN comments ON comments.post_id = posts.id
-        GROUP BY posts.id) AS ratings
-        ON cards.post_id = ratings.id
-    WHERE cards.category_id = $categoryId
-    ORDER BY show_count DESC;";
+                           FROM
+                               (SELECT posts.id AS post_id,
+                                       login,
+                                       avatar,
+                                       title,
+                                       category_id,
+                                       content,
+                                       quote_author,
+                                       image_path,
+                                       video_link,
+                                       website_link,
+                                       date_add,
+                                       show_count
+                               FROM users
+                                    JOIN posts ON users.id = posts.author_id
+                               ORDER BY show_count DESC) AS cards
+                           JOIN
+                                (SELECT posts.id,
+                                        COUNT(DISTINCT likes.id) AS 'likes_count',
+                                        COUNT(DISTINCT comments.id) AS 'comment_count'
+                                FROM posts
+                                    JOIN users ON users.id = posts.author_id
+                                    LEFT JOIN likes ON posts.id = likes.post_id
+                                    LEFT JOIN comments ON comments.post_id = posts.id
+                                GROUP BY posts.id) AS ratings
+                                ON cards.post_id = ratings.id
+                           WHERE cards.category_id = $categoryId
+                           ORDER BY show_count DESC;";
 
     return fetchAll($connect, $sqlCardsOnCategory);
-
 }
 
 /**
@@ -643,13 +639,12 @@ function validateEmail(string $userEmail): bool
 /**
  * Проверка на соответствие пароля условиям ТЗ:
  * пароль должен быть не менее 6 символов, а также содержать в себе цифры и латинские буквы, в верхнем и нижнем регистре.
+ * Условия, по которым пароль должен соответствовать взяты из видео в ТЗ на сайте: https://www.youtube.com/watch?v=NexC8QPTNpM
  * @param string $password Проверяемый пароль
  * @return bool False, если не пароль не соответствует требованиям
  */
 function isPasswordCorrect(string $password): bool
 {
-    // Условия, по которым пароль должен соответствовать взяты из видео в ТЗ на сайте: https://www.youtube.com/watch?v=NexC8QPTNpM
-
     $passwordLength = iconv_strlen($password, 'UTF-8');
     if ($passwordLength < 6) {
         return false;
@@ -709,14 +704,14 @@ function addNewUser($connect, array $userData)
  * Добавление ссылки на аватар в таблицу users.
  * @param $connect mysqli Ресурс соединения
  * @param string $avatarPath Путь к аватару
- * @param int $user_id Id последнего добавленного пользователя
+ * @param int $userId Id последнего добавленного пользователя
  * @return void
  */
-function addUserAvatar($connect, string $avatarPath, int $user_id)
+function addUserAvatar($connect, string $avatarPath, int $userId)
 {
     $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?';
 
-    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $user_id]);
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $userId]);
     mysqli_stmt_execute($stmt);
 }
 
@@ -743,16 +738,15 @@ function getUserAuthorizationData($connect, string $email): array
     $sql = "SELECT * FROM users WHERE email = ?;";
 
     return fetchPrepareStmt($connect, $sql, $email);
-
 }
 
 /**
  * Получение списка постов с сортировкой по дате добавления; выборка по авторам, на которых подписан авторизованный пользователь.
  * @param $connect mysqli Ресурс соединения
- * @param int $subscriber_id Id авторизованного пользователя
+ * @param int $subscriberId Id авторизованного пользователя
  * @return array Массив постов с данными автора поста
  */
-function getSubscribesPosts($connect, int $subscriber_id): array
+function getSubscribesPosts($connect, int $subscriberId): array
 {
     $sql = "SELECT users.id AS 'user_id',
                    login,
@@ -787,19 +781,18 @@ function getSubscribesPosts($connect, int $subscriber_id): array
                           WHERE subscriber_id = ?)
             ORDER BY date_add DESC;";
 
-    return fetchPrepareStmt($connect, $sql, $subscriber_id);
-
+    return fetchPrepareStmt($connect, $sql, $subscriberId);
 }
 
 /**
  * Получение списка постов с сортировкой по дате добавления в выбранной категории;
  * выборка по авторам, на которых подписан авторизованный пользователь.
  * @param $connect mysqli Ресурс соединения
- * @param int $subscriber_id Id авторизованного пользователя
+ * @param int $subscriberId Id авторизованного пользователя
  * @param int $categoryId Id категории, по которой происходит выборка
  * @return array Массив постов с данными автора поста
  */
-function getSubscribesPostsByCategory($connect, int $subscriber_id, int $categoryId): array
+function getSubscribesPostsByCategory($connect, int $subscriberId, int $categoryId): array
 {
     $sql = "SELECT users.id AS 'user_id',
                    login,
@@ -835,14 +828,13 @@ function getSubscribesPostsByCategory($connect, int $subscriber_id, int $categor
                   AND category_id = ?
             ORDER BY date_add DESC;";
 
-    return fetchPrepareStmt($connect, $sql, [$subscriber_id, $categoryId]);
-
+    return fetchPrepareStmt($connect, $sql, [$subscriberId, $categoryId]);
 }
 
 /**
  * Получение хэштегов к конкретному посту по id поста.
  * @param $connect mysqli Ресурс соединения
- * @param $postId Id поста
+ * @param int $postId Id поста
  * @return array
  */
 function getPostHashtags($connect, int $postId): array
@@ -854,4 +846,115 @@ function getPostHashtags($connect, int $postId): array
             WHERE posts.id = ?";
 
     return fetchPrepareStmt($connect, $sql, $postId);
+}
+
+/**
+ * Получение данных по автору, включая количество постов и подписчиков, по id автора публикации.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorId Id автора публикации
+ * @return array
+ */
+function getPostAuthorData($connect, int $authorId): array
+{
+    $sql = "SELECT id,
+                   date_registration,
+                   email,
+                   login,
+                   avatar,
+                   subscribers,
+                   count_posts
+            FROM users
+                JOIN
+                    (SELECT COUNT(DISTINCT subscribes.id) AS 'subscribers',
+                            COUNT(DISTINCT posts.id) AS 'count_posts'
+                    FROM users
+                        LEFT JOIN posts ON users.id = posts.author_id
+                        LEFT JOIN subscribes ON users.id = subscribes.author_id
+                    WHERE users.id = ?) AS ratings
+            WHERE users.id = ?;";
+
+    return fetchPrepareStmt($connect, $sql, [$authorId, $authorId]);
+}
+
+/**
+ * Получение основного контента по содержимому поста вместе с рейтингом для страницы показа поста.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id поста
+ * @return array
+ */
+function getContentDataForPostPage($connect, int $postId): array
+{
+    $sql = "SELECT users.id AS 'user_id',
+                   posts.id AS 'post_id',
+                   category_id,
+                   categories.class_name AS 'category_name',
+                   title,
+                   content,
+                   quote_author,
+                   image_path,
+                   video_link,
+                   website_link,
+                   date_add,
+                   show_count,
+                   likes_count,
+				   comment_count
+            FROM users
+                JOIN posts ON users.id = posts.author_id
+                JOIN categories ON posts.category_id = categories.id
+                RIGHT JOIN
+                    (SELECT posts.id,
+                            COUNT(DISTINCT likes.id) AS 'likes_count',
+                            COUNT(DISTINCT comments.id) AS 'comment_count'
+                    FROM posts
+                        JOIN users ON users.id = posts.author_id
+                        LEFT JOIN likes ON posts.id = likes.post_id
+                        LEFT JOIN comments ON comments.post_id = posts.id
+                    GROUP BY posts.id) AS ratings
+                ON posts.id = ratings.id
+            WHERE posts.id = ?;";
+
+    return fetchPrepareStmt($connect, $sql, $postId);
+}
+
+/**
+ * Получение комментариев к конкретному посту по id поста.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id поста
+ * @return array
+ */
+function getPostComments($connect, int $postId): array
+{
+    $sql = "SELECT posts.id AS 'posts_id',
+                   users.id AS 'comment_author',
+                   login,
+                   avatar,
+                   comments.date_add AS 'comment_date',
+                   comments.content AS 'comment'
+            FROM posts
+                  LEFT JOIN comments ON comments.post_id = posts.id
+                  JOIN users ON users.id = comments.user_id
+            WHERE posts.id = ?
+            ORDER BY comments.date_add DESC;";
+
+    return fetchPrepareStmt($connect, $sql, $postId);
+}
+
+/**
+ * Возвращает корректную форму множественного числа подписчиков автора
+ * @param int $subscribersCount Количество подписчиков
+ * @return string Корректная форма множественного числа
+ */
+function showSubscribersCount(int $subscribersCount): string
+{
+    return get_noun_plural_form($subscribersCount, "подписчик", "подписчика", "подписчиков");
+}
+
+/**
+ * Возвращает корректную форму множественного числа количества публикаций автора
+ * @param int $postsCount Количество публикаций
+ * @return string Корректная форма множественного числа
+ */
+function showAuthorPostsCount(int $postsCount): string
+{
+    return get_noun_plural_form($postsCount, "публикация", "публикации", "публикаций");
 }

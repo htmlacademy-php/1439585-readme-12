@@ -60,12 +60,12 @@
                             <li class="header__profile">
                                 <a class="header__profile-link" href="#">
                                     <div class="header__avatar-wrapper">
-                                        <?php if (!empty($_SESSION['user']['avatar'])): ?>
-                                            <img class="header__profile-avatar" src="<?= $_SESSION['user']['avatar'] ?>" alt="Аватар профиля">
+                                        <?php if (!empty($userData['avatar'])): ?>
+                                            <img class="header__profile-avatar" src="<?= $userData['avatar'] ?>" alt="Аватар профиля">
                                         <?php endif; ?>
                                     </div>
                                     <div class="header__profile-name">
-                                        <span><?= $_SESSION['user']['login'] ?></span>
+                                        <span><?= $userData['login'] ?></span>
                                         <svg class="header__link-arrow" width="10" height="6">
                                             <use xlink:href="#icon-arrow-right-ad"></use>
                                         </svg>

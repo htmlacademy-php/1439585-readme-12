@@ -9,6 +9,10 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
+// Получаем данные по пользователю из сессии
+$userData['login'] = $_SESSION['user']['login'];
+$userData['avatar'] = $_SESSION['user']['avatar'];
+
 /*Получение списка категорий из БД */
 $categories = getCategoryList($connect);
 
@@ -17,7 +21,7 @@ $categoryId = (int)filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER
 
 if (!empty($categoryId)) {
     // если выбрана категория
-    $cards = getCardsByCategory($categoryId, $connect);
+    $cards = getCardsByCategory($connect, $categoryId);
 } else {
     // иначе показать все
     $cards = getAllCardsContent($connect);
@@ -29,6 +33,6 @@ if (empty($cards)) {
 }
 
 $pageContent = include_template('main.php', ['cards' => $cards, 'categories' => $categories]);
-$popularPage = include_template('layout.php', ['pageContent' => $pageContent, 'titleName' => 'readme: популярное', 'is_auth' => AUTH]);
+$popularPage = include_template('layout.php', ['pageContent' => $pageContent, 'titleName' => 'readme: популярное', 'userData' => $userData, 'is_auth' => AUTH]);
 
 print_r($popularPage);

@@ -60,11 +60,11 @@ INSERT INTO comments
 INSERT INTO comments
 	SET user_id = 3, post_id = 7, content = 'Опять ты за свое...';
 INSERT INTO comments
-	SET user_id = 2, post_id = 7, content = 'Блин, заждался уже их';
+	SET user_id = 2, post_id = 2, content = 'Блин, заждался уже их';
 INSERT INTO comments
-	SET user_id = 1, post_id = 10, content = 'Очень интересно, но временами непонятно';
+	SET user_id = 1, post_id = 9, content = 'Очень интересно, но временами непонятно';
 INSERT INTO comments
-	SET user_id = 4, post_id = 10, content = 'Согласен';
+	SET user_id = 4, post_id = 9, content = 'Согласен';
 
 /*получить список постов с сортировкой по популярности и вместе с именами авторов и типом контента;*/
 SELECT login, title, name, class_name, content, quote_author, image_path, video_link, website_link, date_add, show_count

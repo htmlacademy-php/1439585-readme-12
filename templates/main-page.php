@@ -75,7 +75,6 @@
                     </svg>
                     <label class="visually-hidden">Логин</label>
                     </div>
-                    <span class="form__error-label form__error-label--login"><?= $errorFields['email'] ?></span>
                 </div>
                 <div class="authorization__input-wrapper form__input-wrapper">
                     <div class="<?= $errorSection ?>">
@@ -85,7 +84,7 @@
                     </svg>
                     <label class="visually-hidden">Пароль</label>
                     </div>
-                    <span class="form__error-label"><?= $errorFields['password'] ?></span>
+                    <span class="form__error-label"><?= $errorFields['authorization'] ?></span>
                 </div>
                 <a class="authorization__recovery" href="#">Восстановить пароль</a>
                 <button class="authorization__submit button button--main" type="submit">Войти</button>

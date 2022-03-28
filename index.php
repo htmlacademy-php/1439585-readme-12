@@ -8,27 +8,30 @@ require_once('config/site_config.php');
 require_once('functions.php');
 
 $errorFields = [];
+$userData = [];
 
-/* Проверяем, что форма отправлена*/
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* Валидация на заполненность полей*/
-    $errorFields = validateEmptyField($_POST, ['email' => "Email. ", 'password' => "Пароль."]);
+    $isEmptyFields = validateEmptyField($_POST, ['email' => "Email. ", 'password' => "Пароль."]);
 
-    /* Все ли поля заполнены и существует ли пользователь в БД*/
-    if (checkEmailExists($connect, $_POST['email']) && empty($errorFields)) {
+    /* Проверяем, что пользователь ввел не пустые данные и email валидный*/
+    if (empty($isEmptyFields) && validateEmail($_POST['email'])) {
 
-        /* Если да, получаем по нему данные и сверяем хеш паролей*/
-        $userData = getUserAuthorizationData($connect, $_POST['email']);
-        if (!password_verify($_POST['password'], $userData[0]['password'])) {
-            $errorFields['email'] = $errorFields['password'] = 'Вы ввели неверный email/пароль';
+        /* Проверяем существование пользователя в БД; если есть, получаем по нему данные и сверяем хеш паролей*/
+        if (checkEmailExists($connect, $_POST['email'])) {
+            $userData = getUserAuthorizationData($connect, $_POST['email']);
+            if (!password_verify($_POST['password'], $userData[0]['password'])) {
+                $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
+            }
+        } else {
+            $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
         }
-
     } else {
-        $errorFields['email'] = $errorFields['password'] = 'Вы ввели неверный email/пароль';
+        $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
     }
 
-    /* Если все ок, записываем в сессию id пользователя*/
+    /* Если все ок, записываем в сессию пользователя*/
     if (empty($errorFields)) {
         $_SESSION['user']['id'] = $userData[0]['id'];
         $_SESSION['user']['login'] = $userData[0]['login'];

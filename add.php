@@ -9,6 +9,11 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
+// Получаем данные по пользователю из сессии
+$userId = $_SESSION['user']['id'];
+$userData['login'] = $_SESSION['user']['login'];
+$userData['avatar'] = $_SESSION['user']['avatar'];
+
 $categories = getCategoryList($connect);
 $errorFields = [];
 
@@ -31,19 +36,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errorFields)) {
                 /* Добавляем непосредственно сам пост в таблицу с постами */
-                addNewTextPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
+                addNewTextPost($connect, $requiredFields, $userId, $categoryId);
             }
-
             break;
 
         case ('quote'):
-            $requiredFields = ['heading' => "Заголовок.", 'cite-text' => "Текст цитаты.", 'quote-author' => "Автор цитаты."];
+            $requiredFields = [
+                'heading' => "Заголовок.",
+                'cite-text' => "Текст цитаты.",
+                'quote-author' => "Автор цитаты."
+            ];
             $errorFields = validateEmptyField($_POST, $requiredFields);
 
             if (empty($errorFields)) {
-                addNewQuotePost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
+                addNewQuotePost($connect, $requiredFields, $userId, $categoryId);
             }
-
             break;
 
         case ('photo'):
@@ -73,9 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errorFields)) {
                 $imagePath = getPicturePath($imageName);
-                addNewPhotoPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId, $imagePath);
+                addNewPhotoPost($connect, $requiredFields, $userId, $categoryId, $imagePath);
             }
-
             break;
 
         case ('video'):
@@ -88,9 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errorFields)) {
-                addNewVideoPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
+                addNewVideoPost($connect, $requiredFields, $userId, $categoryId);
             }
-
             break;
 
         case ('link'):
@@ -102,9 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errorFields)) {
-                addNewLinkPost($connect, $requiredFields, $_SESSION['user']['id'], $categoryId);
+                addNewLinkPost($connect, $requiredFields, $userId, $categoryId);
             }
-
             break;
     }
 
@@ -128,6 +132,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 /* формирование страницы, разделение на пару шаблонов с баннером ошибок и самой формой */
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
-$pageContent = include_template('adding-post.php', ['categories' => $categories, 'titleName' => 'Добавление публикации', 'is_auth' => AUTH, 'postType' => $postType, 'errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
+$pageContent = include_template('adding-post.php', [
+    'categories' => $categories,
+    'titleName' => 'Добавление публикации',
+    'userData' => $userData,
+    'is_auth' => AUTH,
+    'postType' => $postType,
+    'errorFields' => $errorFields,
+    'redErrorBanner' => $redErrorBanner
+]);
 
 print_r($pageContent);
