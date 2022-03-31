@@ -72,6 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* формирование страницы, разделение на шаблоны с баннером ошибок и самой формой */
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
 $registrationPageContent = include_template('user-registration.php', ['errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
-$registrationPage = include_template('layout.php', ['pageContent' => $registrationPageContent, 'titleName' => 'Регистрация', 'is_auth' => NOT_AUTH]);
+$registrationPage = include_template('layout.php', ['pageContent' => $registrationPageContent, 'titleName' => 'readme: регистрация', 'is_auth' => NOT_AUTH]);
 
 print_r($registrationPage);

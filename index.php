@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* Проверяем существование пользователя в БД; если есть, получаем по нему данные и сверяем хеш паролей*/
         if (checkEmailExists($connect, $_POST['email'])) {
             $userData = getUserAuthorizationData($connect, $_POST['email']);
-            if (!password_verify($_POST['password'], $userData[0]['password'])) {
+            if (!password_verify($_POST['password'], $userData['password'])) {
                 $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
             }
         } else {
@@ -33,9 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* Если все ок, записываем в сессию пользователя*/
     if (empty($errorFields)) {
-        $_SESSION['user']['id'] = $userData[0]['id'];
-        $_SESSION['user']['login'] = $userData[0]['login'];
-        $_SESSION['user']['avatar'] = $userData[0]['avatar'];
+        $_SESSION['user']['id'] = $userData['id'];
+        $_SESSION['user']['login'] = $userData['login'];
+        $_SESSION['user']['avatar'] = $userData['avatar'];
     }
 }
 

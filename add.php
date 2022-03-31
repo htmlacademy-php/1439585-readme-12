@@ -20,6 +20,9 @@ $errorFields = [];
 /* Если была отправлена форма, то выполняем дальнейшие действия на проверку и отправку данных в БД */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    $categoryId = '';
+    $imageName = '';
+    
     $postType = $_POST['post-type'];
     foreach ($categories as $category) {
         if ($postType == $category['class_name']) {
@@ -134,10 +137,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
 $pageContent = include_template('adding-post.php', [
     'categories' => $categories,
-    'titleName' => 'Добавление публикации',
+    'titleName' => 'readme: добавление публикации',
     'userData' => $userData,
     'is_auth' => AUTH,
-    'postType' => $postType,
     'errorFields' => $errorFields,
     'redErrorBanner' => $redErrorBanner
 ]);

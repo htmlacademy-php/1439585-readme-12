@@ -32,7 +32,7 @@
                                 </a>
                             </header>
                             <div class="post__main">
-                                <h2><a href="post.php?postId=<?= $post['post_id'] ?>"><?= $post['title'] ?></a></h2>
+                                <h2><a href="post.php?postId=<?= $post['post_id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
                                 <?php if ($postType == 'post-quote') : ?>
                                     <blockquote>
                                         <p>

@@ -17,26 +17,21 @@ $userData['avatar'] = $_SESSION['user']['avatar'];
 $postId = filter_input(INPUT_GET, 'postId',
     FILTER_SANITIZE_NUMBER_INT) ?: header('Location: /nothing-to-show.php');
 
-$isPostExsist = fetchPrepareStmt($connect, "SELECT * from posts WHERE id = ?;", $postId);
+$isPostExsist = fetchArrayPrepareStmt($connect, "SELECT * from posts WHERE id = ?;", $postId);
 if (empty($isPostExsist)) {
     header('Location: /nothing-to-show.php');
 }
 
-//Получение содержимого и рейтинга поста
-$postContent = getContentDataForPostPage($connect, (int)$postId);
-
-$authorId = $postContent[0]['user_id'];
-
-//Получение данных по автору поста
-$postAuthorData = getPostAuthorData($connect, $authorId);
+//Получение данных о посте, авторе поста и рейтинге
+$postData = getContentDataForPostPage($connect, (int)$postId);
 
 //Получение комментов к посту
 $postsComments = getPostComments($connect, (int)$postId);
 
 /*формирование страницы */
 $pageContent = include_template('post-details.php',
-    ['postContent' => $postContent, 'postsComments' => $postsComments, 'postAuthorData' => $postAuthorData]);
+    ['postData' => $postData, 'postsComments' => $postsComments, 'userData' => $userData]);
 $postPage = include_template('layout.php',
-    ['pageContent' => $pageContent, 'titleName' => 'Публикация', 'userData' => $userData, 'is_auth' => AUTH]);
+    ['pageContent' => $pageContent, 'titleName' => 'readme: публикация', 'userData' => $userData, 'is_auth' => AUTH]);
 
 print_r($postPage);

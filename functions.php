@@ -119,14 +119,14 @@ function fetchAll($connect, string $sqlQuery): array
 }
 
 /**
- * Возвращает массив данных из подготовленного sql-выражения
+ * Возвращает двумерный массив, содержащий ассоциативный массив данных из подготовленного sql-выражения
  * как для выражения с 1 плейсхолдером, так и с несколькими.
  * @param $connect mysqli Ресурс соединения
  * @param string $sqlQuery SQL запрос с плейсхолдерами
  * @param mixed $val Значения для вставки вместо плейсхолдеров
  * @return array
  */
-function fetchPrepareStmt($connect, string $sqlQuery, $val): array
+function fetchAllPrepareStmt($connect, string $sqlQuery, $val): array
 {
     $stmt = db_get_prepare_stmt($connect, $sqlQuery, (array)$val);
     $stmt->execute();
@@ -134,6 +134,28 @@ function fetchPrepareStmt($connect, string $sqlQuery, $val): array
 
     if ($result) {
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
+    die;
+}
+
+/**
+ * Возвращает одномерный ассоциативный массив данных из подготовленного sql-выражения
+ * как для выражения с 1 плейсхолдером, так и с несколькими.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $sqlQuery SQL запрос с плейсхолдерами
+ * @param mixed $val Значения для вставки вместо плейсхолдеров
+ * @return array
+ */
+function fetchArrayPrepareStmt($connect, string $sqlQuery, $val): array
+{
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, (array)$val);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result) {
+        return $result->fetch_array(MYSQLI_ASSOC);
     }
 
     echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
@@ -172,7 +194,7 @@ function ratingCount($connect, string $sqlQuery, array $cards): array
     $k = 0;
 
     foreach ($cards as $card) {
-        $stmtResult = fetchPrepareStmt($connect, $sqlQuery, $card['id']);
+        $stmtResult = fetchAllPrepareStmt($connect, $sqlQuery, $card['id']);
         $ratings[$k]['post_id'] = $card['id'];
         $ratings[$k]['likes'] = $stmtResult[0]['likes'];
         $ratings[$k]['count_comment'] = $stmtResult[0]['count_comment'];
@@ -405,7 +427,7 @@ function addPostsHashtags($connect, int $post_id, array $hashtags)
 
     foreach ($hashtags as $tags) {
 
-        $isTagExsist = fetchPrepareStmt($connect, "SELECT * FROM hashtags WHERE hashtag_content = ?;", $tags);
+        $isTagExsist = fetchAllPrepareStmt($connect, "SELECT * FROM hashtags WHERE hashtag_content = ?;", $tags);
 
         if (!empty($isTagExsist)) {
             $tags_id = $isTagExsist[0]['id'];
@@ -613,7 +635,7 @@ function redirectOnPage(string $page)
 function checkEmailExists($connect, string $userEmail): bool
 {
     $sqlQuery = 'SELECT email FROM users WHERE email = ?';
-    $userExists = fetchPrepareStmt($connect, $sqlQuery, $userEmail);
+    $userExists = fetchAllPrepareStmt($connect, $sqlQuery, $userEmail);
 
     if (!empty($userExists)) {
         return true;
@@ -737,7 +759,7 @@ function getUserAuthorizationData($connect, string $email): array
 {
     $sql = "SELECT * FROM users WHERE email = ?;";
 
-    return fetchPrepareStmt($connect, $sql, $email);
+    return fetchArrayPrepareStmt($connect, $sql, $email);
 }
 
 /**
@@ -781,7 +803,7 @@ function getSubscribesPosts($connect, int $subscriberId): array
                           WHERE subscriber_id = ?)
             ORDER BY date_add DESC;";
 
-    return fetchPrepareStmt($connect, $sql, $subscriberId);
+    return fetchAllPrepareStmt($connect, $sql, $subscriberId);
 }
 
 /**
@@ -828,7 +850,7 @@ function getSubscribesPostsByCategory($connect, int $subscriberId, int $category
                   AND category_id = ?
             ORDER BY date_add DESC;";
 
-    return fetchPrepareStmt($connect, $sql, [$subscriberId, $categoryId]);
+    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $categoryId]);
 }
 
 /**
@@ -845,7 +867,7 @@ function getPostHashtags($connect, int $postId): array
                 JOIN posts ON posts_hashtags.post_id = posts.id
             WHERE posts.id = ?";
 
-    return fetchPrepareStmt($connect, $sql, $postId);
+    return fetchAllPrepareStmt($connect, $sql, $postId);
 }
 
 /**
@@ -873,7 +895,7 @@ function getPostAuthorData($connect, int $authorId): array
                     WHERE users.id = ?) AS ratings
             WHERE users.id = ?;";
 
-    return fetchPrepareStmt($connect, $sql, [$authorId, $authorId]);
+    return fetchAllPrepareStmt($connect, $sql, [$authorId, $authorId]);
 }
 
 /**
@@ -885,6 +907,12 @@ function getPostAuthorData($connect, int $authorId): array
 function getContentDataForPostPage($connect, int $postId): array
 {
     $sql = "SELECT users.id AS 'user_id',
+				   date_registration,
+				   email,
+                   login,
+                   avatar,
+                   author_subscribers,
+                   author_count_post,
                    posts.id AS 'post_id',
                    category_id,
                    categories.class_name AS 'category_name',
@@ -895,13 +923,20 @@ function getContentDataForPostPage($connect, int $postId): array
                    video_link,
                    website_link,
                    date_add,
-                   show_count,
-                   likes_count,
-				   comment_count
+                   show_count, likes_count, comment_count
             FROM users
-                JOIN posts ON users.id = posts.author_id
+            	JOIN posts ON users.id = posts.author_id
                 JOIN categories ON posts.category_id = categories.id
-                RIGHT JOIN
+   				JOIN
+                	(SELECT users.id AS 'users_id',
+                         COUNT(DISTINCT subscribes.id) AS 'author_subscribers',
+                         COUNT(DISTINCT posts.id) AS 'author_count_post'
+                     FROM users
+                         LEFT JOIN subscribes ON users.id = subscribes.author_id
+                         LEFT JOIN posts ON posts.author_id = users.id
+                     GROUP BY users.id) AS author_ratings
+ 				ON author_ratings.users_id = posts.author_id
+                JOIN
                     (SELECT posts.id,
                             COUNT(DISTINCT likes.id) AS 'likes_count',
                             COUNT(DISTINCT comments.id) AS 'comment_count'
@@ -909,12 +944,13 @@ function getContentDataForPostPage($connect, int $postId): array
                         JOIN users ON users.id = posts.author_id
                         LEFT JOIN likes ON posts.id = likes.post_id
                         LEFT JOIN comments ON comments.post_id = posts.id
-                    GROUP BY posts.id) AS ratings
-                ON posts.id = ratings.id
-            WHERE posts.id = ?;";
+                    GROUP BY posts.id) AS post_ratings
+                ON posts.id = post_ratings.id
+				WHERE posts.id = ?;";
 
-    return fetchPrepareStmt($connect, $sql, $postId);
+    return fetchArrayPrepareStmt($connect, $sql, $postId);
 }
+
 
 /**
  * Получение комментариев к конкретному посту по id поста.
@@ -936,7 +972,7 @@ function getPostComments($connect, int $postId): array
             WHERE posts.id = ?
             ORDER BY comments.date_add DESC;";
 
-    return fetchPrepareStmt($connect, $sql, $postId);
+    return fetchAllPrepareStmt($connect, $sql, $postId);
 }
 
 /**
