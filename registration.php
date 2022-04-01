@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
-require_once('helpers.php');
 require_once('functions.php');
 
 $errorFields = [];
@@ -19,10 +18,10 @@ $requiredFields = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    /* Убедиться, что заполены все обязательные поля*/
+    /* Убедиться, что заполнены все обязательные поля*/
     $errorFields = validateEmptyField($_POST, $requiredFields);
 
-    /* Валидация емейла*/
+    /* Валидация email*/
     if (checkEmailExists($connect, $_POST['email']) !== false) {
         $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $_POST['email'] . ', уже зарегистрирован.'], $errorFields);
     }
@@ -64,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /* Если данные были записаны, т.е. получен id записи в БД, то переадресовываем пользователя на главную */
         if (!empty($user_id)) {
-             redirectOnPage("main.html");
+             redirectOnPage("index.php");
         }
     }
 
@@ -73,6 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* формирование страницы, разделение на шаблоны с баннером ошибок и самой формой */
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
 $registrationPageContent = include_template('user-registration.php', ['errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
-$registrationPage = include_template('layout.php', ['pageContent' => $registrationPageContent, 'titleName' => 'Регистрация', 'is_auth' => 0]);
+$registrationPage = include_template('layout.php', ['pageContent' => $registrationPageContent, 'titleName' => 'readme: регистрация', 'is_auth' => NOT_AUTH]);
 
 print_r($registrationPage);

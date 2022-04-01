@@ -1,33 +1,48 @@
 <?php
 
 declare(strict_types=1);
+session_start();
 
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
-require_once('helpers.php');
 require_once('functions.php');
 
-/**Получение списка категорий из БД */
-$categories = getCategoryList($connect);
+$errorFields = [];
+$userData = [];
 
-/**Получаем id категории если пользователем выбрана категория на странице */
-$categoryId = filter_input(INPUT_GET, 'categoryid', FILTER_SANITIZE_NUMBER_INT);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-if (!empty($categoryId)) {
-    // если выбрана категория
-    $cards = getCardsByCategory($categoryId, $connect);
+    /* Валидация на заполненность полей*/
+    $isEmptyFields = validateEmptyField($_POST, ['email' => "Email. ", 'password' => "Пароль."]);
+
+    /* Проверяем, что пользователь ввел не пустые данные и email валидный*/
+    if (empty($isEmptyFields) && validateEmail($_POST['email'])) {
+
+        /* Проверяем существование пользователя в БД; если есть, получаем по нему данные и сверяем хеш паролей*/
+        if (checkEmailExists($connect, $_POST['email'])) {
+            $userData = getUserAuthorizationData($connect, $_POST['email']);
+            if (!password_verify($_POST['password'], $userData['password'])) {
+                $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
+            }
+        } else {
+            $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
+        }
+    } else {
+        $errorFields['authorization'] = 'Вы ввели неверный email/пароль';
+    }
+
+    /* Если все ок, записываем в сессию пользователя*/
+    if (empty($errorFields)) {
+        $_SESSION['user']['id'] = $userData['id'];
+        $_SESSION['user']['login'] = $userData['login'];
+        $_SESSION['user']['avatar'] = $userData['avatar'];
+    }
+}
+
+if (!empty($_SESSION['user'])) {
+    redirectOnPage('feed.php');
 } else {
-    // иначе показать все
-    $cards = getAllCardsContent($connect);
+    $authorizationPage = include_template('main-page.php',
+        ['titleName' => 'readme: блог, каким он должен быть', 'errorFields' => $errorFields]);
+    print_r($authorizationPage);
 }
-
-/**если массив $cards пустой, редиректим на nothing-to-show.php */
-
-if (empty($cards)) {
-    redirectOnPage('nothing-to-show.php');
-}
-
-$pageContent = include_template('main.php', ['cards' => $cards, 'categories' => $categories]);
-$popularPage = include_template('layout.php', ['pageContent' => $pageContent, 'user_name' => USER_NAME, 'titleName' => 'readme: популярное', 'is_auth' => IS_AUTH]);
-
-print_r($popularPage);

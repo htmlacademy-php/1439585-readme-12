@@ -7,19 +7,20 @@ INSERT INTO categories(name,class_name)
 		('Видео', 'video'),
 		('Ссылка', 'link');
 
+/* У добавленных тут пользователей есть нюанс с паролем и дальнейшей авторизацией, тк при авторизации используется password_verify, а при регистрации password_hash, соответственно, при авторизации пользователя она не проходит*/
 /*придумайте пару пользователей*/
 INSERT INTO users
-	SET email = 'katewho@test.ru', login = 'Катерина', password = SHA2('pass1kate', 224), avatar = 'cat_02.jpg';
+	SET email = 'katewho@test.ru', login = 'Катерина', password = SHA2('pass1kate', 224), avatar = '/img/cat_02.jpg';
 INSERT INTO users
-	SET email = 'muha@test.ru', login = 'Andrei Muha', password = SHA2('pass2muha', 224), avatar = 'cat_01.jpg';
+	SET email = 'muha@test.ru', login = 'Andrei Muha', password = SHA2('pass2muha', 224), avatar = '/img/cat_01.jpg';
 
 /*добавление пользователей из существующего массива с постами*/
 INSERT INTO users
-	SET id = 3, email = 'larisa@test.ru', login = 'Лариса', password = SHA2('pass3larisa', 224), avatar = 'userpic-larisa.jpg';
+	SET id = 3, email = 'larisa@test.ru', login = 'Лариса', password = SHA2('pass3larisa', 224), avatar = '/img/userpic-larisa.jpg';
 INSERT INTO users
-	SET id = 4, email = 'vladik@test.ru', login = 'Владик', password = SHA2('pass4vladik', 224), avatar = 'userpic-medium.jpg';
+	SET id = 4, email = 'vladik@test.ru', login = 'Владик', password = SHA2('pass4vladik', 224), avatar = '/img/userpic-medium.jpg';
 INSERT INTO users
-	SET id = 5, email = 'viktor@test.ru', login = 'Виктор', password = SHA2('pass5viktor', 224), avatar = 'userpic-mark.jpg';
+	SET id = 5, email = 'viktor@test.ru', login = 'Виктор', password = SHA2('pass5viktor', 224), avatar = '/img/userpic-mark.jpg';
 
 /*существующий список постов*/
 INSERT INTO posts
@@ -59,11 +60,11 @@ INSERT INTO comments
 INSERT INTO comments
 	SET user_id = 3, post_id = 7, content = 'Опять ты за свое...';
 INSERT INTO comments
-	SET user_id = 2, post_id = 7, content = 'Блин, заждался уже их';
+	SET user_id = 2, post_id = 2, content = 'Блин, заждался уже их';
 INSERT INTO comments
-	SET user_id = 1, post_id = 10, content = 'Очень интересно, но временами непонятно';
+	SET user_id = 1, post_id = 9, content = 'Очень интересно, но временами непонятно';
 INSERT INTO comments
-	SET user_id = 4, post_id = 10, content = 'Согласен';
+	SET user_id = 4, post_id = 9, content = 'Согласен';
 
 /*получить список постов с сортировкой по популярности и вместе с именами авторов и типом контента;*/
 SELECT login, title, name, class_name, content, quote_author, image_path, video_link, website_link, date_add, show_count

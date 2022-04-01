@@ -2,11 +2,11 @@
     <div class="post__main">
         <blockquote style="width: 757px;">
             <p>
-                <?= htmlspecialchars($post['content']) ?>
+                <?= htmlspecialchars($postData['content']) ?>
             </p>
             <cite>
-                <?php if (!empty($post['quote_author'])) {
-                    echo htmlspecialchars($post['quote_author']);
+                <?php if (!empty($postData['quote_author'])) {
+                    echo htmlspecialchars($postData['quote_author']);
                 } else echo 'Неизвестный автор'; ?>
             </cite>
         </blockquote>

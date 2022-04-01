@@ -34,7 +34,7 @@
                 </ul>
             </div>
             <div class="popular__filters filters">
-                <?php $contentCategory = filter_input(INPUT_GET, 'categoryid', FILTER_SANITIZE_NUMBER_INT) ?? 'popular';
+                <?php $contentCategory = filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER_INT) ?? 'popular';
                 ?>
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
@@ -43,7 +43,7 @@
                         <?php if ($contentCategory == 'popular') {
                             $buttonActive = "filters__button--active";
                         } ?>
-                        <a class="filters__button filters__button--ellipse filters__button--all <?= $buttonActive ?>" href="index.php">
+                        <a class="filters__button filters__button--ellipse filters__button--all <?= $buttonActive ?>" href="popular.php">
                             <span>Все</span>
                         </a>
                     </li>
@@ -53,7 +53,7 @@
                             if ($contentCategory == $category['id']) {
                                 $buttonActive = "filters__button--active";
                             } ?>
-                            <a class="filters__button filters__button--<?= $category['class_name'] ?> <?= $buttonActive ?>" href="index.php?categoryid=<?= $category['id'] ?>">
+                            <a class="filters__button filters__button--<?= $category['class_name'] ?> <?= $buttonActive ?>" href="popular.php?category_id=<?= $category['id'] ?>">
                                 <span class="visually-hidden"><?= $category['name'] ?></span>
                                 <svg class="filters__icon" width="22" height="18">
                                     <use xlink:href="#icon-filter-<?= $category['class_name'] ?>"></use>
@@ -127,7 +127,9 @@
                         <div class="post__author">
                             <a class="post__author-link" href="#" title="Автор">
                                 <div class="post__avatar-wrapper">
-                                    <img class="post__author-avatar" src="img/<?= $card['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
+                                    <?php if (!empty($card['avatar'])): ?>
+                                        <img class="post__author-avatar" src="<?= $card['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
+                                    <?php endif; ?>
                                 </div>
                                 <div class="post__info">
                                     <b class="post__author-name"><?= htmlspecialchars($card['login']) ?></b>
