@@ -5,7 +5,6 @@ session_start();
 
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
-require_once('helpers.php');
 require_once('functions.php');
 
 isUserLoggedIn();

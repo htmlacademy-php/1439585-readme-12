@@ -994,3 +994,104 @@ function showAuthorPostsCount(int $postsCount): string
 {
     return get_noun_plural_form($postsCount, "публикация", "публикации", "публикаций");
 }
+
+/**
+ * Определение, какого рода поисковый запрос: из поисковой строки или поиск по хэштегу
+ * по тому, что пришло через параметр GET
+ * @param string $searchQuery Поисковый запрос
+ * @return string tag, если был поиск по хэштегу, queryString - поисковая строка
+ */
+function defineTypeSearchQuery(string $searchQuery): string
+{
+    if (substr($searchQuery, 0, 1) === '#') {
+        return 'tag';
+    }
+    return 'queryString';
+}
+
+/**
+ * Получение постов по результатам запроса из поисковой строки.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $searchQuery Поисковый запрос
+ * @return array
+ */
+function getSearchQueryResult($connect, string $searchQuery): array
+{
+    $sql = "SELECT users.id AS 'user_id',
+                   login,
+                   avatar,
+                   posts.id AS 'post_id',
+                   category_id,
+                   categories.class_name AS 'category_name',
+                   title,
+                   content,
+                   quote_author,
+                   image_path,
+                   video_link,
+                   website_link,
+                   date_add,
+                   likes_count,
+				   comment_count,
+                   MATCH(title, content) AGAINST(?)as relevance
+            FROM users
+            JOIN posts ON users.id = posts.author_id
+            JOIN categories ON posts.category_id = categories.id
+            RIGHT JOIN
+                (SELECT posts.id,
+                        COUNT(DISTINCT likes.id) AS 'likes_count',
+                        COUNT(DISTINCT comments.id) AS 'comment_count'
+                FROM posts
+                    JOIN users ON users.id = posts.author_id
+                    LEFT JOIN likes ON posts.id = likes.post_id
+                    LEFT JOIN comments ON comments.post_id = posts.id
+                GROUP BY posts.id) AS ratings
+            ON posts.id = ratings.id
+            WHERE MATCH(title, content) AGAINST(? IN NATURAL LANGUAGE MODE)
+            ORDER BY relevance DESC";
+
+    return fetchAllPrepareStmt($connect, $sql, [$searchQuery, $searchQuery]);
+}
+
+/**
+ * Получение постов по результатам поиска по хэштегу.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $hashtag Хэштег
+ * @return array
+ */
+function getTagSearchResult($connect, string $hashtag): array
+{
+    $sql = "SELECT users.id AS 'user_id',
+                   login,
+                   avatar,
+                   posts.id AS 'post_id',
+                   category_id,
+                   categories.class_name AS 'category_name',
+                   title,
+                   content,
+                   quote_author,
+                   image_path,
+                   video_link,
+                   website_link,
+                   date_add,
+                   likes_count,
+				   comment_count
+            FROM users
+            JOIN posts ON users.id = posts.author_id
+            JOIN categories ON posts.category_id = categories.id
+            LEFT JOIN posts_hashtags ON posts_hashtags.post_id = posts.id
+            LEFT JOIN hashtags ON hashtags.id = posts_hashtags.hashtag_id
+            RIGHT JOIN
+                (SELECT posts.id,
+                        COUNT(DISTINCT likes.id) AS 'likes_count',
+                        COUNT(DISTINCT comments.id) AS 'comment_count'
+                FROM posts
+                    JOIN users ON users.id = posts.author_id
+                    LEFT JOIN likes ON posts.id = likes.post_id
+                    LEFT JOIN comments ON comments.post_id = posts.id
+                GROUP BY posts.id) AS ratings
+            ON posts.id = ratings.id
+            WHERE MATCH(hashtag_content) AGAINST(? IN NATURAL LANGUAGE MODE)
+            ORDER BY date_add DESC";
+
+    return fetchAllPrepareStmt($connect, $sql, $hashtag);
+}

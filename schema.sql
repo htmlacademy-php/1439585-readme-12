@@ -60,12 +60,14 @@ CREATE TABLE posts (
   CONSTRAINT post_category
   FOREIGN KEY (category_id) REFERENCES categories (id)
 	ON UPDATE RESTRICT
-	ON DELETE RESTRICT
+	ON DELETE RESTRICT,
+	FULLTEXT KEY search_content(title, content)
 );
 
 CREATE TABLE hashtags (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-  hashtag_content VARCHAR(64) NOT NULL UNIQUE
+  hashtag_content VARCHAR(64) NOT NULL UNIQUE,
+  FULLTEXT KEY search_hashtag(hashtag_content)
 );
 
 CREATE TABLE posts_hashtags (
