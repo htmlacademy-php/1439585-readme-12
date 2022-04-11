@@ -96,7 +96,7 @@
                                 <?php foreach ($postHashtags as $postId => $hashtags): ?>
                                     <?php if (($content['post_id'] == $postId) && !empty($hashtags)): ?>
                                         <?php foreach ($hashtags as $tag): ?>
-                                            <li><a href="search.php?search=%23<?= ($tag) ?>">#<?= ($tag) ?></a></li>
+                                            <li><a href="search.php?query=%23<?= ($tag) ?>">#<?= ($tag) ?></a></li>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
