@@ -75,7 +75,7 @@
                 ?>
                 <article class="popular__post post <?= $postType ?>">
                     <header class="post__header">
-                        <h2><a href="post.php?postId=<?= $card['id'] ?>"><?= htmlspecialchars($card['title']) ?></a></h2>
+                        <h2><a href="post.php?postId=<?= $card['post_id'] ?>"><?= htmlspecialchars($card['title']) ?></a></h2>
                     </header>
                     <div class="post__main">
                         <?php if ($postType == 'post-quote') : ?>
@@ -112,7 +112,7 @@
                                 <div class="post-video__preview">
                                     <?= embed_youtube_cover($card['video_link']) ?>
                                 </div>
-                                <a href="post.php?postId=<?= $card['id'] ?>" class="post-video__play-big button">
+                                <a href="post.php?postId=<?= $card['post_id'] ?>" class="post-video__play-big button">
                                     <svg class="post-video__play-big-icon" width="14" height="14">
                                         <use xlink:href="#icon-video-play-big"></use>
                                     </svg>

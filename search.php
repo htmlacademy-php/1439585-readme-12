@@ -25,45 +25,42 @@ if (isset($_SERVER['HTTP_REFERER'])) {
     $httpRefererPage = $_SERVER['HTTP_REFERER'];
 }
 
-if (isset($_GET['query'])) {
+if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
 
-    $searchQuery = (trim((string)$_GET['query']));
+    $searchQuery = (trim($_GET['query']));
 
-    // после того как получили поисковый запрос надо проверить, а не пуст ли он
-    if (!empty($searchQuery)) {
+    //определяем, поисковой запрос был из строки запроса или по хэштегу
+    $searchType = defineTypeSearchQuery($searchQuery);
 
-        //затем определяем, поисковой запрос был из строки запроса или по хэштегу
-        $searchType = defineTypeSearchQuery($searchQuery);
-
-        switch ($searchType) {
-            case('queryString'):
-                $searchContent = getSearchQueryResult($connect, $searchQuery);
-                break;
-            case('tag'):
-                $tagSearch = substr($_GET['query'], 1);
-                $searchContent = getTagSearchResult($connect, $tagSearch);
-                break;
-        }
-    } else {
-        $errorFields = 'error';
+    switch ($searchType) {
+        case('queryString'):
+            $searchContent = getSearchQueryResult($connect, $searchQuery);
+            break;
+        case('tag'):
+            $tagSearch = substr($_GET['query'], 1);
+            $searchContent = getTagSearchResult($connect, $tagSearch);
+            break;
     }
 
     if (empty($searchContent)) {
         $errorFields = 'error';
     }
-
-    if (empty($errorFields)) {
-
-        // Получаем в ассоциативный массив в хэштегами ко всем постам для страницы поиска, где ключ массова - id поста
-        foreach ($searchContent as $content) {
-            $postHashtags[$content['post_id']] = array_column(getPostHashtags($connect, $content['post_id']),
-                'hashtag_content');
-        }
-
-        $templateName = 'search-results.php';
-        $titleName = 'readme: страница результатов поиска';
-    }
+} else {
+    $errorFields = 'error';
 }
+
+if (empty($errorFields)) {
+
+    // Получаем в ассоциативный массив в хэштегами ко всем постам для страницы поиска, где ключ массова - id поста
+    foreach ($searchContent as $content) {
+        $postHashtags[$content['post_id']] = array_column(getPostHashtags($connect, $content['post_id']),
+            'hashtag_content');
+    }
+
+    $templateName = 'search-results.php';
+    $titleName = 'readme: страница результатов поиска';
+}
+
 
 /*формирование страницы поиска*/
 $pageContent = include_template($templateName,
