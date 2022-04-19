@@ -24,10 +24,10 @@
                     micro blogging
                 </p>
             </div>
-            <form class="header__search-form form" action="#" method="get">
+            <form class="header__search-form form" action="search.php" method="get">
                 <div class="header__search">
                     <label class="visually-hidden">Поиск</label>
-                    <input class="header__search-input form__input" type="search">
+                    <input class="header__search-input form__input" type="search" id="query" name="query" value="<?php if (isset($_GET['query'])) echo htmlspecialchars(trim($_GET['query'])) ?>">
                     <button class="header__search-button button" type="submit">
                         <svg class="header__search-icon" width="18" height="18">
                             <use xlink:href="#icon-search"></use>
@@ -65,7 +65,7 @@
                                         <?php endif; ?>
                                     </div>
                                     <div class="header__profile-name">
-                                        <span><?= $userData['login'] ?></span>
+                                        <span><?= htmlspecialchars($userData['login']) ?></span>
                                         <svg class="header__link-arrow" width="10" height="6">
                                             <use xlink:href="#icon-arrow-right-ad"></use>
                                         </svg>

@@ -24,7 +24,7 @@
                                         <?php endif; ?>
                                     </div>
                                     <div class="post__info">
-                                        <b class="post__author-name"><?= $post['login'] ?></b>
+                                        <b class="post__author-name"><?= htmlspecialchars($post['login']) ?></b>
                                         <?php $postDate = showDate($post['date_add']); ?>
                                         <time class="post__time" title=" <?= $postDate['title'] ?>"
                                               datetime="<?= $postDate['datetime'] ?>"><?= $postDate['relative_time'] . ' назад' ?></time>
@@ -114,7 +114,7 @@
                                 <?php foreach ($postHashtags as $postId => $hashtags): ?>
                                     <?php if (($post['post_id'] == $postId) && !empty($hashtags)): ?>
                                         <?php foreach ($hashtags as $tag): ?>
-                                            <li><a href="#">#<?= ($tag) ?></a></li>
+                                            <li><a href="search.php?query=%23<?= ($tag) ?>">#<?= ($tag) ?></a></li>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 <?php endforeach; ?>

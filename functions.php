@@ -538,38 +538,27 @@ function getCategoryList($connect): array
  */
 function getAllCardsContent($connect): array
 {
-    $sqlCardsContent = "SELECT *
-                        FROM
-                            (SELECT posts.id AS post_id,
-                                login,
-                                avatar,
+    $sqlCardsContent = "SELECT  posts.id AS 'post_id',
                                 title,
                                 category_id,
-                                content,
+                                posts.content,
                                 quote_author,
                                 image_path,
                                 video_link,
                                 website_link,
-                                date_add,
-                                show_count
-                            FROM users
-                            JOIN posts
-                                ON users.id = posts.author_id
-                            ORDER BY  show_count DESC) AS cards
-                        JOIN
-                            (SELECT posts.id,
-                                    COUNT(DISTINCT likes.id) AS 'likes_count',
-                                    COUNT(DISTINCT comments.id) AS 'comment_count'
-                            FROM posts
-                            JOIN users
-                                ON users.id = posts.author_id
-                            LEFT JOIN likes
-                                ON posts.id = likes.post_id
-                            LEFT JOIN comments
-                                ON comments.post_id = posts.id
-                            GROUP BY  posts.id) AS ratings
-                            ON cards.post_id = ratings.id
-                        ORDER BY  show_count DESC;";
+                                posts.date_add,
+                                show_count,
+                                login,
+                                users.id AS 'user_id',
+                                avatar,
+                                COUNT(DISTINCT likes.id) AS 'likes_count',
+                                COUNT(DISTINCT comments.id) AS 'comment_count'
+                        FROM posts
+                            JOIN users ON users.id = posts.author_id
+                            LEFT JOIN likes ON posts.id = likes.post_id
+                            LEFT JOIN comments ON comments.post_id = posts.id
+                        GROUP BY posts.id
+                        ORDER BY show_count DESC";
 
     return fetchAll($connect, $sqlCardsContent);
 }
@@ -582,35 +571,28 @@ function getAllCardsContent($connect): array
  */
 function getCardsByCategory($connect, int $categoryId): array
 {
-    $sqlCardsOnCategory = "SELECT *
-                           FROM
-                               (SELECT posts.id AS post_id,
-                                       login,
-                                       avatar,
-                                       title,
-                                       category_id,
-                                       content,
-                                       quote_author,
-                                       image_path,
-                                       video_link,
-                                       website_link,
-                                       date_add,
-                                       show_count
-                               FROM users
-                                    JOIN posts ON users.id = posts.author_id
-                               ORDER BY show_count DESC) AS cards
-                           JOIN
-                                (SELECT posts.id,
-                                        COUNT(DISTINCT likes.id) AS 'likes_count',
-                                        COUNT(DISTINCT comments.id) AS 'comment_count'
-                                FROM posts
-                                    JOIN users ON users.id = posts.author_id
-                                    LEFT JOIN likes ON posts.id = likes.post_id
-                                    LEFT JOIN comments ON comments.post_id = posts.id
-                                GROUP BY posts.id) AS ratings
-                                ON cards.post_id = ratings.id
-                           WHERE cards.category_id = $categoryId
-                           ORDER BY show_count DESC;";
+    $sqlCardsOnCategory = "SELECT   posts.id AS 'post_id',
+                                    title,
+                                    category_id,
+                                    posts.content,
+                                    quote_author,
+                                    image_path,
+                                    video_link,
+                                    website_link,
+                                    posts.date_add,
+                                    show_count,
+                                    login,
+                                    users.id AS 'user_id',
+                                    avatar,
+                                    COUNT(DISTINCT likes.id) AS 'likes_count',
+                                    COUNT(DISTINCT comments.id) AS 'comment_count'
+                            FROM posts
+                                JOIN users ON users.id = posts.author_id
+                                LEFT JOIN likes ON posts.id = likes.post_id
+                                LEFT JOIN comments ON comments.post_id = posts.id
+                            WHERE posts.category_id = $categoryId
+                            GROUP BY posts.id
+                            ORDER BY show_count DESC";
 
     return fetchAll($connect, $sqlCardsOnCategory);
 }
@@ -770,38 +752,31 @@ function getUserAuthorizationData($connect, string $email): array
  */
 function getSubscribesPosts($connect, int $subscriberId): array
 {
-    $sql = "SELECT users.id AS 'user_id',
-                   login,
-                   avatar,
-                   posts.id AS 'post_id',
+    $sql = "SELECT posts.id AS 'post_id',
                    category_id,
                    title,
-                   content,
+                   posts.content,
                    quote_author,
                    image_path,
                    video_link,
                    website_link,
-                   date_add,
+                   posts.date_add,
                    show_count,
-                   likes_count,
-				   comment_count
-            FROM users
-                JOIN posts ON users.id = posts.author_id
-                RIGHT JOIN
-                    (SELECT posts.id,
-                            COUNT(DISTINCT likes.id) AS 'likes_count',
-                            COUNT(DISTINCT comments.id) AS 'comment_count'
-                    FROM posts
-                        JOIN users ON users.id = posts.author_id
-                        LEFT JOIN likes ON posts.id = likes.post_id
-                        LEFT JOIN comments ON comments.post_id = posts.id
-                    GROUP BY posts.id) AS ratings
-                ON posts.id = ratings.id
+                   users.id AS 'user_id',
+                   login,
+                   avatar,
+                   COUNT(DISTINCT likes.id) AS 'likes_count',
+				   COUNT(DISTINCT comments.id) AS 'comment_count'
+            FROM posts
+                JOIN users ON users.id = posts.author_id
+                LEFT JOIN likes ON posts.id = likes.post_id
+                LEFT JOIN comments ON comments.post_id = posts.id
             WHERE posts.author_id
-                      IN (SELECT author_id
+             	IN (SELECT author_id
                           FROM subscribes
                           WHERE subscriber_id = ?)
-            ORDER BY date_add DESC;";
+            GROUP BY posts.id
+            ORDER BY posts.date_add DESC;";
 
     return fetchAllPrepareStmt($connect, $sql, $subscriberId);
 }
@@ -816,38 +791,31 @@ function getSubscribesPosts($connect, int $subscriberId): array
  */
 function getSubscribesPostsByCategory($connect, int $subscriberId, int $categoryId): array
 {
-    $sql = "SELECT users.id AS 'user_id',
-                   login,
-                   avatar,
-                   posts.id AS 'post_id',
+    $sql = "SELECT posts.id AS 'post_id',
                    category_id,
                    title,
-                   content,
+                   posts.content,
                    quote_author,
                    image_path,
                    video_link,
                    website_link,
-                   date_add,
+                   posts.date_add,
                    show_count,
-                   likes_count,
-				   comment_count
-            FROM users
-                JOIN posts ON users.id = posts.author_id
-                RIGHT JOIN
-                    (SELECT posts.id,
-                    COUNT(DISTINCT likes.id) AS 'likes_count',
-                    COUNT(DISTINCT comments.id) AS 'comment_count'
-                    FROM posts
-                    JOIN users ON users.id = posts.author_id
-                    LEFT JOIN likes ON posts.id = likes.post_id
-                    LEFT JOIN comments ON comments.post_id = posts.id
-                    GROUP BY posts.id) AS ratings
-                ON posts.id = ratings.id
+                   users.id AS 'user_id',
+                   login,
+                   avatar,
+                   COUNT(DISTINCT likes.id) AS 'likes_count',
+				   COUNT(DISTINCT comments.id) AS 'comment_count'
+            FROM posts
+                JOIN users ON users.id = posts.author_id
+                LEFT JOIN likes ON posts.id = likes.post_id
+                LEFT JOIN comments ON comments.post_id = posts.id
             WHERE posts.author_id
                   IN (SELECT author_id
                       FROM subscribes
                       WHERE subscriber_id = ?)
                   AND category_id = ?
+            GROUP BY posts.id
             ORDER BY date_add DESC;";
 
     return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $categoryId]);
@@ -878,6 +846,7 @@ function getPostHashtags($connect, int $postId): array
  */
 function getPostAuthorData($connect, int $authorId): array
 {
+    /*Не стала в данном sql-запросе поправлять подсчет кол-ва комментариев тк функция пока не используется и подлежит дальнейшему изменению*/
     $sql = "SELECT id,
                    date_registration,
                    email,
@@ -906,47 +875,41 @@ function getPostAuthorData($connect, int $authorId): array
  */
 function getContentDataForPostPage($connect, int $postId): array
 {
-    $sql = "SELECT users.id AS 'user_id',
-				   date_registration,
-				   email,
-                   login,
-                   avatar,
-                   author_subscribers,
-                   author_count_post,
-                   posts.id AS 'post_id',
-                   category_id,
-                   categories.class_name AS 'category_name',
-                   title,
-                   content,
-                   quote_author,
-                   image_path,
-                   video_link,
-                   website_link,
-                   date_add,
-                   show_count, likes_count, comment_count
-            FROM users
-            	JOIN posts ON users.id = posts.author_id
+    $sql = "SELECT  posts.id AS 'post_id',
+                    category_id,
+                    categories.class_name AS 'category_name',
+                    title,
+                    posts.content,
+                    quote_author,
+                    image_path,
+                    video_link,
+                    website_link,
+                    posts.date_add,
+                    show_count,
+                    users.id AS 'user_id',
+                    date_registration,
+                    email,
+                    login,
+                    avatar,
+                    COUNT(DISTINCT likes.id) AS 'likes_count',
+                    COUNT(DISTINCT comments.id) AS 'comment_count',
+                    COUNT(DISTINCT subscribes.id) AS 'author_subscribers',
+                    author_count_post
+            FROM posts
+                JOIN users ON posts.author_id = users.id
                 JOIN categories ON posts.category_id = categories.id
-   				JOIN
-                	(SELECT users.id AS 'users_id',
-                         COUNT(DISTINCT subscribes.id) AS 'author_subscribers',
-                         COUNT(DISTINCT posts.id) AS 'author_count_post'
-                     FROM users
-                         LEFT JOIN subscribes ON users.id = subscribes.author_id
-                         LEFT JOIN posts ON posts.author_id = users.id
-                     GROUP BY users.id) AS author_ratings
- 				ON author_ratings.users_id = posts.author_id
+                LEFT JOIN likes ON posts.id = likes.post_id
+                LEFT JOIN comments ON comments.post_id = posts.id
+                LEFT JOIN subscribes ON users.id = subscribes.author_id
                 JOIN
-                    (SELECT posts.id,
-                            COUNT(DISTINCT likes.id) AS 'likes_count',
-                            COUNT(DISTINCT comments.id) AS 'comment_count'
-                    FROM posts
-                        JOIN users ON users.id = posts.author_id
-                        LEFT JOIN likes ON posts.id = likes.post_id
-                        LEFT JOIN comments ON comments.post_id = posts.id
-                    GROUP BY posts.id) AS post_ratings
-                ON posts.id = post_ratings.id
-				WHERE posts.id = ?;";
+                    (SELECT users.id AS 'users_id',
+                        	COUNT(DISTINCT posts.id) AS 'author_count_post'
+                     FROM users
+                         LEFT JOIN posts ON posts.author_id = users.id
+                     GROUP BY users.id) AS author_posts
+                ON author_posts.users_id = posts.author_id
+            WHERE posts.id = ?
+            GROUP BY posts.id";
 
     return fetchArrayPrepareStmt($connect, $sql, $postId);
 }
@@ -993,4 +956,91 @@ function showSubscribersCount(int $subscribersCount): string
 function showAuthorPostsCount(int $postsCount): string
 {
     return get_noun_plural_form($postsCount, "публикация", "публикации", "публикаций");
+}
+
+/**
+ * Определение, какого рода поисковый запрос: из поисковой строки или поиск по хэштегу
+ * по тому, что пришло через параметр GET
+ * @param string $searchQuery Поисковый запрос
+ * @return string tag, если был поиск по хэштегу, queryString - поисковая строка
+ */
+function defineTypeSearchQuery(string $searchQuery): string
+{
+    if (substr($searchQuery, 0, 1) === '#') {
+        return 'tag';
+    }
+    return 'queryString';
+}
+
+/**
+ * Получение постов по результатам запроса из поисковой строки.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $searchQuery Поисковый запрос
+ * @return array
+ */
+function getSearchQueryResult($connect, string $searchQuery): array
+{
+    $sql = "SELECT  posts.id AS 'post_id',
+                    title,
+                    posts.content,
+                    quote_author,
+                    image_path,
+                    video_link,
+                    website_link,
+                    posts.date_add,
+                    category_id,
+                    categories.class_name AS 'category_name',
+                    users.id AS 'user_id',
+                    login,
+                    avatar,
+                    COUNT(DISTINCT likes.id) AS 'likes_count',
+                    COUNT(DISTINCT comments.id) AS 'comment_count',
+                    MATCH(title, posts.content) AGAINST(?)as relevance
+            FROM posts
+                JOIN categories ON posts.category_id = categories.id
+                JOIN users ON posts.author_id = users.id
+                LEFT JOIN likes ON posts.id = likes.post_id
+                LEFT JOIN comments ON comments.post_id = posts.id
+            WHERE MATCH(title, posts.content) AGAINST(? IN NATURAL LANGUAGE MODE)
+            GROUP BY posts.id
+            ORDER BY relevance DESC";
+
+    return fetchAllPrepareStmt($connect, $sql, [$searchQuery, $searchQuery]);
+}
+
+/**
+ * Получение постов по результатам поиска по хэштегу.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $hashtag Хэштег
+ * @return array
+ */
+function getTagSearchResult($connect, string $hashtag): array
+{
+    $sql = "SELECT posts.id AS 'post_id',
+                   title,
+                   posts.content,
+                   quote_author,
+                   image_path,
+                   video_link,
+                   website_link,
+                   posts.date_add,
+                   category_id,
+                   categories.class_name AS 'category_name',
+                   users.id AS 'user_id',
+                   login,
+                   avatar,
+                   COUNT(DISTINCT likes.id) AS 'likes_count',
+                   COUNT(DISTINCT comments.id) AS 'comment_count'
+            FROM posts
+                JOIN categories ON posts.category_id = categories.id
+                JOIN users ON posts.author_id = users.id
+                LEFT JOIN posts_hashtags ON posts_hashtags.post_id = posts.id
+                LEFT JOIN hashtags ON hashtags.id = posts_hashtags.hashtag_id
+                LEFT JOIN likes ON posts.id = likes.post_id
+                LEFT JOIN comments ON comments.post_id = posts.id
+            WHERE MATCH(hashtag_content) AGAINST(? IN NATURAL LANGUAGE MODE)
+            GROUP BY posts.id
+            ORDER BY posts.date_add DESC";
+
+    return fetchAllPrepareStmt($connect, $sql, $hashtag);
 }

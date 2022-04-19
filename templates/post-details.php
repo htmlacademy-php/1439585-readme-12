@@ -110,7 +110,7 @@
                         </div>
                         <div class="post-details__name-wrapper user__name-wrapper">
                             <a class="post-details__name user__name" href="#">
-                                <span><?= $postData['login'] ?></span>
+                                <span><?= htmlspecialchars($postData['login']) ?></span>
                             </a>
                             <?php $authorDateTime = showDate($postData['date_registration']); ?>
                             <time class="post-details__time user__time" datetime="<?= $authorDateTime['datetime'] ?>"><?= $authorDateTime['relative_time'] . ' на сайте' ?> </time>
