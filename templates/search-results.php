@@ -15,7 +15,7 @@
                         <?php $postType = "post-" . $content['category_name']; ?>
                         <article class="search__post post <?= $postType ?>">
                             <header class="post__header post__author">
-                                <a class="post__author-link" href="#" title="Автор">
+                                <a class="post__author-link" href="profile.php?profile_id=<?= $content['user_id'] ?>" title="Автор">
                                     <div class="post__avatar-wrapper">
                                         <?php if (!empty($content['avatar'])): ?>
                                             <img class="post__author-avatar" src="<?= $content['avatar'] ?>" alt="Аватар пользователя" width="60" height="60">
@@ -31,7 +31,7 @@
                                 </a>
                             </header>
                             <div class="post__main">
-                                <h2><a href="post.php?postId=<?= $content['post_id'] ?>"><?= htmlspecialchars($content['title'])?></a></h2>
+                                <h2><a href="post.php?post_id=<?= $content['post_id'] ?>"><?= htmlspecialchars($content['title'])?></a></h2>
                                 <?php if ($postType == 'post-quote') : ?>
                                     <blockquote>
                                         <p>
@@ -68,12 +68,12 @@
                                         </div>
                                     </div>
                                 <?php elseif ($postType == 'post-text') : ?>
-                                    <p><?= cutCardContent($content['content']) ?></p>
+                                    <p><?= cutCardContent($content['content'], $content['post_id']) ?></p>
                                 <?php endif; ?>
                             </div>
                             <footer class="post__footer post__indicators">
                                 <div class="post__buttons">
-                                    <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+                                    <a class="post__indicator post__indicator--likes button" href="likes.php?post_id=<?= $content['post_id'] ?>" title="Лайк">
                                         <svg class="post__indicator-icon" width="20" height="17">
                                             <use xlink:href="#icon-heart"></use>
                                         </svg>
@@ -83,7 +83,7 @@
                                         <span><?= $content['likes_count'] ?></span>
                                         <span class="visually-hidden">количество лайков</span>
                                     </a>
-                                    <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
+                                    <a class="post__indicator post__indicator--comments button" href="post.php?post_id=<?= $content['post_id'] ?>" title="Комментарии">
                                         <svg class="post__indicator-icon" width="19" height="17">
                                             <use xlink:href="#icon-comment"></use>
                                         </svg>

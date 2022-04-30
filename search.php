@@ -8,7 +8,7 @@ require_once('config/site_config.php');
 require_once('functions.php');
 
 isUserLoggedIn();
-
+$userData['id'] = $_SESSION['user']['id'];
 $userData['login'] = $_SESSION['user']['login'];
 $userData['avatar'] = $_SESSION['user']['avatar'];
 

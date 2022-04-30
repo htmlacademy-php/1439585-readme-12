@@ -10,7 +10,7 @@ require_once('functions.php');
 isUserLoggedIn();
 
 // Получаем данные по пользователю из сессии
-$userId = $_SESSION['user']['id'];
+$userData['id'] = (int)$_SESSION['user']['id'];
 $userData['login'] = $_SESSION['user']['login'];
 $userData['avatar'] = $_SESSION['user']['avatar'];
 
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $categoryId = '';
     $imageName = '';
-    
+
     $postType = $_POST['post-type'];
     foreach ($categories as $category) {
         if ($postType == $category['class_name']) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errorFields)) {
                 /* Добавляем непосредственно сам пост в таблицу с постами */
-                addNewTextPost($connect, $requiredFields, $userId, $categoryId);
+                addNewTextPost($connect, $requiredFields, $userData['id'], $categoryId);
             }
             break;
 
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorFields = validateEmptyField($_POST, $requiredFields);
 
             if (empty($errorFields)) {
-                addNewQuotePost($connect, $requiredFields, $userId, $categoryId);
+                addNewQuotePost($connect, $requiredFields, $userData['id'], $categoryId);
             }
             break;
 
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (empty($errorFields)) {
                 $imagePath = getPicturePath($imageName);
-                addNewPhotoPost($connect, $requiredFields, $userId, $categoryId, $imagePath);
+                addNewPhotoPost($connect, $requiredFields, $userData['id'], $categoryId, $imagePath);
             }
             break;
 
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errorFields)) {
-                addNewVideoPost($connect, $requiredFields, $userId, $categoryId);
+                addNewVideoPost($connect, $requiredFields, $userData['id'], $categoryId);
             }
             break;
 
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errorFields)) {
-                addNewLinkPost($connect, $requiredFields, $userId, $categoryId);
+                addNewLinkPost($connect, $requiredFields, $userData['id'], $categoryId);
             }
             break;
     }
@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $redirectPage = "post.php?postId=" . $post_id;
+        $redirectPage = "post.php?post_id=" . $post_id;
         redirectOnPage($redirectPage);
     }
 }
@@ -137,11 +137,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
 $pageContent = include_template('adding-post.php', [
     'categories' => $categories,
-    'titleName' => 'readme: добавление публикации',
-    'userData' => $userData,
-    'is_auth' => AUTH,
     'errorFields' => $errorFields,
     'redErrorBanner' => $redErrorBanner
 ]);
-
-print_r($pageContent);
+$addingPostPage = include_template('layout.php', [
+    'pageContent' => $pageContent,
+    'titleName' => 'readme: добавление публикации',
+    'userData' => $userData,
+    'is_auth' => AUTH
+]);
+print_r($addingPostPage);

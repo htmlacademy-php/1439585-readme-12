@@ -16,7 +16,7 @@
                     } ?>
                     <div class="post__indicators">
                         <div class="post__buttons">
-                            <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+                            <a class="post__indicator post__indicator--likes button" href="likes.php?post_id=<?= $postData['post_id'] ?>" title="Лайк">
                                 <svg class="post__indicator-icon" width="20" height="17">
                                     <use xlink:href="#icon-heart"></use>
                                 </svg>
@@ -33,42 +33,53 @@
                                 <span><?= $postData['comment_count'] ?></span>
                                 <span class="visually-hidden">количество комментариев</span>
                             </a>
-                            <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
+                            <a class="post__indicator post__indicator--repost button" href="repost.php?post_id=<?= $postData['post_id'] ?>" title="Репост">
                                 <svg class="post__indicator-icon" width="19" height="17">
                                     <use xlink:href="#icon-repost"></use>
                                 </svg>
-                                <span>5</span>
+                                <span><?= $postData['repost_count'] ?></span>
                                 <span class="visually-hidden">количество репостов</span>
                             </a>
                         </div>
                         <span class="post__view"><?= $postData['show_count'] ?> просмотров</span>
                     </div>
                     <div class="comments">
-                        <form class="comments__form form" action="#" method="post">
+
+                        <!--leave-comment.php-->
+                        <form class="comments__form form" action="post.php?post_id=<?= $postData['post_id'] ?>" method="post">
+                            <input class="visually-hidden" type="text" name="post-id" value="<?= $postData['post_id'] ?>">
                             <div class="comments__my-avatar">
                                 <?php if (!empty($userData['avatar'])): ?>
                                     <img class="comments__picture" src="<?= $userData['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
                                 <?php endif; ?>
                             </div>
-                            <div class="form__input-section form__input-section--error">
-                                <textarea class="comments__textarea form__textarea form__input" placeholder="Ваш комментарий"></textarea>
+                            <?php if (!empty($validationError))
+                            {
+                                $errorLine = 'form__input-section--error';
+                            } else {
+                                $errorLine = '';
+                            }
+                            ?>
+                            <div class="form__input-section <?= $errorLine ?>">
+                                <textarea class="comments__textarea form__textarea form__input" name="comment_content" placeholder="Ваш комментарий"></textarea>
                                 <label class="visually-hidden">Ваш комментарий</label>
-                                <button class="form__error-button button" type="button">!</button>
-                                <div class="form__error-text">
-                                    <h3 class="form__error-title">Ошибка валидации</h3>
-                                    <p class="form__error-desc">Это поле обязательно к заполнению</p>
-                                </div>
+                                <?php if (!empty($validationError)): ?>
+                                    <button class="form__error-button button" type="button">!</button>
+                                    <div class="form__error-text">
+                                        <h3 class="form__error-title">Ошибка валидации</h3>
+                                        <p class="form__error-desc">Это поле обязательно к заполнению</p>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <button class="comments__submit button button--green" type="submit">Отправить</button>
                         </form>
+
                         <div class="comments__list-wrapper">
-                            <?php $i = 0 ?>
-                            <?php foreach ($postsComments as $comment) : ?>
-                                <?php $i++ ?>
+                            <?php foreach ($postsComments as $comment): ?>
                                 <ul class="comments__list">
                                     <li class="comments__item user">
                                         <div class="comments__avatar">
-                                            <a class="user__avatar-link" href="#">
+                                            <a class="user__avatar-link" href="profile.php?profile_id=<?= $comment['comment_author_id'] ?>">
                                                 <?php if (!empty($comment['avatar'])): ?>
                                                     <img class="comments__picture" src="<?= $comment['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
                                                 <?php endif; ?>
@@ -76,7 +87,7 @@
                                         </div>
                                         <div class="comments__info">
                                             <div class="comments__name-wrapper">
-                                                <a class="comments__user-name" href="#">
+                                                <a class="comments__user-name" href="profile.php?profile_id=<?= $comment['comment_author_id'] ?>">
                                                     <span><?= htmlspecialchars($comment['login']) ?></span>
                                                 </a>
                                                 <?php $commentDate = showDate($comment['comment_date']); ?>
@@ -88,32 +99,25 @@
                                         </div>
                                     </li>
                                 </ul>
-                                <?php if ($i == 2) { break; } ?>
                             <?php endforeach; ?>
-                            <?php if ($postData['comment_count'] > 2) : ?>
-                                <a class="comments__more-link" href="#">
-                                    <span>Показать все комментарии</span>
-                                    <sup class="comments__amount"><?= (int)$postData['comment_count'] - 2 ?></sup>
-                                </a>
-                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
                 <div class="post-details__user user">
                     <div class="post-details__user-info user__info">
                         <div class="post-details__avatar user__avatar">
-                            <a class="post-details__avatar-link user__avatar-link" href="#">
+                            <a class="post-details__avatar-link user__avatar-link" href="profile.php?profile_id=<?= $postData['user_id'] ?>">
                                 <?php if (!empty($postData['avatar'])): ?>
                                     <img class="post-details__picture user__picture" src="<?= $postData['avatar'] ?>" width="60" height="60" alt="Аватар пользователя">
                                 <?php endif; ?>
                             </a>
                         </div>
                         <div class="post-details__name-wrapper user__name-wrapper">
-                            <a class="post-details__name user__name" href="#">
+                            <a class="post-details__name user__name" href="profile.php?profile_id=<?= $postData['user_id'] ?>">
                                 <span><?= htmlspecialchars($postData['login']) ?></span>
                             </a>
                             <?php $authorDateTime = showDate($postData['date_registration']); ?>
-                            <time class="post-details__time user__time" datetime="<?= $authorDateTime['datetime'] ?>"><?= $authorDateTime['relative_time'] . ' на сайте' ?> </time>
+                            <time class="post-details__time user__time" datetime="<?= $authorDateTime['datetime'] ?>"><?= $authorDateTime['relative_time'] . ' на сайте' ?></time>
                         </div>
                     </div>
                     <div class="post-details__rating user__rating">
@@ -126,9 +130,25 @@
                             <span class="post-details__rating-text user__rating-text"><?= showAuthorPostsCount($postData['author_count_post']) ?></span>
                         </p>
                     </div>
+                    <!-- Показ "отписаться" или "подписаться"  -->
+                    <?php
+                    $button = 'button--main';
+                    $buttonText = 'Подписаться';
+                    $action = 'subscribe.php';
+
+                    if ($postData['is_subscribe'] === 1) {
+                        $button = 'button--quartz';
+                        $buttonText = 'Отписаться';
+                        $action = 'unsubscribe.php';
+                    } ?>
                     <div class="post-details__user-buttons user__buttons">
-                        <button class="user__button user__button--subscription button button--main" type="button">Подписаться</button>
-                        <a class="user__button user__button--writing button button--green" href="#">Сообщение</a>
+                        <form action="<?= $action ?>" method="get">
+                            <input class="visually-hidden" type="text" name="author_id" value="<?= $postData['user_id'] ?>">
+                            <button style="margin-bottom: 10px; width: 319px;" class="user__button user__button--subscription button <?= $button ?>" type="submit"><?= $buttonText ?></button>
+                        </form>
+                        <?php if ($postData['is_subscribe'] === 1): ?>
+                            <a class="user__button user__button--writing button button--green" href="#">Сообщение</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
