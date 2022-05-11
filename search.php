@@ -53,8 +53,7 @@ if (empty($errorFields)) {
 
     // Получаем в ассоциативный массив в хэштегами ко всем постам для страницы поиска, где ключ массова - id поста
     foreach ($searchContent as $content) {
-        $postHashtags[$content['post_id']] = array_column(getPostHashtags($connect, $content['post_id']),
-            'hashtag_content');
+        $postHashtags[$content['post_id']] = getPostHashtags($connect, $content['post_id']);
     }
 
     $templateName = 'search-results.php';

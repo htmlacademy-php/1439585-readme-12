@@ -831,10 +831,11 @@ function getSubscribesPosts($connect, int $subscriberId): array
              	IN (SELECT author_id
                           FROM subscribes
                           WHERE subscriber_id = ?)
+                OR posts.author_id = ?
             GROUP BY posts.id
             ORDER BY posts.date_add DESC;";
 
-    return fetchAllPrepareStmt($connect, $sql, $subscriberId);
+    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $subscriberId]);
 }
 
 /**
@@ -868,15 +869,16 @@ function getSubscribesPostsByCategory($connect, int $subscriberId, int $category
                 LEFT JOIN likes ON posts.id = likes.post_id
                 LEFT JOIN comments ON comments.post_id = posts.id
                 LEFT JOIN reposts ON reposts.original_post_id = posts.id
-            WHERE posts.author_id
+            WHERE (posts.author_id
                   IN (SELECT author_id
                       FROM subscribes
                       WHERE subscriber_id = ?)
+                  OR posts.author_id = ?)
                   AND category_id = ?
             GROUP BY posts.id
             ORDER BY date_add DESC;";
 
-    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $categoryId]);
+    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $subscriberId, $categoryId]);
 }
 
 /**
@@ -893,7 +895,7 @@ function getPostHashtags($connect, int $postId): array
                 JOIN posts ON posts_hashtags.post_id = posts.id
             WHERE posts.id = ?;";
 
-    return fetchAllPrepareStmt($connect, $sql, $postId);
+    return array_column(fetchAllPrepareStmt($connect, $sql, $postId), 'hashtag_content');
 }
 
 /**

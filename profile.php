@@ -39,14 +39,14 @@ switch ($section) {
 
         // Список тегов к этим постам
         foreach ($mainContent as $post) {
-            $postHashtags[$post['post_id']] = array_column(getPostHashtags($connect, $post['post_id']),
-                'hashtag_content');
+            $postHashtags[$post['post_id']] = getPostHashtags($connect, $post['post_id']);
         }
         break;
 }
 
 $pageContent = include_template('profile-details.php', [
     'userProfileData' => $userProfileData,
+    'authorizedUser' => $userData['id'],
     'mainContent' => $mainContent,
     'postHashtags' => $postHashtags,
     'section' => $section

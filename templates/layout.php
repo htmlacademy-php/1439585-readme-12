@@ -44,7 +44,7 @@
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--feed">
-                        <a class="header__page-link  <?php if ($_SERVER['SCRIPT_NAME'] === '/feed.php') echo 'header__page-link--active'?>" href="feed.php" title="Моя лента">
+                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/feed.php') echo 'header__page-link--active'?>" href="feed.php" title="Моя лента">
                             <span class="visually-hidden">Моя лента</span>
                         </a>
                     </li>
@@ -85,7 +85,8 @@
                                         <a class="header__profile-nav-link" href="#">
                                             <span class="header__profile-nav-text">
                                                 Сообщения
-                                                <i class="header__profile-indicator">2</i>
+                                                <!-- В следующем задании 9.7. Отправка электронной почты будет реализован функционал сообщений и как раз условие на показ кол-ва непрочитанных сообщений профайла -->
+                                                <!-- <i class="header__profile-indicator">2</i>-->
                                             </span>
                                         </a>
                                     </li>

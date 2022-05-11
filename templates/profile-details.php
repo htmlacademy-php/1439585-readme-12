@@ -26,23 +26,25 @@
                     </p>
                 </div>
                 <div class="profile__user-buttons user__buttons">
-                    <?php
-                    $button = 'button--main';
-                    $buttonText = 'Подписаться';
-                    $action = 'subscribe.php';
+                    <?php if ($userProfileData['id'] !== $authorizedUser): ?>
+                        <?php
+                        $button = 'button--main';
+                        $buttonText = 'Подписаться';
+                        $action = 'subscribe.php';
 
-                    if ($userProfileData['is_subscribe'] === 1) {
-                        $button = 'button--quartz';
-                        $buttonText = 'Отписаться';
-                        $action = 'unsubscribe.php';
-                    } ?>
-                    <form action="<?= $action ?>" method="get">
-                        <input class="visually-hidden" type="text" name="author_id" value="<?= $userProfileData['id'] ?>">
-                        <button style="margin-bottom: 10px; width: 360px;" class="profile__user-button user__button user__button--subscription button <?= $button ?>" type="submit" ><?= $buttonText ?></button>
-                    </form>
-                    <?php if ($userProfileData['is_subscribe'] === 1): ?>
-                        <a class="profile__user-button user__button user__button--writing button button--green" href="#">Сообщение</a>
-                    <?php endif;?>
+                        if ($userProfileData['is_subscribe'] === 1) {
+                            $button = 'button--quartz';
+                            $buttonText = 'Отписаться';
+                            $action = 'unsubscribe.php';
+                        } ?>
+                        <form action="<?= $action ?>" method="get">
+                            <input class="visually-hidden" type="text" name="author_id" value="<?= $userProfileData['id'] ?>">
+                            <button style="margin-bottom: 10px; width: 360px;" class="profile__user-button user__button user__button--subscription button <?= $button ?>" type="submit" ><?= $buttonText ?></button>
+                        </form>
+                        <?php if ($userProfileData['is_subscribe'] === 1): ?>
+                            <a class="profile__user-button user__button user__button--writing button button--green" href="#">Сообщение</a>
+                        <?php endif;?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -30,10 +30,12 @@ if (!empty($categoryId)) {
 
 /* Получаем в ассоциативный массив в хэштегами ко всем постам на странице, где ключ массова - id поста*/
 foreach ($posts as $post) {
-    $postHashtags[$post['post_id']] = array_column(getPostHashtags($connect, $post['post_id']), 'hashtag_content');
+    $postHashtags[$post['post_id']] = getPostHashtags($connect, $post['post_id']);
 }
 
-$pageContent = include_template('feed-details.php', ['categories' => $categories, 'posts' => $posts, 'postHashtags' => $postHashtags]);
-$feedPage = include_template('layout.php', ['pageContent' => $pageContent, 'titleName' => 'readme: моя лента', 'userData' => $userData, 'is_auth' => AUTH]);
+$pageContent = include_template('feed-details.php',
+    ['categories' => $categories, 'posts' => $posts, 'postHashtags' => $postHashtags]);
+$feedPage = include_template('layout.php',
+    ['pageContent' => $pageContent, 'titleName' => 'readme: моя лента', 'userData' => $userData, 'is_auth' => AUTH]);
 
 print_r($feedPage);
