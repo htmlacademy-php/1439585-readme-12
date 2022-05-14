@@ -7,20 +7,18 @@
             <h2 class="visually-hidden">Лента</h2>
             <div class="feed__main-wrapper">
                 <div class="feed__wrapper">
-                    <?php foreach ($posts as $post) : ?>
+                    <?php foreach ($posts as $post): ?>
                         <?php foreach ($categories as $category) {
                             if ($post['category_id'] == $category['id']) {
                                 $postType = "post-" . $category['class_name'];
                             }
-                        }
-                        ?>
+                        } ?>
                         <article class="feed__post post <?= $postType ?>">
                             <header class="post__header post__author">
-                                <a class="post__author-link" href="#" title="Автор">
+                                <a class="post__author-link" href="profile.php?profile_id=<?= $post['user_id'] ?>" title="Автор">
                                     <div class="post__avatar-wrapper">
                                         <?php if (!empty($post['avatar'])): ?>
-                                            <img class="post__author-avatar" src="<?= $post['avatar'] ?>"
-                                             alt="Аватар пользователя" width="60" height="60">
+                                            <img class="post__author-avatar" src="<?= $post['avatar'] ?>" alt="Аватар пользователя" width="60" height="60">
                                         <?php endif; ?>
                                     </div>
                                     <div class="post__info">
@@ -32,8 +30,8 @@
                                 </a>
                             </header>
                             <div class="post__main">
-                                <h2><a href="post.php?postId=<?= $post['post_id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
-                                <?php if ($postType == 'post-quote') : ?>
+                                <h2><a href="post.php?post_id=<?= $post['post_id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
+                                <?php if ($postType == 'post-quote'): ?>
                                     <blockquote>
                                         <p>
                                             <?= htmlspecialchars($post['content']) ?>
@@ -46,15 +44,14 @@
                                             } ?>
                                         </cite>
                                     </blockquote>
-                                <?php elseif ($postType == 'post-link') : ?>
+                                <?php elseif ($postType == 'post-link'): ?>
                                     <div class="post-link__wrapper">
                                         <a class="post-link__external"
                                            href="<?= correctSiteUrl(htmlspecialchars($post['website_link'])) ?>"
                                            title="Перейти по ссылке">
                                             <div class="post-link__icon-wrapper">
                                                 <img
-                                                    src="https://www.google.com/s2/favicons?domain=<?= $post['website_link'] ?>"
-                                                    alt="Иконка">
+                                                    src="https://www.google.com/s2/favicons?domain=<?= $post['website_link'] ?>" alt="Иконка">
                                             </div>
                                             <div class="post-link__info">
                                                 <h3><?= htmlspecialchars($post['title']) ?></h3>
@@ -65,24 +62,23 @@
                                             </svg>
                                         </a>
                                     </div>
-                                <?php elseif ($postType == 'post-photo') : ?>
+                                <?php elseif ($postType == 'post-photo'): ?>
                                     <div class="post-photo__image-wrapper">
-                                        <img src="<?= $post['image_path'] ?>" alt="Фото от пользователя" width="760"
-                                             height="396">
+                                        <img src="<?= $post['image_path'] ?>" alt="Фото от пользователя" width="760" height="396">
                                     </div>
-                                <?php elseif ($postType == 'post-video') : ?>
+                                <?php elseif ($postType == 'post-video'): ?>
                                     <div class="post-video__block">
                                         <div class="post-video__preview">
-                                            <?= embed_youtube_video($post['video_link']); ?>
+                                            <?= embed_youtube_video($post['video_link']) ?>
                                         </div>
                                     </div>
-                                <?php elseif ($postType == 'post-text') : ?>
-                                    <p><?= cutCardContent($post['content']) ?></p>
+                                <?php elseif ($postType == 'post-text'): ?>
+                                    <p><?= cutCardContent($post['content'], $post['post_id']) ?></p>
                                 <?php endif; ?>
                             </div>
                             <footer class="post__footer post__indicators">
                                 <div class="post__buttons">
-                                    <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+                                    <a class="post__indicator post__indicator--likes button" href="likes.php?post_id=<?= $post['post_id'] ?>" title="Лайк">
                                         <svg class="post__indicator-icon" width="20" height="17">
                                             <use xlink:href="#icon-heart"></use>
                                         </svg>
@@ -93,7 +89,7 @@
                                         <span><?= $post['likes_count'] ?></span>
                                         <span class="visually-hidden">количество лайков</span>
                                     </a>
-                                    <a class="post__indicator post__indicator--comments button" href="#"
+                                    <a class="post__indicator post__indicator--comments button" href="post.php?post_id=<?= $post['post_id'] ?>"
                                        title="Комментарии">
                                         <svg class="post__indicator-icon" width="19" height="17">
                                             <use xlink:href="#icon-comment"></use>
@@ -101,11 +97,11 @@
                                         <span><?= $post['comment_count'] ?></span>
                                         <span class="visually-hidden">количество комментариев</span>
                                     </a>
-                                    <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
+                                    <a class="post__indicator post__indicator--repost button" href="repost.php?post_id=<?= $post['post_id'] ?>" title="Репост">
                                         <svg class="post__indicator-icon" width="19" height="17">
                                             <use xlink:href="#icon-repost"></use>
                                         </svg>
-                                        <span>0</span>
+                                        <span><?= $post['repost_count'] ?></span>
                                         <span class="visually-hidden">количество репостов</span>
                                     </a>
                                 </div>
@@ -124,17 +120,18 @@
                 </div>
             </div>
             <ul class="feed__filters filters">
-                <?php $contentCategory = filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER_INT) ?? 'all';
-                ?>
+                <?php $contentCategory = filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER_INT) ?? 'all'; ?>
                 <li class="feed__filters-item filters__item">
                     <?php if ($contentCategory == 'all') {
                         $buttonActive = "filters__button--active";
+                    } else {
+                        $buttonActive = "";
                     } ?>
                     <a class="filters__button filters__button--all <?= $buttonActive ?>" href="feed.php">
                         <span>Все</span>
                     </a>
                 </li>
-                <?php foreach ($categories as $category) : ?>
+                <?php foreach ($categories as $category): ?>
                     <li class="feed__filters-item filters__item">
                         <?php $buttonActive = "button";
                         if ($contentCategory == $category['id']) {

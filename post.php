@@ -10,26 +10,51 @@ require_once('functions.php');
 isUserLoggedIn();
 
 // Получаем данные по пользователю из сессии
+$userData['id'] = $_SESSION['user']['id'];
 $userData['login'] = $_SESSION['user']['login'];
 $userData['avatar'] = $_SESSION['user']['avatar'];
 
-$postId = filter_input(INPUT_GET, 'postId',
+$postId = (int)filter_input(INPUT_GET, 'post_id',
     FILTER_SANITIZE_NUMBER_INT) ?: header('Location: /nothing-to-show.php');
 
-$isPostExsist = fetchArrayPrepareStmt($connect, "SELECT * from posts WHERE id = ?;", $postId);
-if (empty($isPostExsist)) {
+if (isPostExists($connect, $postId) === false) {
     header('Location: /nothing-to-show.php');
 }
 
-//Получение данных о посте, авторе поста и рейтинге
-$postData = getContentDataForPostPage($connect, (int)$postId);
+$postData = getContentDataForPostPage($connect, $postId, $userData['id']);
+$postsComments = getPostComments($connect, $postId);
 
-//Получение комментов к посту
-$postsComments = getPostComments($connect, (int)$postId);
+//Добавление комментария к посту
+$validationError = '';
+if (!empty($_POST['comment_content'])) {
+    // Проверяем, что такой пост все еще существует, post-id берем из формы
+    if (isPostExists($connect, (int)$_POST['post-id']) === false) {
+        header('Location: /nothing-to-show.php');
+    }
+
+    if (validateCommentLength($_POST['comment_content']) === true) {
+        addCommentToPost($connect, $postId, (int)$userData['id'], $_POST['comment_content']);
+        if (!empty(mysqli_insert_id($connect))) {
+            redirectOnPage("profile.php?profile_id=" . $postData['user_id']);
+        }
+    } else {
+        $validationError = 'Это поле обязательно к заполнению';
+    }
+}
+
+//Обновление счетчика просмотров в случае, если было простое обновление страницы, а не при неудачной валидации добавление коммента
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    updateShowCount($connect, $postId);
+}
 
 /*формирование страницы */
 $pageContent = include_template('post-details.php',
-    ['postData' => $postData, 'postsComments' => $postsComments, 'userData' => $userData]);
+    [
+        'postData' => $postData,
+        'postsComments' => $postsComments,
+        'userData' => $userData,
+        'validationError' => $validationError
+    ]);
 $postPage = include_template('layout.php',
     ['pageContent' => $pageContent, 'titleName' => 'readme: публикация', 'userData' => $userData, 'is_auth' => AUTH]);
 

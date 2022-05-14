@@ -39,24 +39,24 @@
             <nav class="header__nav">
                 <ul class="header__my-nav">
                     <li class="header__my-page header__my-page--popular">
-                        <a class="header__page-link header__page-link--active" href="popular.php" title="Популярный контент">
+                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/popular.php') echo 'header__page-link--active'?>" href="popular.php" title="Популярный контент">
                             <span class="visually-hidden">Популярный контент</span>
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--feed">
-                        <a class="header__page-link" href="feed.php" title="Моя лента">
+                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/feed.php') echo 'header__page-link--active'?>" href="feed.php" title="Моя лента">
                             <span class="visually-hidden">Моя лента</span>
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--messages">
-                        <a class="header__page-link" href="messages.html" title="Личные сообщения">
+                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/messages.html') echo 'header__page-link--active'?>" href="messages.html" title="Личные сообщения">
                             <span class="visually-hidden">Личные сообщения</span>
                         </a>
                     </li>
                 </ul>
                 <ul class="header__user-nav">
                     <li class="header__profile">
-                        <a class="header__profile-link" href="#">
+                        <a class="header__profile-link" href="profile.php?profile_id=<?= $userData['id'] ?>">
                             <div class="header__avatar-wrapper">
                                 <?php if (!empty($userData['avatar'])): ?>
                                     <img class="header__profile-avatar" src="<?= $userData['avatar'] ?>" alt="Аватар пользователя">
@@ -75,7 +75,7 @@
                             <div class="header__profile-tooltip">
                                 <ul class="header__profile-nav">
                                     <li class="header__profile-nav-item">
-                                        <a class="header__profile-nav-link" href="#">
+                                        <a class="header__profile-nav-link" href="profile.php?profile_id=<?= $userData['id'] ?>">
                                             <span class="header__profile-nav-text">
                                                 Мой профиль
                                             </span>
@@ -85,7 +85,8 @@
                                         <a class="header__profile-nav-link" href="#">
                                             <span class="header__profile-nav-text">
                                                 Сообщения
-                                                <i class="header__profile-indicator">2</i>
+                                                <!-- В следующем задании 9.7. Отправка электронной почты будет реализован функционал сообщений и как раз условие на показ кол-ва непрочитанных сообщений профайла -->
+                                                <!-- <i class="header__profile-indicator">2</i>-->
                                             </span>
                                         </a>
                                     </li>
@@ -101,7 +102,11 @@
                         </div>
                     </li>
                     <li>
-                        <a class="header__post-button button button--transparent" href="/add.php">Пост</a>
+                        <?php if ($_SERVER['SCRIPT_NAME'] === '/add.php'): ?>
+                            <a class="header__post-button header__post-button--active button button--transparent" href="index.php">Закрыть</a>
+                        <?php else: ?>
+                            <a class="header__post-button button button--transparent" href="/add.php">Пост</a>
+                        <?php endif; ?>
                     </li>
                 </ul>
             </nav>
@@ -177,7 +182,7 @@
 </footer>
 <!-- При закомментированных js-скриптах работает отправка фото (переключение табов на странице с популярным переключаются, ссылки с параметрами другие моменты выполненные по проекту на текущий момент работают)-->
 <!-- <script src="libs/dropzone.js"></script>
-<script src="js/dropzone-settings.js"></script>
-<script src="js/main.js"></script> -->
+<script src="js/dropzone-settings.js"></script> -->
+<!--<script src="js/main.js"></script>-->
 </body>
 </html>

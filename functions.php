@@ -6,10 +6,11 @@ require_once('config/site_config.php');
 /**
  * Обрезает текст до указанной длины и добавляет в конце троеточие и ссылку на полный текст.
  * @param string $cardContent Текст для обрезания
- * @param integer $length Длина строки, установленная по умолчанию
+ * @param int $postId Id поста для формирования ссылки на него
+ * @param int $length Длина строки, установленная по умолчанию
  * @return string
  */
-function cutCardContent(string $cardContent, int $length = 300): string
+function cutCardContent(string $cardContent, int $postId, int $length = 300): string
 {
     $words = explode(' ', $cardContent);
     $count = 0;
@@ -24,7 +25,8 @@ function cutCardContent(string $cardContent, int $length = 300): string
     }
 
     return htmlspecialchars(implode(' ',
-            array_slice($words, 0, $key))) . '...' . '<p> <a class="post-text__more-link" href="#">Читать далее</a>';
+            array_slice($words, 0,
+                $key))) . '...' . '<p> <a class="post-text__more-link" href="post.php?post_id=' . $postId . '">Читать далее</a>';
 }
 
 /**
@@ -146,9 +148,9 @@ function fetchAllPrepareStmt($connect, string $sqlQuery, $val): array
  * @param $connect mysqli Ресурс соединения
  * @param string $sqlQuery SQL запрос с плейсхолдерами
  * @param mixed $val Значения для вставки вместо плейсхолдеров
- * @return array
+ * @return void
  */
-function fetchArrayPrepareStmt($connect, string $sqlQuery, $val): array
+function fetchArrayPrepareStmt($connect, string $sqlQuery, $val)
 {
     $stmt = db_get_prepare_stmt($connect, $sqlQuery, (array)$val);
     $stmt->execute();
@@ -160,6 +162,42 @@ function fetchArrayPrepareStmt($connect, string $sqlQuery, $val): array
 
     echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
     die;
+}
+
+/**
+ * Выполнение запроса к БД и извлечение результата в одномерный массив.
+ * @param $connect mysqli Ресурс соединения
+ * @param string $sqlQuery SQL запрос с данными, которые нужно получить из БД
+ * @return array
+ */
+function fetchResult($connect, $sqlQuery): array
+{
+    $resultSqlQuery = $connect->query($sqlQuery);
+
+    if ($resultSqlQuery) {
+        return $resultSqlQuery->fetch_assoc();
+    }
+
+    echo sprintf("Ошибка получения данных. %d %s", $connect->errno, $connect->error);
+    die;
+}
+
+/**
+ * Выполнение запроса к БД с подготовленным выражением
+ * @param $connect mysqli Ресурс соединения
+ * @param string $sqlQuery
+ * @param array $data Данные для вставки вместо плейсхолдеров
+ * @return void
+ */
+function executePrepareStmt($connect, string $sqlQuery, array $data)
+{
+    $stmt = db_get_prepare_stmt($connect, $sqlQuery, $data);
+    mysqli_stmt_execute($stmt);
+
+    if (mysqli_errno($connect) > 0) {
+        echo sprintf("Ошибка получения данных. %d %s", mysqli_errno($connect), mysqli_error($connect));
+        die;
+    }
 }
 
 /**
@@ -179,29 +217,6 @@ function prepareData(array $fields): array
     }
 
     return $resultData;
-}
-
-/**
- * Возвращает массив с подсчитанным количеством лайков и комментариев к посту.
- * @param $connect mysqli Ресурс соединения
- * @param string $sqlQuery SQL запрос на получение количества лайков и комментариев
- * @param array $cards Массив с содержимым поста
- * @return array
- */
-function ratingCount($connect, string $sqlQuery, array $cards): array
-{
-    $ratings = [];
-    $k = 0;
-
-    foreach ($cards as $card) {
-        $stmtResult = fetchAllPrepareStmt($connect, $sqlQuery, $card['id']);
-        $ratings[$k]['post_id'] = $card['id'];
-        $ratings[$k]['likes'] = $stmtResult[0]['likes'];
-        $ratings[$k]['count_comment'] = $stmtResult[0]['count_comment'];
-        $k++;
-    }
-
-    return $ratings;
 }
 
 /**
@@ -532,11 +547,40 @@ function getCategoryList($connect): array
 }
 
 /**
+ * Подсчет общего количества всех постов по всем категориям
+ * @param $connect mysqli Ресурс соединения
+ * @return int
+ */
+function countAllPosts($connect): int
+{
+    $sql = "SELECT COUNT(id) AS count_posts FROM posts;";
+
+    return fetchResult($connect, $sql)['count_posts'];
+}
+
+/**
+ * Подсчет общего количества постов в выбранной категории
+ * @param $connect mysqli Ресурс соединения
+ * @param int $categoryId Id выбранной пользователем категории
+ * @return int
+ */
+function countPostsByCategory($connect, int $categoryId): int
+{
+    $sql = "SELECT COUNT(id) AS count_posts FROM posts WHERE category_id = ?;";
+
+    return fetchArrayPrepareStmt($connect, $sql, $categoryId)['count_posts'];
+}
+
+/**
  * Получение всех существующих карточек постов с рейтингом, отсортированных по популярности.
  * @param $connect mysqli Ресурс соединения
+ * @param int $limit Ограничение количества записей за запрос
+ * @param int $offset Смещение для выборки
+ * @param string $sortingBy Параметр сортировки(по какому полю из БД)
+ * @param string $sortOrder Порядок сортировки
  * @return array
  */
-function getAllCardsContent($connect): array
+function getAllCardsContent($connect, int $limit, int $offset, string $sortingBy, string $sortOrder): array
 {
     $sqlCardsContent = "SELECT  posts.id AS 'post_id',
                                 title,
@@ -558,7 +602,8 @@ function getAllCardsContent($connect): array
                             LEFT JOIN likes ON posts.id = likes.post_id
                             LEFT JOIN comments ON comments.post_id = posts.id
                         GROUP BY posts.id
-                        ORDER BY show_count DESC";
+                        ORDER BY $sortingBy $sortOrder
+                        LIMIT $limit OFFSET $offset;";
 
     return fetchAll($connect, $sqlCardsContent);
 }
@@ -567,10 +612,20 @@ function getAllCardsContent($connect): array
  * Получение карточек постов с рейтингом по конкретной категории, отсортированных по популярности.
  * @param $connect mysqli Ресурс соединения
  * @param int $categoryId Id категории, по которой происходит выборка
+ * @param int $limit Ограничение количества записей за запрос
+ * @param int $offset Смещение для выборки
+ * @param string $sortingBy Параметр сортировки(по какому полю из БД)
+ * @param string $sortOrder Порядок сортировки
  * @return array
  */
-function getCardsByCategory($connect, int $categoryId): array
-{
+function getCardsByCategory(
+    $connect,
+    int $categoryId,
+    int $limit,
+    int $offset,
+    string $sortingBy,
+    string $sortOrder
+): array {
     $sqlCardsOnCategory = "SELECT   posts.id AS 'post_id',
                                     title,
                                     category_id,
@@ -592,7 +647,8 @@ function getCardsByCategory($connect, int $categoryId): array
                                 LEFT JOIN comments ON comments.post_id = posts.id
                             WHERE posts.category_id = $categoryId
                             GROUP BY posts.id
-                            ORDER BY show_count DESC";
+                            ORDER BY $sortingBy $sortOrder
+                            LIMIT $limit OFFSET $offset;";
 
     return fetchAll($connect, $sqlCardsOnCategory);
 }
@@ -616,7 +672,7 @@ function redirectOnPage(string $page)
  */
 function checkEmailExists($connect, string $userEmail): bool
 {
-    $sqlQuery = 'SELECT email FROM users WHERE email = ?';
+    $sqlQuery = 'SELECT email FROM users WHERE email = ?;';
     $userExists = fetchAllPrepareStmt($connect, $sqlQuery, $userEmail);
 
     if (!empty($userExists)) {
@@ -700,8 +756,7 @@ function addNewUser($connect, array $userData)
 {
     $sqlQuery = "INSERT INTO users (date_registration, email, login, password) VALUES (NOW(), ?, ?, ?);";
 
-    $stmt = db_get_prepare_stmt($connect, $sqlQuery, $userData);
-    mysqli_stmt_execute($stmt);
+    executePrepareStmt($connect, $sqlQuery, $userData);
 }
 
 /**
@@ -713,10 +768,9 @@ function addNewUser($connect, array $userData)
  */
 function addUserAvatar($connect, string $avatarPath, int $userId)
 {
-    $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?';
+    $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?;';
 
-    $stmt = db_get_prepare_stmt($connect, $sqlQuery, [$avatarPath, $userId]);
-    mysqli_stmt_execute($stmt);
+    executePrepareStmt($connect, $sqlQuery, [$avatarPath, $userId]);
 }
 
 /**
@@ -766,19 +820,22 @@ function getSubscribesPosts($connect, int $subscriberId): array
                    login,
                    avatar,
                    COUNT(DISTINCT likes.id) AS 'likes_count',
-				   COUNT(DISTINCT comments.id) AS 'comment_count'
+				   COUNT(DISTINCT comments.id) AS 'comment_count',
+                   COUNT(DISTINCT reposts.id) AS 'repost_count'
             FROM posts
                 JOIN users ON users.id = posts.author_id
                 LEFT JOIN likes ON posts.id = likes.post_id
                 LEFT JOIN comments ON comments.post_id = posts.id
+                LEFT JOIN reposts ON reposts.original_post_id = posts.id
             WHERE posts.author_id
              	IN (SELECT author_id
                           FROM subscribes
                           WHERE subscriber_id = ?)
+                OR posts.author_id = ?
             GROUP BY posts.id
             ORDER BY posts.date_add DESC;";
 
-    return fetchAllPrepareStmt($connect, $sql, $subscriberId);
+    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $subscriberId]);
 }
 
 /**
@@ -805,20 +862,23 @@ function getSubscribesPostsByCategory($connect, int $subscriberId, int $category
                    login,
                    avatar,
                    COUNT(DISTINCT likes.id) AS 'likes_count',
-				   COUNT(DISTINCT comments.id) AS 'comment_count'
+				   COUNT(DISTINCT comments.id) AS 'comment_count',
+                   COUNT(DISTINCT reposts.id) AS 'repost_count'
             FROM posts
                 JOIN users ON users.id = posts.author_id
                 LEFT JOIN likes ON posts.id = likes.post_id
                 LEFT JOIN comments ON comments.post_id = posts.id
-            WHERE posts.author_id
+                LEFT JOIN reposts ON reposts.original_post_id = posts.id
+            WHERE (posts.author_id
                   IN (SELECT author_id
                       FROM subscribes
                       WHERE subscriber_id = ?)
+                  OR posts.author_id = ?)
                   AND category_id = ?
             GROUP BY posts.id
             ORDER BY date_add DESC;";
 
-    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $categoryId]);
+    return fetchAllPrepareStmt($connect, $sql, [$subscriberId, $subscriberId, $categoryId]);
 }
 
 /**
@@ -833,38 +893,35 @@ function getPostHashtags($connect, int $postId): array
             FROM hashtags
                 JOIN posts_hashtags ON hashtags.id = posts_hashtags.hashtag_id
                 JOIN posts ON posts_hashtags.post_id = posts.id
-            WHERE posts.id = ?";
+            WHERE posts.id = ?;";
 
-    return fetchAllPrepareStmt($connect, $sql, $postId);
+    return array_column(fetchAllPrepareStmt($connect, $sql, $postId), 'hashtag_content');
 }
 
 /**
  * Получение данных по автору, включая количество постов и подписчиков, по id автора публикации.
  * @param $connect mysqli Ресурс соединения
  * @param int $authorId Id автора публикации
+ * @param int $authorizedUserId Id авторизованного пользователя
  * @return array
  */
-function getPostAuthorData($connect, int $authorId): array
+function getUserData($connect, int $authorId, int $authorizedUserId): array
 {
-    /*Не стала в данном sql-запросе поправлять подсчет кол-ва комментариев тк функция пока не используется и подлежит дальнейшему изменению*/
-    $sql = "SELECT id,
+    $sql = "SELECT users.id,
                    date_registration,
                    email,
                    login,
                    avatar,
-                   subscribers,
-                   count_posts
+                   COUNT(DISTINCT subscribes.id) AS 'subscribers',
+				   COUNT(DISTINCT posts.id) AS 'count_posts',
+                   (SELECT EXISTS (SELECT * FROM subscribes WHERE author_id = ? AND subscriber_id = ?)) AS 'is_subscribe'
             FROM users
-                JOIN
-                    (SELECT COUNT(DISTINCT subscribes.id) AS 'subscribers',
-                            COUNT(DISTINCT posts.id) AS 'count_posts'
-                    FROM users
-                        LEFT JOIN posts ON users.id = posts.author_id
-                        LEFT JOIN subscribes ON users.id = subscribes.author_id
-                    WHERE users.id = ?) AS ratings
-            WHERE users.id = ?;";
+            LEFT JOIN subscribes ON users.id = subscribes.author_id
+            LEFT JOIN posts ON users.id = posts.author_id
+            WHERE users.id = ?
+            GROUP BY users.id;";
 
-    return fetchAllPrepareStmt($connect, $sql, [$authorId, $authorId]);
+    return fetchArrayPrepareStmt($connect, $sql, [$authorId, $authorizedUserId, $authorId]);
 }
 
 /**
@@ -873,7 +930,7 @@ function getPostAuthorData($connect, int $authorId): array
  * @param int $postId Id поста
  * @return array
  */
-function getContentDataForPostPage($connect, int $postId): array
+function getContentDataForPostPage($connect, int $postId, int $authorizedUserId): array
 {
     $sql = "SELECT  posts.id AS 'post_id',
                     category_id,
@@ -894,13 +951,16 @@ function getContentDataForPostPage($connect, int $postId): array
                     COUNT(DISTINCT likes.id) AS 'likes_count',
                     COUNT(DISTINCT comments.id) AS 'comment_count',
                     COUNT(DISTINCT subscribes.id) AS 'author_subscribers',
-                    author_count_post
+                    author_count_post,
+                    COUNT(DISTINCT reposts.id) AS 'repost_count',
+                    (SELECT EXISTS (SELECT * FROM subscribes WHERE author_id = users.id AND subscriber_id = ?)) AS 'is_subscribe'
             FROM posts
                 JOIN users ON posts.author_id = users.id
                 JOIN categories ON posts.category_id = categories.id
                 LEFT JOIN likes ON posts.id = likes.post_id
                 LEFT JOIN comments ON comments.post_id = posts.id
                 LEFT JOIN subscribes ON users.id = subscribes.author_id
+                LEFT JOIN reposts ON reposts.original_post_id = posts.id
                 JOIN
                     (SELECT users.id AS 'users_id',
                         	COUNT(DISTINCT posts.id) AS 'author_count_post'
@@ -909,9 +969,9 @@ function getContentDataForPostPage($connect, int $postId): array
                      GROUP BY users.id) AS author_posts
                 ON author_posts.users_id = posts.author_id
             WHERE posts.id = ?
-            GROUP BY posts.id";
+            GROUP BY posts.id;";
 
-    return fetchArrayPrepareStmt($connect, $sql, $postId);
+    return fetchArrayPrepareStmt($connect, $sql, [$authorizedUserId, $postId]);
 }
 
 
@@ -1003,7 +1063,7 @@ function getSearchQueryResult($connect, string $searchQuery): array
                 LEFT JOIN comments ON comments.post_id = posts.id
             WHERE MATCH(title, posts.content) AGAINST(? IN NATURAL LANGUAGE MODE)
             GROUP BY posts.id
-            ORDER BY relevance DESC";
+            ORDER BY relevance DESC;";
 
     return fetchAllPrepareStmt($connect, $sql, [$searchQuery, $searchQuery]);
 }
@@ -1040,7 +1100,337 @@ function getTagSearchResult($connect, string $hashtag): array
                 LEFT JOIN comments ON comments.post_id = posts.id
             WHERE MATCH(hashtag_content) AGAINST(? IN NATURAL LANGUAGE MODE)
             GROUP BY posts.id
-            ORDER BY posts.date_add DESC";
+            ORDER BY posts.date_add DESC;";
 
     return fetchAllPrepareStmt($connect, $sql, $hashtag);
+}
+
+/**
+ * Проверка существования поста в БД.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id поста, который надо проверить на существование
+ * @return bool false, если такого поста не существует
+ */
+function isPostExists($connect, int $postId): bool
+{
+    $sql = "SELECT * from posts WHERE id = ?;";
+
+    if (!empty(fetchArrayPrepareStmt($connect, $sql, $postId))) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Обновление количества просмотров у поста.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id поста
+ * @return void
+ */
+function updateShowCount($connect, int $postId)
+{
+    $sql = "UPDATE posts SET show_count = show_count + 1 WHERE id = ?;";
+
+    executePrepareStmt($connect, $sql, [$postId]);
+}
+
+/**
+ * Проверка существования лайка к посту от пользователя в БД.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id пользователя, ставящего лайк
+ * @param int $postId Id поста
+ * @return bool false, если такой связи не существует
+ */
+function isLikeExists($connect, int $userId, int $postId): bool
+{
+    $sql = "SELECT * from likes WHERE user_id = ? AND post_id = ?;";
+
+    if (!empty(fetchArrayPrepareStmt($connect, $sql, [$userId, $postId]))) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Добавление лайка к посту.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id текущего авторизованного пользователя
+ * @param int $postId Id поста, которому надо добавить лайк
+ * @return void
+ */
+function addLikeToPost($connect, int $userId, int $postId)
+{
+    $sql = "INSERT INTO likes SET user_id = ?, post_id = ?;";
+
+    executePrepareStmt($connect, $sql, [$userId, $postId]);
+}
+
+/**
+ * Проверка длины комментария.
+ * @param string $comment Содержимое комментария
+ * @return bool false, если длина комментария меньше 4
+ */
+function validateCommentLength(string $comment): bool
+{
+    if (iconv_strlen(trim($comment)) < 4) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Добавление комментария к посту.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id поста, к которому добавляется комментарий
+ * @param int $userId Id пользователя, оставившего комментарий
+ * @return void
+ */
+function addCommentToPost($connect, int $postId, int $userId, string $comment)
+{
+    $sql = "INSERT INTO comments (user_id, post_id, date_add, content) VALUES (?, ?, NOW(), ?);";
+
+    executePrepareStmt($connect, $sql, [$userId, $postId, $comment]);
+}
+
+/**
+ * Получение списка постов, добавленных пользователем с сортировкой по дате добавления.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id пользователя
+ * @return array
+ */
+function getUsersPosts($connect, int $userId): array
+{
+    $sql = "SELECT  posts.id AS 'post_id',
+                    posts.category_id,
+                    title,
+                    posts.content,
+                    quote_author,
+                    image_path,
+                    video_link,
+                    website_link,
+                    posts.date_add,
+                    categories.name,
+                    categories.class_name,
+                    is_repost,
+                    posts.original_author_id,
+                    users.login AS 'original_author_login',
+                    users.avatar AS 'original_author_avatar',
+                    COUNT(DISTINCT likes.id) AS 'likes_count',
+                    COUNT(DISTINCT reposts.id) AS 'repost_count'
+            FROM posts
+                JOIN categories ON posts.category_id = categories.id
+                LEFT JOIN likes ON posts.id = likes.post_id
+                LEFT JOIN reposts ON reposts.original_post_id = posts.id
+                LEFT JOIN users ON users.id = posts.original_author_id
+            WHERE posts.author_id = ?
+            GROUP BY posts.id
+            ORDER BY date_add DESC;";
+
+    return fetchAllPrepareStmt($connect, $sql, $userId);
+}
+
+/**
+ * Получение списка лайков ко всем постам пользователя для страницы профиля пользователя.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id пользователя, чья страница профиля открыта
+ * @return array
+ */
+function getLikesForUserProfilePage($connect, int $userId): array
+{
+    $sql = "SELECT  likes.user_id AS 'like_user_id',
+                    likes.post_id AS 'like_post_id',
+                    likes.date_add,
+                    likes.id AS 'like_id',
+                    posts.category_id,
+                    categories.name AS 'category_name',
+                    image_path,
+                    video_link,
+                    users.login,
+                    avatar,
+                    users.id AS 'users_id'
+            FROM likes
+                JOIN posts ON likes.post_id = posts.id
+                JOIN users ON likes.user_id = users.id
+                JOIN categories ON categories.id = posts.category_id
+            WHERE posts.author_id = ?
+            ORDER BY likes.date_add DESC;";
+
+    return fetchAllPrepareStmt($connect, $sql, $userId);
+}
+
+/**
+ * Получение списка пользователей, которые подписаны на автора.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id автора
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @return array
+ */
+function getSubscribersList($connect, int $userId, int $authorizedUserId): array
+{
+    $sql = "SELECT  users.id AS 'user_id',
+                    login,
+                    avatar,
+                    users.date_registration,
+                    subscribers_count,
+                    COUNT(DISTINCT posts.id) AS 'count_post',
+                    (SELECT EXISTS (SELECT * FROM subscribes WHERE subscribes.author_id = user_id AND subscriber_id = ?)) AS 'is_subscribe'
+            FROM users
+                JOIN subscribes ON users.id = subscriber_id
+                JOIN posts ON posts.author_id = users.id
+                LEFT JOIN
+                    (SELECT subscribes.author_id,
+                            COUNT(DISTINCT subscribes.id) AS 'subscribers_count'
+                    FROM subscribes
+                    GROUP BY subscribes.author_id) AS subscribers_count
+                 ON subscribers_count.author_id = users.id
+            WHERE subscribes.author_id = ?
+            GROUP BY users.id;";
+
+    return fetchAllPrepareStmt($connect, $sql, [$authorizedUserId, $userId]);
+}
+
+/**
+ * Проверяет, подписан ли авторизованный пользователь на профайл автора.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @param int $userProfileId Id профайл другого пользователя
+ * @return bool false, если авторизованный пользователь не подписан на автора
+ */
+function isUserSubscribe($connect, int $authorizedUserId, int $userProfileId): bool
+{
+    $sql = "SELECT * FROM subscribes WHERE author_id = ? AND subscriber_id = ?;";
+    $result = fetchArrayPrepareStmt($connect, $sql, [$userProfileId, $authorizedUserId]);
+
+    if (empty($result)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Проверка существования пользователя в БД.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id пользователя, которого надо проверить на существование
+ * @return bool false, если такого поста не существует
+ */
+function isUserExists($connect, int $userId): bool
+{
+    $sql = "SELECT * from users WHERE id = ?;";
+
+    if (!empty(fetchArrayPrepareStmt($connect, $sql, $userId))) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Подписаться на пользователя.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @param int $userProfileId Id профайл другого пользователя
+ * @return void
+ */
+function subscribeToUser($connect, int $authorizedUserId, int $userProfileId)
+{
+    $sql = "INSERT INTO subscribes (subscriber_id, author_id) VALUES (?, ?);";
+
+    executePrepareStmt($connect, $sql, [$authorizedUserId, $userProfileId]);
+}
+
+/**
+ * Отписаться от пользователя.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @param int $userProfileId Id профайл другого пользователя
+ * @return void
+ */
+function unsubscribeFromUser($connect, int $authorizedUserId, int $userProfileId)
+{
+    $sql = "DELETE FROM subscribes WHERE subscriber_id = ? AND author_id = ?;";
+
+    executePrepareStmt($connect, $sql, [$authorizedUserId, $userProfileId]);
+}
+
+/**
+ * Получение данных о посте для дальнейшего репоста.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id поста
+ * @return array
+ */
+function getPostData($connect, int $postId): array
+{
+    $sql = "SELECT author_id, category_id, title, content, quote_author, image_path, video_link, website_link
+            FROM posts
+            WHERE id = ?;";
+
+    return fetchArrayPrepareStmt($connect, $sql, $postId);
+}
+
+/**
+ * Получение массива id хэштегов к посту для добавления их при репосте.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $postId Id оригинального поста
+ * @return array
+ */
+function getHashtagsForRepost($connect, int $postId): array
+{
+    $sql = "SELECT hashtag_id FROM posts_hashtags WHERE post_id = ?;";
+
+    return array_column(fetchAllPrepareStmt($connect, $sql, $postId), 'hashtag_id');
+}
+
+/**
+ * Добавление репоста поста вместе хэштегами от него.
+ * @param $connect mysqli Ресурс соединения
+ * @param array $newPostData Массив данных из оригинального поста для репоста
+ * @param int $originalPostId Id оригинального поста
+ * @return void
+ */
+function addRepost($connect, array $newPostData, int $originalPostId, array $repostHashtags)
+{
+    $sqlAddPost = " INSERT INTO posts
+                    (author_id, category_id, date_add, title, content, quote_author, image_path, video_link, website_link, is_repost, original_author_id)
+                    VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?);";
+    $sqlAddRelationship = " INSERT INTO reposts
+                            (original_post_id, new_post_id)
+                            VALUES (?, ?);";
+
+    $sqlAddHashtags = "INSERT INTO posts_hashtags (post_id, hashtag_id) VALUE (?,?);";
+
+    mysqli_query($connect, "START TRANSACTION");
+
+    $stmtRepost = db_get_prepare_stmt($connect, $sqlAddPost, $newPostData);
+    $repostResult = mysqli_stmt_execute($stmtRepost);
+
+    // получение Id нового поста-репоста
+    $newPostId = mysqli_insert_id($connect);
+
+    $stmtRelationship = db_get_prepare_stmt($connect, $sqlAddRelationship, [$originalPostId, $newPostId]);
+    $relationshipResult = mysqli_stmt_execute($stmtRelationship);
+
+    if (!empty($repostHashtags)) {
+        $hashtagsResult = false;
+
+        foreach ($repostHashtags as $hashtag) {
+            $stmtHashtags = db_get_prepare_stmt($connect, $sqlAddHashtags, [$newPostId, $hashtag]);
+            $hashtagsResult = mysqli_stmt_execute($stmtHashtags);
+        }
+
+        if ($repostResult && $relationshipResult && $hashtagsResult) {
+            mysqli_query($connect, "COMMIT");
+        } else {
+            mysqli_query($connect, "ROLLBACK");
+        }
+    } else {
+
+        if ($repostResult && $relationshipResult) {
+            mysqli_query($connect, "COMMIT");
+        } else {
+            mysqli_query($connect, "ROLLBACK");
+        }
+    }
 }
