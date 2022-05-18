@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if (!empty(checkSubscribersExists($connect, $userData['id']))) {
+        if (checkSubscribersExists($connect, $userData['id']) === true) {
             $recipientList = getSubscribersListForMail($connect, $userData['id']);
 
             foreach ($recipientList as $recipient) {
