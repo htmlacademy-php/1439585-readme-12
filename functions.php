@@ -4,7 +4,7 @@ require_once('helpers.php');
 require_once('config/site_config.php');
 
 /**
- * Обрезает текст до указанной длины и добавляет в конце троеточие и ссылку на полный текст.
+ * Обрезает текст до указанной длины и добавляет в конце троеточия и ссылку на полный текст.
  * @param string $cardContent Текст для обрезания
  * @param int $postId Id поста для формирования ссылки на него
  * @param int $length Длина строки, установленная по умолчанию
@@ -60,7 +60,7 @@ function correctSiteUrl(string $siteLink): string
 /**
  * Возвращает массив, содержащий:
  * datetime - дата добавления на сайт; title - время в формате "YYYY-MM-DD HH-MM"; relative_time - форму относительного времени.
- * Подходит как для показа даты добавления поста, так и для показа, как давно пользователь был зарегистрирован.
+ * Подходит как для показа даты добавления поста, лайка, так и для показа, как давно пользователь был зарегистрирован.
  * @param string $dateAdd Дата, которую нужно обработать
  * @return array
  */
@@ -148,7 +148,7 @@ function fetchAllPrepareStmt($connect, string $sqlQuery, $val): array
  * @param $connect mysqli Ресурс соединения
  * @param string $sqlQuery SQL запрос с плейсхолдерами
  * @param mixed $val Значения для вставки вместо плейсхолдеров
- * @return void
+ * @return array|void Array в случае, если результат не пустой
  */
 function fetchArrayPrepareStmt($connect, string $sqlQuery, $val)
 {
@@ -170,7 +170,7 @@ function fetchArrayPrepareStmt($connect, string $sqlQuery, $val)
  * @param string $sqlQuery SQL запрос с данными, которые нужно получить из БД
  * @return array
  */
-function fetchResult($connect, $sqlQuery): array
+function fetchResult($connect, string $sqlQuery): array
 {
     $resultSqlQuery = $connect->query($sqlQuery);
 
@@ -341,12 +341,12 @@ function validatePictureUrl(string $keyName): bool
 {
     $siteUrl = filter_var($_POST[$keyName], FILTER_VALIDATE_URL);
 
-    /*Если ссылка не прошла FILTER_VALIDATE_URL, return false */
+    // Если ссылка не прошла FILTER_VALIDATE_URL, return false
     if ($siteUrl == false) {
         return false;
     }
 
-    /*Если заголовок не содержит content-type соответсвующий формату image, return false */
+    // Если заголовок не содержит content-type соответсвующий формату image, return false
     $siteHeaders = get_headers($siteUrl);
     if (strstr(implode($siteHeaders), 'Content-Type: image')) {
         $imageType = exif_imagetype($siteUrl);
@@ -354,7 +354,7 @@ function validatePictureUrl(string $keyName): bool
         return false;
     }
 
-    /* Соответствие mime-типу */
+    // Соответствие mime-типу
     if (in_array($imageType, [1, 2, 3])) {
         return true;
     } else {
@@ -419,7 +419,7 @@ function addMainPostContent($connect, array $requiredFields, string $sql, string
 {
     $AddPostContent = prepareData($requiredFields);
 
-    /* На случай добавления поста-фотографии добавляем отдельно данное поле */
+    // На случай добавления поста-фотографии добавляем отдельно данное поле
     if (!empty($imageName)) {
         $AddPostContent['image_path'] = $imageName;
     }
@@ -469,7 +469,9 @@ function addPostsHashtags($connect, int $post_id, array $hashtags)
  */
 function addNewTextPost($connect, array $requiredFields, int $userId, string $categoryId)
 {
-    $sql = "INSERT INTO posts (author_id, category_id, date_add, title, content ) VALUES ($userId, $categoryId, NOW(), ?, ?);";
+    $sql = "INSERT INTO posts
+            (author_id, category_id, date_add, title, content )
+            VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
     addMainPostContent($connect, $requiredFields, $sql);
 }
@@ -484,7 +486,9 @@ function addNewTextPost($connect, array $requiredFields, int $userId, string $ca
  */
 function addNewQuotePost($connect, array $requiredFields, int $userId, string $categoryId)
 {
-    $sql = "INSERT INTO posts (author_id, category_id, date_add, title, content, quote_author) VALUES ($userId, $categoryId, NOW(), ?, ?, ?);";
+    $sql = "INSERT INTO posts
+            (author_id, category_id, date_add, title, content, quote_author)
+            VALUES ($userId, $categoryId, NOW(), ?, ?, ?);";
 
     addMainPostContent($connect, $requiredFields, $sql);
 }
@@ -500,7 +504,9 @@ function addNewQuotePost($connect, array $requiredFields, int $userId, string $c
  */
 function addNewPhotoPost($connect, array $requiredFields, int $userId, string $categoryId, $imageName)
 {
-    $sql = "INSERT INTO posts (author_id, category_id, date_add, title, image_path) VALUES ($userId, $categoryId, NOW(), ?, ?);";
+    $sql = "INSERT INTO posts
+            (author_id, category_id, date_add, title, image_path)
+            VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
     addMainPostContent($connect, $requiredFields, $sql, $imageName);
 }
@@ -515,7 +521,9 @@ function addNewPhotoPost($connect, array $requiredFields, int $userId, string $c
  */
 function addNewVideoPost($connect, array $requiredFields, int $userId, string $categoryId)
 {
-    $sql = "INSERT INTO posts (author_id, category_id, date_add, title, video_link) VALUES ($userId, $categoryId, NOW(), ?, ?);";
+    $sql = "INSERT INTO posts
+            (author_id, category_id, date_add, title, video_link)
+            VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
     addMainPostContent($connect, $requiredFields, $sql);
 }
@@ -530,7 +538,9 @@ function addNewVideoPost($connect, array $requiredFields, int $userId, string $c
  */
 function addNewLinkPost($connect, array $requiredFields, int $userId, string $categoryId)
 {
-    $sql = "INSERT INTO posts (author_id, category_id, date_add, title, website_link) VALUES ($userId, $categoryId, NOW(), ?, ?);";
+    $sql = "INSERT INTO posts
+            (author_id, category_id, date_add, title, website_link)
+            VALUES ($userId, $categoryId, NOW(), ?, ?);";
 
     addMainPostContent($connect, $requiredFields, $sql);
 }
@@ -543,6 +553,7 @@ function addNewLinkPost($connect, array $requiredFields, int $userId, string $ca
 function getCategoryList($connect): array
 {
     $sqlCategories = "SELECT * FROM categories;";
+
     return fetchAll($connect, $sqlCategories);
 }
 
@@ -618,14 +629,8 @@ function getAllCardsContent($connect, int $limit, int $offset, string $sortingBy
  * @param string $sortOrder Порядок сортировки
  * @return array
  */
-function getCardsByCategory(
-    $connect,
-    int $categoryId,
-    int $limit,
-    int $offset,
-    string $sortingBy,
-    string $sortOrder
-): array {
+function getCardsByCategory($connect, int $categoryId, int $limit, int $offset, string $sortingBy, string $sortOrder): array
+{
     $sqlCardsOnCategory = "SELECT   posts.id AS 'post_id',
                                     title,
                                     category_id,
@@ -672,7 +677,7 @@ function redirectOnPage(string $page)
  */
 function checkEmailExists($connect, string $userEmail): bool
 {
-    $sqlQuery = 'SELECT email FROM users WHERE email = ?;';
+    $sqlQuery = "SELECT email FROM users WHERE email = ?;";
     $userExists = fetchAllPrepareStmt($connect, $sqlQuery, $userEmail);
 
     if (!empty($userExists)) {
@@ -754,7 +759,9 @@ function checkPasswordMatch(string $password, string $repeatPassword): bool
  */
 function addNewUser($connect, array $userData)
 {
-    $sqlQuery = "INSERT INTO users (date_registration, email, login, password) VALUES (NOW(), ?, ?, ?);";
+    $sqlQuery = "INSERT INTO users
+                 (date_registration, email, login, password)
+                 VALUES (NOW(), ?, ?, ?);";
 
     executePrepareStmt($connect, $sqlQuery, $userData);
 }
@@ -928,6 +935,7 @@ function getUserData($connect, int $authorId, int $authorizedUserId): array
  * Получение основного контента по содержимому поста вместе с рейтингом для страницы показа поста.
  * @param $connect mysqli Ресурс соединения
  * @param int $postId Id поста
+ * @param int $authorizedUserId Id авторизованного пользователя
  * @return array
  */
 function getContentDataForPostPage($connect, int $postId, int $authorizedUserId): array
@@ -1022,7 +1030,7 @@ function showAuthorPostsCount(int $postsCount): string
  * Определение, какого рода поисковый запрос: из поисковой строки или поиск по хэштегу
  * по тому, что пришло через параметр GET
  * @param string $searchQuery Поисковый запрос
- * @return string tag, если был поиск по хэштегу, queryString - поисковая строка
+ * @return string Вернет tag, если был поиск по хэштегу, queryString - поисковая строка
  */
 function defineTypeSearchQuery(string $searchQuery): string
 {
@@ -1109,7 +1117,7 @@ function getTagSearchResult($connect, string $hashtag): array
  * Проверка существования поста в БД.
  * @param $connect mysqli Ресурс соединения
  * @param int $postId Id поста, который надо проверить на существование
- * @return bool false, если такого поста не существует
+ * @return bool False, если такого поста не существует
  */
 function isPostExists($connect, int $postId): bool
 {
@@ -1140,7 +1148,7 @@ function updateShowCount($connect, int $postId)
  * @param $connect mysqli Ресурс соединения
  * @param int $userId Id пользователя, ставящего лайк
  * @param int $postId Id поста
- * @return bool false, если такой связи не существует
+ * @return bool False, если такой связи не существует
  */
 function isLikeExists($connect, int $userId, int $postId): bool
 {
@@ -1162,7 +1170,7 @@ function isLikeExists($connect, int $userId, int $postId): bool
  */
 function addLikeToPost($connect, int $userId, int $postId)
 {
-    $sql = "INSERT INTO likes SET user_id = ?, post_id = ?;";
+    $sql = "INSERT INTO likes (user_id, post_id) VALUES (?, ?);";
 
     executePrepareStmt($connect, $sql, [$userId, $postId]);
 }
@@ -1170,7 +1178,7 @@ function addLikeToPost($connect, int $userId, int $postId)
 /**
  * Проверка длины комментария.
  * @param string $comment Содержимое комментария
- * @return bool false, если длина комментария меньше 4
+ * @return bool False, если длина комментария меньше 4
  */
 function validateCommentLength(string $comment): bool
 {
@@ -1190,7 +1198,9 @@ function validateCommentLength(string $comment): bool
  */
 function addCommentToPost($connect, int $postId, int $userId, string $comment)
 {
-    $sql = "INSERT INTO comments (user_id, post_id, date_add, content) VALUES (?, ?, NOW(), ?);";
+    $sql = "INSERT INTO comments
+            (user_id, post_id, date_add, content)
+            VALUES (?, ?, NOW(), ?);";
 
     executePrepareStmt($connect, $sql, [$userId, $postId, $comment]);
 }
@@ -1433,4 +1443,289 @@ function addRepost($connect, array $newPostData, int $originalPostId, array $rep
             mysqli_query($connect, "ROLLBACK");
         }
     }
+}
+
+/**
+ * Подсчет общего количества новых сообщений у авторизованного пользователя.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @return int
+ */
+function countAllNewMessages($connect, int $authorizedUserId): int
+{
+    $sql = "SELECT COUNT(is_new) AS 'all_new_messages' FROM messages WHERE recipient_id = ? AND is_new = 1;";
+
+    return fetchArrayPrepareStmt($connect, $sql, $authorizedUserId)['all_new_messages'];
+}
+
+/**
+ * Получение списка контактов, с кем уже существует переписка,
+ * включая последнее сообщение и количество непрочитанных сообщений.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @return array
+ */
+function getMessagesContactsList($connect, int $authorizedUserId): array
+{
+    $sqlContactsList = "SELECT  messages.dialog_id,
+                                date_send,
+                                content,
+                                (SELECT SUM(is_new)
+                                 FROM messages
+                                 WHERE dialog_id = dialog_with.dialog_id AND is_new = 1 AND messages.recipient_id = ?
+                                ) AS 'new_message_count',
+                                dialog_with_id,
+                                messages.sender_id,
+                                login,
+                                avatar
+                        FROM messages
+                            JOIN messages_log ON messages.id = last_message_id
+                            JOIN (SELECT recipient_id AS 'dialog_with_id',
+                                         dialog_id
+                                  FROM messages
+                                  WHERE sender_id = ?
+                                  UNION
+                                  SELECT sender_id AS 'dialog_with_id',
+                                  dialog_id
+                                  FROM messages
+                                  WHERE recipient_id = ?) AS dialog_with
+                            ON messages_log.dialog_id = dialog_with.dialog_id
+                            JOIN users ON users.id = dialog_with_id
+                        ORDER BY messages.date_send DESC;";
+
+    return fetchAllPrepareStmt($connect, $sqlContactsList, [$authorizedUserId, $authorizedUserId, $authorizedUserId]);
+}
+
+/**
+ * Проверка на существование переписки с пользователем.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @param int $recipientId Id получателя сообщений
+ * @return bool False если диалога не существует
+ */
+function isDialogExists($connect, int $authorizedUserId, int $recipientId): bool
+{
+    $sqlIdExists = "SELECT id FROM messages WHERE (sender_id IN (?, ?) AND recipient_id IN (?, ?));";
+    $resultSql = fetchArrayPrepareStmt($connect, $sqlIdExists,
+        [$authorizedUserId, $recipientId, $authorizedUserId, $recipientId]);
+
+    if (empty($resultSql)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Получить id диалога с пользователем для дальнейшей правки данных в таблице связей.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @param int $recipientId Id получателя сообщений
+ * @return int Id диалога
+ */
+function getDialogId($connect, int $authorizedUserId, int $recipientId): int
+{
+    $sql = "SELECT dialog_id FROM messages WHERE (sender_id IN (?, ?) AND recipient_id IN (?, ?)) LIMIT 1";
+
+    return fetchArrayPrepareStmt($connect, $sql,
+        [$authorizedUserId, $recipientId, $authorizedUserId, $recipientId])['dialog_id'];
+}
+
+/**
+ * Генерация нового dialog_id.
+ * @param $connect mysqli Ресурс соединения
+ * @return int Сгенерированное число
+ */
+function generateNewDialogId($connect): int
+{
+    $sqlIsTableEmpty = "SELECT COUNT(id) FROM messages_log;";
+
+    if (fetchResult($connect, $sqlIsTableEmpty)['COUNT(id)'] == 0) {
+        //Если в таблице еще нет записей, возвращаем 1 в качестве нового dialog_id
+        return 1;
+    } else {
+        //Получаем последнюю запись dialog_id
+        $sqlLastDialogId = "SELECT MAX(dialog_id) AS 'dialog_id' FROM messages_log;";
+        return fetchResult($connect, $sqlLastDialogId)['dialog_id'] + 1;
+    }
+}
+
+/**
+ * Получение данных о пользователе, с которым не велась ранее переписка для контакт-листа.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id получателя сообщений
+ * @return array
+ */
+function getUserDataForContactList($connect, int $userId): array
+{
+    $sql = "SELECT id AS 'dialog_with_id', login, avatar FROM users WHERE id = ?;";
+
+    return fetchArrayPrepareStmt($connect, $sql, $userId);
+}
+
+/**
+ * Получение сообщений в переписке в хронологическом порядке от старого к новому.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @param int $recipientId Id получателя сообщений
+ * @return array
+ */
+function getMessages($connect, int $authorizedUserId, int $recipientId): array
+{
+    $sql = "SELECT messages.id,
+                   sender_id,
+                   dialog_id,
+                   date_send,
+                   content,
+                   is_new,
+                   login,
+                   avatar
+            FROM messages
+                JOIN users ON sender_id = users.id
+            WHERE (sender_id IN (?, ?) AND recipient_id IN (?, ?))
+            ORDER BY messages.date_send ASC;";
+
+    return fetchAllPrepareStmt($connect, $sql, [$authorizedUserId, $recipientId, $authorizedUserId, $recipientId]);
+}
+
+/**
+ * Отметить сообщение прочитанным.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $messageId Id сообщения, информацию о котором надо изменить
+ * @return void
+ */
+function markMessageAsRead($connect, int $messageId)
+{
+    $sql = "UPDATE messages SET is_new = 0 WHERE id = ?;";
+
+    executePrepareStmt($connect, $sql, [$messageId]);
+}
+
+/**
+ * Проверяет не пустое ли сообщение пришло от пользователя.
+ * @param string $message Проверяемое сообщение
+ * @return bool False если сообщение пустое
+ */
+function validateEmptyMessage(string $message): bool
+{
+    if (empty(trim($message))) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Добавление самого сообщения в БД, а также обновление или добавление связи с id последнего добавленного сообщения.
+ * @param $connect mysqli Ресурс соединения
+ * @param array $messageData Данные для сообщения
+ * @param int $dialogId Id диалога двух пользователей
+ * @return void
+ */
+function addMessage($connect, array $messageData, int $dialogId)
+{
+    $sqlAddMessage = "INSERT INTO messages
+                      (sender_id, recipient_id, dialog_id, content)
+                      VALUES (?, ?, ?, ?);";
+    $sqlAddRelationship = "REPLACE INTO messages_log
+                           (dialog_id, last_message_id)
+                           VALUES (?, ?);";
+
+    mysqli_query($connect, "START TRANSACTION");
+
+    // сделать запись самого сообщения
+    $stmtAddMessage = db_get_prepare_stmt($connect, $sqlAddMessage, $messageData);
+    $addMessageResult = mysqli_stmt_execute($stmtAddMessage);
+
+    // получение Id последнего сообщения в диалоге
+    $lastMessageId = mysqli_insert_id($connect);
+
+    // изменить или сделать запись в таблицу связей с id последнего сообщения
+    $stmtRelationship = db_get_prepare_stmt($connect, $sqlAddRelationship, [$dialogId, $lastMessageId]);
+    $relationshipResult = mysqli_stmt_execute($stmtRelationship);
+
+    if ($addMessageResult && $relationshipResult) {
+        mysqli_query($connect, "COMMIT");
+    } else {
+        mysqli_query($connect, "ROLLBACK");
+    }
+}
+
+/**
+ * Отображение превью даты последних сообщений в контакт-листе на странице сообщений;
+ * показывает дату в формате "HH-MM", если сообщение было отправлено в текущие сутки, иначе "DD MM"
+ * @param string $messageDate Дата сообщения
+ * @return string
+ */
+function showMessagePreviewDate(string $messageDate): string
+{
+    $tmstMessageDate = strtotime($messageDate);
+    $tmstMidnight = strtotime('00:00');
+    $monthList = [
+        1 => 'янв',
+        2 => 'февр',
+        3 => 'март',
+        4 => 'апр',
+        5 => 'мая',
+        6 => 'июня',
+        7 => 'июля',
+        8 => 'авг',
+        9 => 'сент',
+        10 => 'окт',
+        11 => 'нояб',
+        12 => 'дек'
+    ];
+
+    if ($tmstMidnight > $tmstMessageDate) {
+        return date('j ', $tmstMessageDate) . $monthList[date('n', $tmstMessageDate)];
+    } else {
+        return date('H:i', $tmstMessageDate);
+    }
+}
+
+/**
+ * Проверяет есть ли у пользователя подписчики.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id пользователя
+ * @return bool False если подписчики отсутствуют
+ */
+function checkSubscribersExists($connect, int $userId): bool
+{
+    $sql = "SELECT * FROM subscribes WHERE author_id = ?";
+
+    $existsResult = fetchAllPrepareStmt($connect, $sql, $userId);
+
+    if (empty($existsResult)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Получение списка подписчиков для отправки уведомлений им.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $authorizedUserId Id авторизованного пользователя
+ * @return array
+ */
+function getSubscribersListForMail($connect, int $authorizedUserId): array
+{
+    $sql = "SELECT  users.id AS 'user_id',
+                    login,
+                    email
+            FROM users
+                JOIN subscribes ON users.id = subscriber_id
+            WHERE subscribes.author_id = ?;";
+
+    return fetchAllPrepareStmt($connect, $sql, $authorizedUserId);
+}
+
+/**
+ * Получение данных пользователя для отправки ему уведомления на почту.
+ * @param $connect mysqli Ресурс соединения
+ * @param int $userId Id пользователя
+ * @return array
+ */
+function getUserDataForMailer($connect, int $userId): array
+{
+    $sql = "SELECT email, login FROM users WHERE id = ?";
+
+    return fetchArrayPrepareStmt($connect, $sql, $userId);
 }

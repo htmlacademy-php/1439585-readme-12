@@ -1,4 +1,5 @@
-<?php if (!empty($errorFields)) {
+<?php
+if (!empty($errorFields)) {
     $visualHidden = '';
 } else {
     $visualHidden = 'visually-hidden';

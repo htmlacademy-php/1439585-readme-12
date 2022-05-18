@@ -20,7 +20,7 @@
                 <h2><a href="post.php?post_id=<?= $post['post_id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
             </header>
             <div class="post__main">
-            <?php if ($post['class_name'] == 'quote'): ?>
+            <?php if ($post['class_name'] === 'quote'): ?>
                 <blockquote>
                     <p>
                         <?= htmlspecialchars($post['content']) ?>
@@ -33,11 +33,9 @@
                         } ?>
                     </cite>
                 </blockquote>
-            <?php elseif ($post['class_name'] == 'link'): ?>
+            <?php elseif ($post['class_name'] === 'link'): ?>
                 <div class="post-link__wrapper">
-                    <a class="post-link__external"
-                       href="<?= correctSiteUrl(htmlspecialchars($post['website_link'])) ?>"
-                       title="Перейти по ссылке">
+                    <a class="post-link__external" href="<?= correctSiteUrl(htmlspecialchars($post['website_link'])) ?>" title="Перейти по ссылке">
                         <div class="post-link__icon-wrapper">
                             <img src="https://www.google.com/s2/favicons?domain=<?= $post['website_link'] ?>" alt="Иконка">
                         </div>
@@ -50,18 +48,20 @@
                         </svg>
                     </a>
                 </div>
-            <?php elseif ($post['class_name'] == 'photo'): ?>
+            <?php elseif ($post['class_name'] === 'photo'): ?>
                 <div class="post-photo__image-wrapper">
                     <img src="<?= $post['image_path'] ?>" alt="Фото от пользователя" width="760" height="396">
                 </div>
-            <?php elseif ($post['class_name'] == 'video'): ?>
+            <?php elseif ($post['class_name'] === 'video'): ?>
                 <div class="post-video__block">
                     <div class="post-video__preview">
                         <?= embed_youtube_video($post['video_link']); ?>
                     </div>
                 </div>
-            <?php elseif ($post['class_name'] == 'text'): ?>
-                <p><?= cutCardContent($post['content'], $post['post_id']) ?></p>
+            <?php elseif ($post['class_name'] === 'text'): ?>
+                <p>
+                    <?= cutCardContent($post['content'], $post['post_id']) ?>
+                </p>
             <?php endif; ?>
             </div>
             <footer class="post__footer">
@@ -90,7 +90,7 @@
                 </div>
                 <ul class="post__tags">
                     <?php foreach ($postHashtags as $postId => $hashtags): ?>
-                        <?php if (($post['post_id'] == $postId) && !empty($hashtags)): ?>
+                        <?php if (($post['post_id'] === $postId) && !empty($hashtags)): ?>
                             <?php foreach ($hashtags as $tag): ?>
                                 <li><a href="search.php?query=%23<?= ($tag) ?>">#<?= ($tag) ?></a></li>
                             <?php endforeach; ?>

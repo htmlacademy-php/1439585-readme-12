@@ -9,22 +9,21 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
-// Получаем данные по пользователю из сессии
 $userData['id'] = $_SESSION['user']['id'];
 $userData['login'] = $_SESSION['user']['login'];
 $userData['avatar'] = $_SESSION['user']['avatar'];
+$userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
 
-/*Получение списка категорий из БД */
 $categories = getCategoryList($connect);
 
-/*Получаем id категории, если пользователем выбрана категория на странице */
+//Получаем id категории, если пользователем выбрана категория на странице
 $categoryId = (int)filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER_INT);
 
-/* Получаем параметры сортировки и направление сортировки */
+//Получаем параметры сортировки и направление сортировки
 $getSortBy = (string)filter_input(INPUT_GET, 'by', FILTER_SANITIZE_SPECIAL_CHARS);
 $getSortOrder = (string)filter_input(INPUT_GET, 'sorting', FILTER_SANITIZE_SPECIAL_CHARS);
 
-/* Используется switch case default, чтобы при получении иного типа сортировки или отсутствия заданных параметров не возникало ошибки при обращении к БД, а задавались параметры по умолчанию*/
+//Используется switch-case-default, чтобы при получении иного типа сортировки или отсутствия заданных параметров не возникало ошибки при обращении к БД, а задавались параметры по умолчанию
 switch ($getSortBy) {
     case('rating'):
         $sortByParam = 'likes_count';
@@ -43,7 +42,7 @@ switch ($getSortOrder) {
         $sortOrderParam = 'DESC';
 }
 
-//Текущие параметры сортировки и фильтрации на странице
+//Текущие параметры сортировки и фильтрации на странице:
 $currentPageParams = '';
 // Узнаем, на какой странице находимся сейчас
 $currentPage = (int)filter_input(INPUT_GET, 'page', FILTER_SANITIZE_NUMBER_INT);
@@ -58,8 +57,6 @@ $limit = 6;
 $offset = $limit * ($currentPage - 1);
 
 if (!empty($categoryId)) {
-    // если выбрана категория постов, то действия следующие:
-    // количество постов всего в данной категории
     $countPosts = countPostsByCategory($connect, $categoryId);
     $cards = getCardsByCategory($connect, $categoryId, $limit, $offset, $sortByParam, $sortOrderParam);
     $currentPageParams = '&category_id=' . $categoryId;
@@ -67,8 +64,6 @@ if (!empty($categoryId)) {
         $currentPageParams = '&category_id=' . $categoryId . '&by=' . $getSortBy . '&sorting=' . $getSortOrder;;
     }
 } else {
-    // иначе показать все посты и выполняем следующие действия:
-    // количество постов всего
     $countPosts = countAllPosts($connect);
     $cards = getAllCardsContent($connect, $limit, $offset, $sortByParam, $sortOrderParam);
     if (!empty($getSortBy)) {
@@ -76,16 +71,14 @@ if (!empty($categoryId)) {
     }
 }
 
-// количество выводимых страниц
+//Количество выводимых страниц
 $countPages = ceil($countPosts / $limit);
-// условие, что количество next page должны быть ограничены количеством страниц
 if ($currentPage < $countPages) {
     $nextPage = $currentPage + 1;
 } else {
     $nextPage = $currentPage;
 }
 
-/*если массив $cards пустой, редиректим на nothing-to-show.php */
 if (empty($cards)) {
     redirectOnPage('nothing-to-show.php');
 }

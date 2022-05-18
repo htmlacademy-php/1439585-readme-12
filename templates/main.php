@@ -18,7 +18,7 @@
                         <?php
                         $class = '';
                         $classItem = '';
-                        if ($keySorting === 'relevance' & $getSortBy === '') {
+                        if ($keySorting === 'relevance' && $getSortBy === '') {
                             $class = 'sorting__link--active';
                             $classItem = 'sorting__item--popular';
                         } elseif ($keySorting === $getSortBy) {
@@ -52,7 +52,8 @@
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
                     <li class="popular__filters-item popular__filters-item--all filters__item filters__item--all">
-                        <?php if ($contentCategory == 'popular') {
+                        <?php
+                        if ($contentCategory === 'popular') {
                             $buttonActive = "filters__button--active";
                         } else {
                             $buttonActive = "";
@@ -63,11 +64,13 @@
                     </li>
                     <?php foreach ($categories as $category): ?>
                         <li class="popular__filters-item filters__item">
-                            <?php $buttonActive = "button";
+                            <?php
+                            $buttonActive = "button";
                             if ($contentCategory == $category['id']) {
                                 $buttonActive = "filters__button--active";
                             } ?>
-                            <a class="filters__button filters__button--<?= $category['class_name'] ?> <?= $buttonActive ?>" href="popular.php?category_id=<?= $category['id'] ?>">
+                            <a class="filters__button filters__button--<?= $category['class_name'] ?> <?= $buttonActive ?>"
+                                href="popular.php?category_id=<?= $category['id'] ?>">
                                 <span class="visually-hidden"><?= $category['name'] ?></span>
                                 <svg class="filters__icon" width="22" height="18">
                                     <use xlink:href="#icon-filter-<?= $category['class_name'] ?>"></use>
@@ -81,7 +84,7 @@
         <div class="popular__posts">
             <?php foreach ($cards as $card): ?>
                 <?php foreach ($categories as $category) {
-                    if ($card['category_id'] == $category['id']) {
+                    if ((int)$card['category_id'] === (int)$category['id']) {
                         $postType = "post-" . $category['class_name'];
                     }
                 }
@@ -97,12 +100,15 @@
                                     <?= htmlspecialchars($card['content']) ?>
                                 </p>
                                 <cite>
-                                    <?php if (!empty($card['quote_author'])) {
+                                    <?php
+                                    if (!empty($card['quote_author'])) {
                                         echo htmlspecialchars($card['quote_author']);
-                                    } else echo 'Неизвестный автор'; ?>
+                                    } else {
+                                        echo 'Неизвестный автор';
+                                    } ?>
                                 </cite>
                             </blockquote>
-                        <?php elseif ($postType == 'post-link'): ?>
+                        <?php elseif ($postType === 'post-link'): ?>
                             <div class="post-link__wrapper">
                                 <a class="post-link__external" href="<?= correctSiteUrl(htmlspecialchars($card['website_link'])) ?>" title="Перейти по ссылке">
                                     <div class="post-link__info-wrapper">
@@ -116,11 +122,11 @@
                                     <span><?= cutPreviewLink($card['website_link']) ?></span>
                                 </a>
                             </div>
-                        <?php elseif ($postType == 'post-photo'): ?>
+                        <?php elseif ($postType === 'post-photo'): ?>
                             <div class="post-photo__image-wrapper">
                                 <img src="<?= $card['image_path'] ?>" alt="Фото от пользователя" width="360" height="240">
                             </div>
-                        <?php elseif ($postType == 'post-video'): ?>
+                        <?php elseif ($postType === 'post-video'): ?>
                             <div class="post-video__block">
                                 <div class="post-video__preview">
                                     <?= embed_youtube_cover($card['video_link']) ?>
@@ -132,8 +138,10 @@
                                     <span class="visually-hidden">Запустить проигрыватель</span>
                                 </a>
                             </div>
-                        <?php elseif ($postType == 'post-text'): ?>
-                            <p><?= cutCardContent($card['content'], $card['post_id']) ?></p>
+                        <?php elseif ($postType === 'post-text'): ?>
+                            <p>
+                                <?= cutCardContent($card['content'], $card['post_id']) ?>
+                            </p>
                         <?php endif; ?>
                     </div>
                     <footer class="post__footer">

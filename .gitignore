@@ -9,6 +9,4 @@ Thumbs.db
 vendor
 uploads/*
 !uploads/.gitkeep
-adding-post/tags.php
-adding-post/heading.php
-
+config/smtp_config.php

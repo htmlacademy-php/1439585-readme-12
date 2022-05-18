@@ -8,9 +8,11 @@ require_once('config/site_config.php');
 require_once('functions.php');
 
 isUserLoggedIn();
+
 $userData['id'] = $_SESSION['user']['id'];
 $userData['login'] = $_SESSION['user']['login'];
 $userData['avatar'] = $_SESSION['user']['avatar'];
+$userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
 
 $errorFields = '';
 $searchQuery = '';
@@ -19,7 +21,7 @@ $postHashtags = [];
 $templateName = 'no-results.php';
 $titleName = 'readme: страница результатов поиска (нет результатов)';
 
-// Узнаем, с какой страницы пришел пользователь, чтобы в случае, когда ничего не найдено можно было вернуть его обратно
+//Узнаем, с какой страницы пришел пользователь, чтобы в случае, когда ничего не найдено можно было вернуть его обратно
 $httpRefererPage = '';
 if (isset($_SERVER['HTTP_REFERER'])) {
     $httpRefererPage = $_SERVER['HTTP_REFERER'];
@@ -29,7 +31,7 @@ if (isset($_GET['query']) && !empty(trim($_GET['query']))) {
 
     $searchQuery = (trim($_GET['query']));
 
-    //определяем, поисковой запрос был из строки запроса или по хэштегу
+    //Определяем, поисковой запрос был из строки запроса или по хэштегу
     $searchType = defineTypeSearchQuery($searchQuery);
 
     switch ($searchType) {
@@ -60,8 +62,6 @@ if (empty($errorFields)) {
     $titleName = 'readme: страница результатов поиска';
 }
 
-
-/*формирование страницы поиска*/
 $pageContent = include_template($templateName,
     [
         'searchQuery' => $searchQuery,

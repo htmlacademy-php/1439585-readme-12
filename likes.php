@@ -20,7 +20,7 @@ if (isPostExists($connect, $postId) === false) {
     header("Location: $httpRefererPage");
 }
 
-//До того как добавить запись в таблицу связей проверим, нет ли там уже лайка к этому посту от этого пользователя
+//До того как добавили запись в таблицу связей проверим, нет ли там уже лайка к этому посту от этого пользователя
 if (isLikeExists($connect, $userId, $postId) === false) {
     addLikeToPost($connect, $userId, $postId);
 }

@@ -10,6 +10,7 @@ require_once('functions.php');
 isUserLoggedIn();
 
 $pageContent = include_template('no-content.php');
-$nothingShowPage = include_template('layout.php', ['pageContent' => $pageContent, 'titleName' => 'readme: нечего показать', 'is_auth' => AUTH]);
+$nothingShowPage = include_template('layout.php',
+    ['pageContent' => $pageContent, 'titleName' => 'readme: нечего показать', 'is_auth' => AUTH]);
 
 print_r($nothingShowPage);

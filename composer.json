@@ -1,0 +1,15 @@
+{
+    "name": "redrikshu/readme",
+    "description": "Microblogging website for publishing different formats posts",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "RedrikShukhart",
+            "email": "redrikshu@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/mailer": "^5.4"
+    }
+}

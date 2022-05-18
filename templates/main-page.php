@@ -1,9 +1,9 @@
-<?php if (!empty($errorFields)) {
+<?php
+if (!empty($errorFields)) {
     $errorSection = 'form__input-section form__input-section--error';
 } else {
     $errorSection = '';
-}
-?>
+} ?>
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -69,7 +69,7 @@
             <form class="authorization__form form" action="#" method="post">
                 <div class="authorization__input-wrapper form__input-wrapper">
                     <div class="<?= $errorSection ?>">
-                    <input class="authorization__input authorization__input--login form__input" type="text" name="email" placeholder="Электронная почта" value="<?php if (isset($_POST['email'])) echo $_POST['email'] ?>">
+                    <input class="authorization__input authorization__input--login form__input" type="text" name="email" placeholder="Электронная почта" value="<?= $_POST['email'] ?? '' ?>">
                     <svg class="form__input-icon" width="19" height="18">
                         <use xlink:href="#icon-input-user"></use>
                     </svg>
@@ -132,7 +132,7 @@
                         <a class="footer__page-link" href="popular.php">Популярный контент</a>
                     </li>
                     <li class="footer__my-page footer__my-page--messages">
-                        <a class="footer__page-link" href="messages.html">Личные сообщения</a>
+                        <a class="footer__page-link" href="messages.php">Личные сообщения</a>
                     </li>
                 </ul>
                 <div class="footer__copyright">

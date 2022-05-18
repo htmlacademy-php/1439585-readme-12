@@ -12,6 +12,8 @@ isUserLoggedIn();
 $userData['id'] = $_SESSION['user']['id'];
 $userData['login'] = $_SESSION['user']['login'];
 $userData['avatar'] = $_SESSION['user']['avatar'];
+$userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
+
 $postHashtags = [];
 
 $userProfileId = (int)filter_input(INPUT_GET, 'profile_id', FILTER_SANITIZE_NUMBER_INT);
@@ -19,13 +21,11 @@ if (empty($userProfileId)) {
     redirectOnPage('nothing-to-show');
 }
 
-// Проверить, что такой пользователь существует
 if (isUserExists($connect, $userProfileId) === false) {
     redirectOnPage('nothing-to-show');
 }
 $userProfileData = getUserData($connect, $userProfileId, $userData['id']);
 
-// В зависимости от того, какая вкладка выбрана для показа, тот контент и подгружаем
 $section = (string)filter_input(INPUT_GET, 'section', FILTER_SANITIZE_SPECIAL_CHARS) ?: 'posts';
 switch ($section) {
     case('likes'):
@@ -37,7 +37,6 @@ switch ($section) {
     default:
         $mainContent = getUsersPosts($connect, $userProfileId);
 
-        // Список тегов к этим постам
         foreach ($mainContent as $post) {
             $postHashtags[$post['post_id']] = getPostHashtags($connect, $post['post_id']);
         }
