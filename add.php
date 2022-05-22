@@ -3,22 +3,14 @@
 declare(strict_types=1);
 session_start();
 
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-
-require_once('vendor/autoload.php');
-require_once('config/smtp_configuration.php');
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
 require_once('functions.php');
+require_once('templates/sending-mail-content.php');
 
 isUserLoggedIn();
 
-$userData['id'] = (int)$_SESSION['user']['id'];
-$userData['login'] = $_SESSION['user']['login'];
-$userData['avatar'] = $_SESSION['user']['avatar'];
-$userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
+$userData = userInitialization($connect);
 
 $categories = getCategoryList($connect);
 $errorFields = [];
@@ -134,24 +126,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (checkSubscribersExists($connect, $userData['id']) === true) {
             $recipientList = getSubscribersListForMail($connect, $userData['id']);
-
             foreach ($recipientList as $recipient) {
-                $messageSubject = "Новая публикация от пользователя " . $userData['login'];
-                $messageBody = "Здравствуйте, " . $recipient['login'] . ". Пользователь " . $userData['login'] . " только что опубликовал новую запись „" . htmlspecialchars($_POST['heading']) . "“. Посмотрите её на странице пользователя: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $userData['id'];
-
-                $emailNewPost = (new Email())
-                    ->from(SENDER_ADDRESS)
-                    ->to($recipient['email'])
-                    ->subject($messageSubject)
-                    ->text($messageBody);
-
-                $mailerNewPost = new Mailer($transport);
-                try {
-                    $mailerNewPost->send($emailNewPost);
-                } catch (TransportExceptionInterface $exception) {
-                    echo sprintf("Поймано исключение: %s", $exception->getMessage());
-                    die;
-                }
+                //Тема и тело письма содержаться в шаблоне /templates/sending-mail-content.php
+                sendMailNotification($transport, $recipient['email'], $messageSubject, $messageBody);
             }
         }
 

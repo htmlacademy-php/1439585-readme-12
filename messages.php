@@ -9,10 +9,7 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
-$userData['id'] = (int)$_SESSION['user']['id'];
-$userData['login'] = $_SESSION['user']['login'];
-$userData['avatar'] = $_SESSION['user']['avatar'];
-$userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
+$userData = userInitialization($connect);
 
 $newDialogUserData = [];
 $messagesHistory = [];

@@ -1,7 +1,40 @@
 <?php
 
-require_once('helpers.php');
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+
+require_once('vendor/autoload.php');
+require_once('config/smtp_configuration.php');
 require_once('config/site_config.php');
+require_once('helpers.php');
+
+/**
+ * Проверка на существование сессии с пользователем;
+ * если пользователь не авторизован, отправляем на главную.
+ * @return void
+ */
+function isUserLoggedIn()
+{
+    if (empty($_SESSION['user'])) {
+        redirectOnPage('index.php');
+    }
+}
+
+/**
+ * Инициализация авторизованного пользователя.
+ * @param $connect mysqli Ресурс соединения
+ * @return array
+ */
+function userInitialization($connect): array
+{
+    $userData['id'] = $_SESSION['user']['id'];
+    $userData['login'] = $_SESSION['user']['login'];
+    $userData['avatar'] = $_SESSION['user']['avatar'];
+    $userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
+
+    return $userData;
+}
 
 /**
  * Обрезает текст до указанной длины и добавляет в конце троеточия и ссылку на полный текст.
@@ -778,18 +811,6 @@ function addUserAvatar($connect, string $avatarPath, int $userId)
     $sqlQuery = 'UPDATE users SET avatar = ? WHERE id = ?;';
 
     executePrepareStmt($connect, $sqlQuery, [$avatarPath, $userId]);
-}
-
-/**
- * Проверка на существование сессии с пользователем;
- * если пользователь не авторизован, отправляем на главную.
- * @return void
- */
-function isUserLoggedIn()
-{
-    if (empty($_SESSION['user'])) {
-        redirectOnPage('index.php');
-    }
 }
 
 /**
@@ -1728,4 +1749,29 @@ function getUserDataForMailer($connect, int $userId): array
     $sql = "SELECT email, login FROM users WHERE id = ?";
 
     return fetchArrayPrepareStmt($connect, $sql, $userId);
+}
+
+/**
+ * Отправка письма-уведомления на почту пользователя.
+ * @param $transport Объект транспорта с настроенными параметрами подключения(/config/smtp_configuration.php)
+ * @param string $recipientEmail Email получателя уведомления
+ * @param string $messageSubject Тема письма
+ * @param string $messageBody Тело письма
+ * @return void
+ */
+function sendMailNotification($transport, string $recipientEmail, string $messageSubject, string $messageBody)
+{
+    $emailNewPost = (new Email())
+        ->from(SENDER_ADDRESS)
+        ->to($recipientEmail)
+        ->subject($messageSubject)
+        ->text($messageBody);
+
+    $mailerNewPost = new Mailer($transport);
+    try {
+        $mailerNewPost->send($emailNewPost);
+    } catch (TransportExceptionInterface $exception) {
+        echo sprintf("Поймано исключение: %s", $exception->getMessage());
+        die;
+    }
 }

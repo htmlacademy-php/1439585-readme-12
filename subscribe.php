@@ -2,14 +2,9 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-
-require_once('vendor/autoload.php');
 require_once('config/db_connect.php');
-require_once('config/smtp_configuration.php');
 require_once('functions.php');
+require_once('templates/sending-mail-content.php');
 
 session_start();
 
@@ -35,22 +30,8 @@ if (empty(mysqli_insert_id($connect))) {
 }
 
 //В случае если запись была успешно добавлена в БД, надо отправить этому пользователю уведомление о новом подписчике.
+//Тема и тело письма содержаться в шаблоне /templates/sending-mail-content.php
 $recipientData = getUserDataForMailer($connect, $authorId);
-$messageSubject = "У вас новый подписчик";
-$messageBody = "Здравствуйте, " . $recipientData['login'] . ". На вас подписался новый пользователь $userLogin. Вот ссылка на его профиль: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=$userId";
-
-$emailNewSubscriber = (new Email())
-    ->from(SENDER_ADDRESS)
-    ->to($recipientData['email'])
-    ->subject($messageSubject)
-    ->text($messageBody);
-
-$mailerNewSubscriber = new Mailer($transport);
-try {
-    $mailerNewSubscriber->send($emailNewSubscriber);
-} catch (TransportExceptionInterface $exception) {
-    echo sprintf("Поймано исключение: %s", $exception->getMessage());
-    die;
-}
+sendMailNotification($transport, $recipientData['email'], $messageSubject, $messageBody);
 
 redirectOnPage('profile.php?profile_id=' . $authorId);
