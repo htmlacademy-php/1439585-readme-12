@@ -22,11 +22,12 @@
                 micro blogging
             </p>
         </div>
-        <?php if ($is_auth == 1): ?>
+        <?php if ($is_auth === 1): ?>
         <form class="header__search-form form" action="search.php" method="get">
             <div class="header__search">
                 <label class="visually-hidden">Поиск</label>
-                <input class="header__search-input form__input" type="search" id="query" name="query" value="<?php if (isset($_GET['query'])) echo htmlspecialchars(trim($_GET['query'])) ?>">
+                <input class="header__search-input form__input" type="search" id="query" name="query"
+                       value="<?= isset($_GET['query']) ? htmlspecialchars(trim($_GET['query'])) : '' ?>">
                 <button class="header__search-button button" type="submit">
                     <svg class="header__search-icon" width="18" height="18">
                         <use xlink:href="#icon-search"></use>
@@ -39,17 +40,17 @@
             <nav class="header__nav">
                 <ul class="header__my-nav">
                     <li class="header__my-page header__my-page--popular">
-                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/popular.php') echo 'header__page-link--active'?>" href="popular.php" title="Популярный контент">
+                        <a class="header__page-link <?= ($_SERVER['SCRIPT_NAME'] === '/popular.php') ? 'header__page-link--active' : '' ?>" href="popular.php" title="Популярный контент">
                             <span class="visually-hidden">Популярный контент</span>
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--feed">
-                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/feed.php') echo 'header__page-link--active'?>" href="feed.php" title="Моя лента">
+                        <a class="header__page-link <?= ($_SERVER['SCRIPT_NAME'] === '/feed.php') ? 'header__page-link--active' : '' ?>" href="feed.php" title="Моя лента">
                             <span class="visually-hidden">Моя лента</span>
                         </a>
                     </li>
                     <li class="header__my-page header__my-page--messages">
-                        <a class="header__page-link <?php if ($_SERVER['SCRIPT_NAME'] === '/messages.html') echo 'header__page-link--active'?>" href="messages.html" title="Личные сообщения">
+                        <a class="header__page-link <?= ($_SERVER['SCRIPT_NAME'] === '/messages.php') ? 'header__page-link--active' : '' ?>" href="messages.php" title="Личные сообщения">
                             <span class="visually-hidden">Личные сообщения</span>
                         </a>
                     </li>
@@ -82,11 +83,12 @@
                                         </a>
                                     </li>
                                     <li class="header__profile-nav-item">
-                                        <a class="header__profile-nav-link" href="#">
+                                        <a class="header__profile-nav-link" href="messages.php">
                                             <span class="header__profile-nav-text">
                                                 Сообщения
-                                                <!-- В следующем задании 9.7. Отправка электронной почты будет реализован функционал сообщений и как раз условие на показ кол-ва непрочитанных сообщений профайла -->
-                                                <!-- <i class="header__profile-indicator">2</i>-->
+                                                <?php if(!empty($userData['all_new_messages'])): ?>
+                                                    <i class="header__profile-indicator"><?= $userData['all_new_messages'] ?></i>
+                                                <?php endif; ?>
                                             </span>
                                         </a>
                                     </li>
@@ -165,7 +167,7 @@
                         <a class="footer__page-link" href="popular.php">Популярный контент</a>
                     </li>
                     <li class="footer__my-page footer__my-page--messages">
-                        <a class="footer__page-link" href="messages.html">Личные сообщения</a>
+                        <a class="footer__page-link" href="messages.php">Личные сообщения</a>
                     </li>
                 </ul>
                 <div class="footer__copyright">
@@ -180,9 +182,5 @@
         </div>
     </div>
 </footer>
-<!-- При закомментированных js-скриптах работает отправка фото (переключение табов на странице с популярным переключаются, ссылки с параметрами другие моменты выполненные по проекту на текущий момент работают)-->
-<!-- <script src="libs/dropzone.js"></script>
-<script src="js/dropzone-settings.js"></script> -->
-<!--<script src="js/main.js"></script>-->
 </body>
 </html>

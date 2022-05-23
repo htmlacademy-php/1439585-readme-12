@@ -9,15 +9,12 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
-// Получаем данные по пользователю из сессии
-$userData['id'] = (int)$_SESSION['user']['id'];
-$userData['login'] = $_SESSION['user']['login'];
-$userData['avatar'] = $_SESSION['user']['avatar'];
+$userData = userInitialization($connect);
 
 $categories = getCategoryList($connect);
 $errorFields = [];
 
-/* Если была отправлена форма, то выполняем дальнейшие действия на проверку и отправку данных в БД */
+// Если была отправлена форма, то выполняем дальнейшие действия на проверку и отправку данных в БД
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $categoryId = '';
@@ -34,11 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     switch ($postType) {
         case ('text'):
             $requiredFields = ['heading' => "Заголовок.", 'post-text' => "Текст поста."];
-            /* Пусты ли обязательные поля */
             $errorFields = validateEmptyField($_POST, $requiredFields);
 
             if (empty($errorFields)) {
-                /* Добавляем непосредственно сам пост в таблицу с постами */
+                // Добавляем непосредственно сам пост в таблицу с постами
                 addNewTextPost($connect, $requiredFields, $userData['id'], $categoryId);
             }
             break;
@@ -60,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $requiredFields = ['heading' => "Заголовок."];
             $errorFields = validateEmptyField($_POST, $requiredFields);
 
-            /* Проверяем далее по отдельности вызывая функции, тк нам нужно, чтобы выдавало разное описание в случае ошибки*/
+            // Проверяем далее по отдельности вызывая функции, тк нам нужно, чтобы выдавало разное описание в случае ошибки
             if (validateEmptyPicture() === false) {
                 $errorFields['image-path'] = 'Вы не добавили картинку';
             }
@@ -115,16 +111,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             break;
     }
 
+    // Если пост был записан, необходимо отправить подписчикам уведомление о новом посте и перенаправить автора на страницу нового поста
     $post_id = mysqli_insert_id($connect);
-
-    /* Если пост был записан */
     if (!empty($post_id)) {
 
-        /* Проверяем наличие тегов ибо они не обязательные поля; при наличии добавляем в БД */
+        // Проверяем наличие тегов ибо они не обязательные поля; при наличии добавляем в БД
         if (!empty($_POST['tags'])) {
             $hashtags = prepareTags('tags');
             if (!empty($hashtags)) {
                 addPostsHashtags($connect, $post_id, $hashtags);
+            }
+        }
+
+        if (checkSubscribersExists($connect, $userData['id']) === true) {
+            $recipientList = getSubscribersListForMail($connect, $userData['id']);
+            foreach ($recipientList as $recipient) {
+                $messageContent = messageContent($recipient['login'], $userData, 'add');
+                sendMailNotification($transport, $recipient['email'], $messageContent);
             }
         }
 
@@ -133,7 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* формирование страницы, разделение на пару шаблонов с баннером ошибок и самой формой */
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
 $pageContent = include_template('adding-post.php', [
     'categories' => $categories,

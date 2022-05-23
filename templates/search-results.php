@@ -31,19 +31,22 @@
                                 </a>
                             </header>
                             <div class="post__main">
-                                <h2><a href="post.php?post_id=<?= $content['post_id'] ?>"><?= htmlspecialchars($content['title'])?></a></h2>
-                                <?php if ($postType == 'post-quote') : ?>
+                                <h2><a href="post.php?post_id=<?= $content['post_id'] ?>"><?= htmlspecialchars($content['title']) ?></a></h2>
+                                <?php if ($postType === 'post-quote'): ?>
                                     <blockquote>
                                         <p>
                                             <?= htmlspecialchars($content['content']) ?>
                                         </p>
                                         <cite>
-                                            <?php if (!empty($content['quote_author'])) {
+                                            <?php
+                                            if (!empty($content['quote_author'])) {
                                                 echo htmlspecialchars($content['quote_author']);
-                                            } else echo 'Неизвестный автор'; ?>
+                                            } else {
+                                                echo 'Неизвестный автор';
+                                            } ?>
                                         </cite>
                                     </blockquote>
-                                <?php elseif ($postType == 'post-link') : ?>
+                                <?php elseif ($postType === 'post-link'): ?>
                                     <div class="post-link__wrapper">
                                         <a class="post-link__external" href="<?= correctSiteUrl(htmlspecialchars($content['website_link'])) ?>" title="Перейти по ссылке">
                                             <div class="post-link__info-wrapper">
@@ -57,18 +60,20 @@
                                             </div>
                                         </a>
                                     </div>
-                                <?php elseif ($postType == 'post-photo') : ?>
+                                <?php elseif ($postType === 'post-photo'): ?>
                                     <div class="post-details__image-wrapper post-photo__image-wrapper">
                                         <img src="<?= $content['image_path'] ?>" alt="Фото от пользователя" width="760" height="507">
                                     </div>
-                                <?php elseif ($postType == 'post-video') : ?>
+                                <?php elseif ($postType === 'post-video'): ?>
                                     <div class="post-video__block">
                                         <div class="post-video__preview">
                                             <?= embed_youtube_video($content['video_link']); ?>
                                         </div>
                                     </div>
-                                <?php elseif ($postType == 'post-text') : ?>
-                                    <p><?= cutCardContent($content['content'], $content['post_id']) ?></p>
+                                <?php elseif ($postType === 'post-text'): ?>
+                                    <p>
+                                        <?= cutCardContent($content['content'], $content['post_id']) ?>
+                                    </p>
                                 <?php endif; ?>
                             </div>
                             <footer class="post__footer post__indicators">
@@ -94,7 +99,7 @@
                             </footer>
                             <ul class="post__tags">
                                 <?php foreach ($postHashtags as $postId => $hashtags): ?>
-                                    <?php if (($content['post_id'] == $postId) && !empty($hashtags)): ?>
+                                    <?php if (($content['post_id'] === $postId) && !empty($hashtags)): ?>
                                         <?php foreach ($hashtags as $tag): ?>
                                             <li><a href="search.php?query=%23<?= ($tag) ?>">#<?= ($tag) ?></a></li>
                                         <?php endforeach; ?>

@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 date_default_timezone_set('Europe/Moscow');
 
-define('DB_NAME', 'readme');
-define('DB_USER', 'root');
-define('DB_PASSWORD', 'commanderSpock');
-define('DB_HOST', 'sbrt');
-define('DB_CHARSET', 'utf8');
+//Имя базы данных:
+const DB_NAME = '';
+//Логин от базы данных:
+const DB_USER = '';
+//Пароль от базы данных:
+const DB_PASSWORD = '';
+//Имя хоста:
+const DB_HOST = '';
+const DB_CHARSET = 'utf8';

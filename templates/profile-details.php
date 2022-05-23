@@ -42,7 +42,7 @@
                             <button style="margin-bottom: 10px; width: 360px;" class="profile__user-button user__button user__button--subscription button <?= $button ?>" type="submit" ><?= $buttonText ?></button>
                         </form>
                         <?php if ($userProfileData['is_subscribe'] === 1): ?>
-                            <a class="profile__user-button user__button user__button--writing button button--green" href="#">Сообщение</a>
+                            <a class="profile__user-button user__button user__button--writing button button--green" href="messages.php?user_id=<?= $userProfileData['id'] ?>">Сообщение</a>
                         <?php endif;?>
                     <?php endif; ?>
                 </div>

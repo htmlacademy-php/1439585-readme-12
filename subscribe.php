@@ -8,7 +8,8 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
-$userId = (int)$_SESSION['user']['id'];
+$userData['id'] = (int)$_SESSION['user']['id'];
+$userData['login'] = $_SESSION['user']['login'];
 $httpRefererPage = $_SERVER['HTTP_REFERER'];
 
 $authorId = (int)filter_input(INPUT_GET, 'author_id',
@@ -19,12 +20,16 @@ if (isUserExists($connect, $authorId) === false) {
     header("Location: $httpRefererPage");
 }
 
-subscribeToUser($connect, $userId, $authorId);
+subscribeToUser($connect, $userData['id'], $authorId);
 
 //Выполнить переадресацию обратно на профиль пользователя, если в БД была добавлена запись
 if (empty(mysqli_insert_id($connect))) {
     header("Location: $httpRefererPage");
 }
-redirectOnPage('profile.php?profile_id=' . $authorId);
 
-//Отправить этому пользователю уведомление о новом подписчике (смотрите описание процесса «Отправка уведомлений»). - пока не делала, тк работа с отправкой писем в следующем задании.
+//В случае если запись была успешно добавлена в БД, надо отправить этому пользователю уведомление о новом подписчике.
+$recipientData = getUserDataForMailer($connect, $authorId);
+$messageContent = messageContent($recipientData['login'], $userData, 'subscribe');
+sendMailNotification($transport, $recipientData['email'], $messageContent);
+
+redirectOnPage('profile.php?profile_id=' . $authorId);

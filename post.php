@@ -9,10 +9,7 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
-// Получаем данные по пользователю из сессии
-$userData['id'] = $_SESSION['user']['id'];
-$userData['login'] = $_SESSION['user']['login'];
-$userData['avatar'] = $_SESSION['user']['avatar'];
+$userData = userInitialization($connect);
 
 $postId = (int)filter_input(INPUT_GET, 'post_id',
     FILTER_SANITIZE_NUMBER_INT) ?: header('Location: /nothing-to-show.php');
@@ -47,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     updateShowCount($connect, $postId);
 }
 
-/*формирование страницы */
 $pageContent = include_template('post-details.php',
     [
         'postData' => $postData,

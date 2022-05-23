@@ -5,17 +5,15 @@
         </div>
         <div class="adding-post container">
             <div class="adding-post__tabs-wrapper tabs">
-                <!-- расположены табы переключения по категориям-->
                 <div class="adding-post__tabs filters">
                     <?php foreach ($categories as $category): ?>
                         <ul class="adding-post__tabs-list filters__list tabs__list">
                             <li class="adding-post__tabs-item filters__item">
-                                <!--условие на показ табов, какие активными будут-->
                                 <?php
                                 $contentCategory = filter_input(INPUT_GET, 'category_name', FILTER_SANITIZE_SPECIAL_CHARS);
 
-                                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                                    /**условие на активность таба после сабмита */
+                                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                                    //условие на активность таба после сабмита
                                     $compareType = $_POST['post-type'];
                                 } elseif ((!empty($contentCategory))) {
                                     $compareType = $contentCategory;
@@ -23,7 +21,7 @@
                                     $compareType = 'text';
                                 }
 
-                                if ($category['class_name'] == $compareType) {
+                                if ($category['class_name'] === $compareType) {
                                     $activeButton = 'filters__button--active';
                                     $activeTab = 'tabs__item--active';
                                 } else {
@@ -31,8 +29,6 @@
                                     $activeTab = '';
                                 }
                                 ?>
-                                <!-- end условие на показ табов, какие активными будут -->
-
                                 <a class="adding-post__tabs-link filters__button filters__button--<?= $category['class_name'] ?> <?= $activeButton ?> tabs__item <?= $activeTab ?> button" href="add.php?category_name=<?= $category['class_name'] ?>">
                                     <svg class="filters__icon" width="22" height="18">
                                         <use xlink:href="#icon-filter-<?= $category['class_name'] ?>"></use>
@@ -43,10 +39,7 @@
                         </ul>
                     <?php endforeach; ?>
                 </div>
-                <!-- end расположены табы переключения по категориям-->
-
                 <div class="adding-post__tab-content">
-                    <!-- тут располагаются сами формы-->
                     <?php
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $contentCategory = $_POST['post-type'];
@@ -65,7 +58,6 @@
                         echo "Sorry, there is some mistake.  There is nothing you want :(";
                     }
                     ?>
-                    <!-- end тут располагаются сами формы-->
                 </div>
             </div>
         </div>

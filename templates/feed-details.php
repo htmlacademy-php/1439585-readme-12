@@ -8,8 +8,9 @@
             <div class="feed__main-wrapper">
                 <div class="feed__wrapper">
                     <?php foreach ($posts as $post): ?>
-                        <?php foreach ($categories as $category) {
-                            if ($post['category_id'] == $category['id']) {
+                        <?php
+                        foreach ($categories as $category) {
+                            if ((int)$post['category_id'] === (int)$category['id']) {
                                 $postType = "post-" . $category['class_name'];
                             }
                         } ?>
@@ -31,7 +32,7 @@
                             </header>
                             <div class="post__main">
                                 <h2><a href="post.php?post_id=<?= $post['post_id'] ?>"><?= htmlspecialchars($post['title']) ?></a></h2>
-                                <?php if ($postType == 'post-quote'): ?>
+                                <?php if ($postType === 'post-quote'): ?>
                                     <blockquote>
                                         <p>
                                             <?= htmlspecialchars($post['content']) ?>
@@ -44,7 +45,7 @@
                                             } ?>
                                         </cite>
                                     </blockquote>
-                                <?php elseif ($postType == 'post-link'): ?>
+                                <?php elseif ($postType === 'post-link'): ?>
                                     <div class="post-link__wrapper">
                                         <a class="post-link__external"
                                            href="<?= correctSiteUrl(htmlspecialchars($post['website_link'])) ?>"
@@ -62,18 +63,20 @@
                                             </svg>
                                         </a>
                                     </div>
-                                <?php elseif ($postType == 'post-photo'): ?>
+                                <?php elseif ($postType === 'post-photo'): ?>
                                     <div class="post-photo__image-wrapper">
                                         <img src="<?= $post['image_path'] ?>" alt="Фото от пользователя" width="760" height="396">
                                     </div>
-                                <?php elseif ($postType == 'post-video'): ?>
+                                <?php elseif ($postType === 'post-video'): ?>
                                     <div class="post-video__block">
                                         <div class="post-video__preview">
                                             <?= embed_youtube_video($post['video_link']) ?>
                                         </div>
                                     </div>
-                                <?php elseif ($postType == 'post-text'): ?>
-                                    <p><?= cutCardContent($post['content'], $post['post_id']) ?></p>
+                                <?php elseif ($postType === 'post-text'): ?>
+                                    <p>
+                                        <?= cutCardContent($post['content'], $post['post_id']) ?>
+                                    </p>
                                 <?php endif; ?>
                             </div>
                             <footer class="post__footer post__indicators">
@@ -108,7 +111,7 @@
                             </footer>
                             <ul class="post__tags">
                                 <?php foreach ($postHashtags as $postId => $hashtags): ?>
-                                    <?php if (($post['post_id'] == $postId) && !empty($hashtags)): ?>
+                                    <?php if (((int)$post['post_id'] === $postId) && !empty($hashtags)): ?>
                                         <?php foreach ($hashtags as $tag): ?>
                                             <li><a href="search.php?query=%23<?= ($tag) ?>">#<?= ($tag) ?></a></li>
                                         <?php endforeach; ?>
@@ -122,7 +125,7 @@
             <ul class="feed__filters filters">
                 <?php $contentCategory = filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER_INT) ?? 'all'; ?>
                 <li class="feed__filters-item filters__item">
-                    <?php if ($contentCategory == 'all') {
+                    <?php if ($contentCategory === 'all') {
                         $buttonActive = "filters__button--active";
                     } else {
                         $buttonActive = "";

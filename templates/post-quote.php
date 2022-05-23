@@ -5,9 +5,12 @@
                 <?= htmlspecialchars($postData['content']) ?>
             </p>
             <cite>
-                <?php if (!empty($postData['quote_author'])) {
+                <?php
+                if (!empty($postData['quote_author'])) {
                     echo htmlspecialchars($postData['quote_author']);
-                } else echo 'Неизвестный автор'; ?>
+                } else {
+                    echo 'Неизвестный автор';
+                } ?>
             </cite>
         </blockquote>
     </div>

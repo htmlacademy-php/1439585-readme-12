@@ -18,19 +18,19 @@ $requiredFields = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    /* Убедиться, что заполнены все обязательные поля*/
     $errorFields = validateEmptyField($_POST, $requiredFields);
 
-    /* Валидация email*/
+    //Валидация email
     if (checkEmailExists($connect, $_POST['email']) !== false) {
-        $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $_POST['email'] . ', уже зарегистрирован.'], $errorFields);
+        $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $_POST['email'] . ', уже зарегистрирован.'],
+            $errorFields);
     }
 
     if (empty($errorFields) && (validateEmail($_POST['email']) === false)) {
         $errorFields = array_merge(['email' => 'Вы указали некорректный email.'], $errorFields);
     }
 
-    /* Валидация паролей*/
+    //Валидация паролей
     if (isPasswordCorrect($_POST['password']) !== true) {
         $errorFields['password'] = 'Пароль должен содержать не менее 6 символов. В нем должны быть цифры и буквы латинского алфавита верхнего и нижнего регистров.';
     }
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorFields['password'] = 'Пароли не совпадают.';
     }
 
-    /*  Если юзер добавил аватарку, поверяем mime-тип*/
+    //Если юзер добавил аватарку, поверяем mime-тип
     if (!empty($_FILES['userpic-avatar']['name'])) {
         if (validatePictureFromUser('userpic-avatar') === false) {
             $errorFields['userpic-avatar'] = 'Файл не является картинкой.';
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    /* Если нет никаких ошибок, то сохранить данные в таблице пользователей*/
+    //Если нет никаких ошибок, то сохранить данные в таблице пользователей
     if (empty($errorFields)) {
 
         $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -61,17 +61,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             addUserAvatar($connect, $avatarPath, $user_id);
         }
 
-        /* Если данные были записаны, т.е. получен id записи в БД, то переадресовываем пользователя на главную */
+        //Если данные были записаны, т.е. получен id записи в БД, то переадресовываем пользователя на главную
         if (!empty($user_id)) {
-             redirectOnPage("index.php");
+            redirectOnPage("index.php");
         }
     }
 
 }
 
-/* формирование страницы, разделение на шаблоны с баннером ошибок и самой формой */
 $redErrorBanner = include_template('/error-fields.php', ['errorFields' => $errorFields]);
-$registrationPageContent = include_template('user-registration.php', ['errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
-$registrationPage = include_template('layout.php', ['pageContent' => $registrationPageContent, 'titleName' => 'readme: регистрация', 'is_auth' => NOT_AUTH]);
+$registrationPageContent = include_template('user-registration.php',
+    ['errorFields' => $errorFields, 'redErrorBanner' => $redErrorBanner]);
+$registrationPage = include_template('layout.php',
+    ['pageContent' => $registrationPageContent, 'titleName' => 'readme: регистрация', 'is_auth' => NOT_AUTH]);
 
 print_r($registrationPage);

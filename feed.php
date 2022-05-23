@@ -9,26 +9,22 @@ require_once('functions.php');
 
 isUserLoggedIn();
 
-// Получаем данные по пользователю из сессии
-$userData['id'] = (int)$_SESSION['user']['id'];
-$userData['login'] = $_SESSION['user']['login'];
-$userData['avatar'] = $_SESSION['user']['avatar'];
+$userData = userInitialization($connect);
 
 $postHashtags = [];
 
 $categories = getCategoryList($connect);
 
-/*Получаем id категории, если пользователем выбрана категория на странице */
+//Получаем id категории, если пользователем выбрана категория на странице
 $categoryId = (int)filter_input(INPUT_GET, 'category_id', FILTER_SANITIZE_NUMBER_INT);
 
-/*получить список постов с сортировкой по дате добавления вместе с данными авторов, выборка только тех постов, на кого подписан пользователь*/
+//Получить список постов с сортировкой по дате добавления вместе с данными авторов, выборка только тех постов, на кого подписан пользователь
 if (!empty($categoryId)) {
     $posts = getSubscribesPostsByCategory($connect, $userData['id'], $categoryId);
 } else {
     $posts = getSubscribesPosts($connect, $userData['id']);
 }
 
-/* Получаем в ассоциативный массив в хэштегами ко всем постам на странице, где ключ массова - id поста*/
 foreach ($posts as $post) {
     $postHashtags[$post['post_id']] = getPostHashtags($connect, $post['post_id']);
 }

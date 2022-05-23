@@ -7,20 +7,19 @@ INSERT INTO categories(name,class_name)
 		('Видео', 'video'),
 		('Ссылка', 'link');
 
-/* У добавленных тут пользователей есть нюанс с паролем и дальнейшей авторизацией, тк при авторизации используется password_verify, а при регистрации password_hash, соответственно, при авторизации пользователя она не проходит*/
 /*придумайте пару пользователей*/
 INSERT INTO users
-	SET email = 'katewho@test.ru', login = 'Катерина', password = SHA2('pass1kate', 224), avatar = '/img/cat_02.jpg';
+	SET email = 'katewho@test.ru', login = 'Катерина', password = SHA2('pass1Kate', 224), avatar = '/img/cat_02.jpg';
 INSERT INTO users
-	SET email = 'muha@test.ru', login = 'Andrei Muha', password = SHA2('pass2muha', 224), avatar = '/img/cat_01.jpg';
+	SET email = 'muha@test.ru', login = 'Andrei Muha', password = SHA2('pass2Muha', 224), avatar = '/img/cat_01.jpg';
 
 /*добавление пользователей из существующего массива с постами*/
 INSERT INTO users
-	SET id = 3, email = 'larisa@test.ru', login = 'Лариса', password = SHA2('pass3larisa', 224), avatar = '/img/userpic-larisa.jpg';
+	SET id = 3, email = 'larisa@test.ru', login = 'Лариса', password = SHA2('pass3Larisa', 224), avatar = '/img/userpic-larisa.jpg';
 INSERT INTO users
-	SET id = 4, email = 'vladik@test.ru', login = 'Владик', password = SHA2('pass4vladik', 224), avatar = '/img/userpic-medium.jpg';
+	SET id = 4, email = 'vladik@test.ru', login = 'Владик', password = SHA2('pass4Vladik', 224), avatar = '/img/userpic-medium.jpg';
 INSERT INTO users
-	SET id = 5, email = 'viktor@test.ru', login = 'Виктор', password = SHA2('pass5viktor', 224), avatar = '/img/userpic-mark.jpg';
+	SET id = 5, email = 'viktor@test.ru', login = 'Виктор', password = SHA2('pass5Viktor', 224), avatar = '/img/userpic-mark.jpg';
 
 /*существующий список постов*/
 INSERT INTO posts
@@ -120,7 +119,7 @@ INSERT INTO posts_hashtags SET post_id = 4, hashtag_id = 4;
 INSERT INTO posts_hashtags SET post_id = 3, hashtag_id = 4;
 
 /*добавление сообщений*/
-INSERT INTO messeges SET sender_id = 2, recipient_id = 5, content = 'Привет, слушай, здоровские фотки получились!';
-INSERT INTO messeges SET sender_id = 5, recipient_id = 2, content = 'Привет! Спасибо, старался, наконец-то время появилось на это....А то поездка была давно, а обработал только сейчас.';
-INSERT INTO messeges SET sender_id = 3, recipient_id = 1, content = 'Катю, поедешь с нами на озеро? Мы тут с ребятами поплавать собрались';
-INSERT INTO messeges SET sender_id = 1, recipient_id = 3, content = 'Да, с удовольствием! во сколько выдвигаемся? Заберете меня??))';
+INSERT INTO messages SET sender_id = 3, recipient_id = 1, dialog_id = 1, content = 'Катю, поедешь с нами на озеро? Мы тут с ребятами поплавать собрались';
+INSERT INTO messages SET sender_id = 1, recipient_id = 3, dialog_id = 1, content = 'Да, с удовольствием! во сколько выдвигаемся? Заберете меня??))';
+INSERT INTO messages SET sender_id = 2, recipient_id = 5, dialog_id = 2, content = 'Привет, слушай, здоровские фотки получились!';
+INSERT INTO messages SET sender_id = 5, recipient_id = 2, dialog_id = 2, content = 'Привет! Спасибо, старался, наконец-то время появилось на это....А то поездка была давно, а обработал только сейчас.';

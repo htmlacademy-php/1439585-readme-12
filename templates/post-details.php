@@ -26,7 +26,7 @@
                                 <span><?= $postData['likes_count'] ?></span>
                                 <span class="visually-hidden">количество лайков</span>
                             </a>
-                            <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
+                            <a class="post__indicator post__indicator--comments button" title="Комментарии">
                                 <svg class="post__indicator-icon" width="19" height="17">
                                     <use xlink:href="#icon-comment"></use>
                                 </svg>
@@ -44,8 +44,6 @@
                         <span class="post__view"><?= $postData['show_count'] ?> просмотров</span>
                     </div>
                     <div class="comments">
-
-                        <!--leave-comment.php-->
                         <form class="comments__form form" action="post.php?post_id=<?= $postData['post_id'] ?>" method="post">
                             <input class="visually-hidden" type="text" name="post-id" value="<?= $postData['post_id'] ?>">
                             <div class="comments__my-avatar">
@@ -53,7 +51,8 @@
                                     <img class="comments__picture" src="<?= $userData['avatar'] ?>" width="40" height="40" alt="Аватар пользователя">
                                 <?php endif; ?>
                             </div>
-                            <?php if (!empty($validationError))
+                            <?php
+                            if (!empty($validationError))
                             {
                                 $errorLine = 'form__input-section--error';
                             } else {
@@ -73,7 +72,6 @@
                             </div>
                             <button class="comments__submit button button--green" type="submit">Отправить</button>
                         </form>
-
                         <div class="comments__list-wrapper">
                             <?php foreach ($postsComments as $comment): ?>
                                 <ul class="comments__list">
@@ -130,7 +128,6 @@
                             <span class="post-details__rating-text user__rating-text"><?= showAuthorPostsCount($postData['author_count_post']) ?></span>
                         </p>
                     </div>
-                    <!-- Показ "отписаться" или "подписаться"  -->
                     <?php
                     $button = 'button--main';
                     $buttonText = 'Подписаться';
@@ -147,7 +144,7 @@
                             <button style="margin-bottom: 10px; width: 319px;" class="user__button user__button--subscription button <?= $button ?>" type="submit"><?= $buttonText ?></button>
                         </form>
                         <?php if ($postData['is_subscribe'] === 1): ?>
-                            <a class="user__button user__button--writing button button--green" href="#">Сообщение</a>
+                            <a class="user__button user__button--writing button button--green" href="messages.php?user_id=<?= $postData['user_id'] ?>">Сообщение</a>
                         <?php endif; ?>
                     </div>
                 </div>
