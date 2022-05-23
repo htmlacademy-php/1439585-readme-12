@@ -6,7 +6,6 @@ session_start();
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
 require_once('functions.php');
-require_once('templates/sending-mail-content.php');
 
 isUserLoggedIn();
 
@@ -127,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (checkSubscribersExists($connect, $userData['id']) === true) {
             $recipientList = getSubscribersListForMail($connect, $userData['id']);
             foreach ($recipientList as $recipient) {
-                //Тема и тело письма содержаться в шаблоне /templates/sending-mail-content.php
-                sendMailNotification($transport, $recipient['email'], $messageSubject, $messageBody);
+                $messageContent = messageContent($recipient['login'], $userData, 'add');
+                sendMailNotification($transport, $recipient['email'], $messageContent);
             }
         }
 

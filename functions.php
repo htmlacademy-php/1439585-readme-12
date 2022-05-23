@@ -1752,24 +1752,48 @@ function getUserDataForMailer($connect, int $userId): array
 }
 
 /**
+ * Определение, какое содержимое и тема письма будут отправлены пользователю в зависимости от используемого сценария.
+ * @param string $recipientLogin Логин получателя
+ * @param array $senderData Логин и id отправителя
+ * @param string $messageType Тип сообщения: add - уведомление о публикации нового поста, subscribe - уведомление о новом подписчике
+ * @return array
+ */
+function messageContent(string $recipientLogin, array $senderData, string $messageType): array
+{
+    $message = [];
+
+    switch ($messageType) {
+        case ('add'):
+            $message['subject'] = "Новая публикация от пользователя " . $senderData['login'];
+            $message['body'] = "Здравствуйте, " . $recipientLogin . ". Пользователь " . $senderData['login'] . " только что опубликовал новую запись „" . htmlspecialchars($_POST['heading']) . "“. Посмотрите её на странице пользователя: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $senderData['id'];
+            break;
+        case ('subscribe'):
+            $message['subject'] = "У вас новый подписчик";
+            $message['body'] = "Здравствуйте, " . $recipientLogin . ". На вас подписался новый пользователь " . $senderData['login'] . ". Вот ссылка на его профиль: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $senderData['id'];
+            break;
+    }
+
+    return $message;
+}
+
+/**
  * Отправка письма-уведомления на почту пользователя.
  * @param $transport Объект транспорта с настроенными параметрами подключения(/config/smtp_configuration.php)
  * @param string $recipientEmail Email получателя уведомления
- * @param string $messageSubject Тема письма
- * @param string $messageBody Тело письма
+ * @param array $messageContent Содержимое письма
  * @return void
  */
-function sendMailNotification($transport, string $recipientEmail, string $messageSubject, string $messageBody)
+function sendMailNotification($transport, string $recipientEmail, array $messageContent)
 {
-    $emailNewPost = (new Email())
+    $email = (new Email())
         ->from(SENDER_ADDRESS)
         ->to($recipientEmail)
-        ->subject($messageSubject)
-        ->text($messageBody);
+        ->subject($messageContent['subject'])
+        ->text($messageContent['body']);
 
-    $mailerNewPost = new Mailer($transport);
+    $mailer = new Mailer($transport);
     try {
-        $mailerNewPost->send($emailNewPost);
+        $mailer->send($email);
     } catch (TransportExceptionInterface $exception) {
         echo sprintf("Поймано исключение: %s", $exception->getMessage());
         die;
