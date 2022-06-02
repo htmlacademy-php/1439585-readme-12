@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $titleName ?></title>
+    <title><?= htmlspecialchars($titleName) ?></title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body class="page">
@@ -57,7 +57,7 @@
                 </ul>
                 <ul class="header__user-nav">
                     <li class="header__profile">
-                        <a class="header__profile-link" href="profile.php?profile_id=<?= $userData['id'] ?>">
+                        <a class="header__profile-link" href="profile.php?profile_id=<?= $userData['id'] ?? '' ?>">
                             <div class="header__avatar-wrapper">
                                 <?php if (!empty($userData['avatar'])): ?>
                                     <img class="header__profile-avatar" src="<?= $userData['avatar'] ?>" alt="Аватар пользователя">
@@ -65,7 +65,7 @@
                             </div>
                             <div class="header__profile-name">
                                 <span>
-                                    <?= htmlspecialchars($userData['login']) ?>
+                                    <?= htmlspecialchars($userData['login'] ?? '') ?>
                                 </span>
                                 <svg class="header__link-arrow" width="10" height="6">
                                     <use xlink:href="#icon-arrow-right-ad"></use>
@@ -76,7 +76,7 @@
                             <div class="header__profile-tooltip">
                                 <ul class="header__profile-nav">
                                     <li class="header__profile-nav-item">
-                                        <a class="header__profile-nav-link" href="profile.php?profile_id=<?= $userData['id'] ?>">
+                                        <a class="header__profile-nav-link" href="profile.php?profile_id=<?= $userData['id'] ?? '' ?>">
                                             <span class="header__profile-nav-text">
                                                 Мой профиль
                                             </span>

@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $isEmptyFields = validateEmptyField($_POST, ['email' => "Email. ", 'password' => "Пароль."]);
 
+    // Строкой выше есть проверка validateEmptyField, в которой проверяется, не пусты ли указанные используемые далее поля в массиве $_POST
     if (empty($isEmptyFields) && validateEmail($_POST['email'])) {
 
         if (checkEmailExists($connect, $_POST['email'])) {
@@ -31,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errorFields)) {
         $_SESSION['user']['id'] = $userData['id'];
         $_SESSION['user']['login'] = $userData['login'];
-        $_SESSION['user']['avatar'] = $userData['avatar'];
+        $_SESSION['user']['avatar'] = $userData['avatar'] ?? '';
     }
 }
 

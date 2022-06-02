@@ -2,7 +2,7 @@
     <div class="post__main">
         <blockquote style="width: 757px;">
             <p>
-                <?= htmlspecialchars($postData['content']) ?>
+                <?= htmlspecialchars($postData['content'] ?? '') ?>
             </p>
             <cite>
                 <?php

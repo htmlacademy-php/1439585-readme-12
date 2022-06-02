@@ -12,30 +12,30 @@
             <div class="container">
                 <div class="search__content">
                     <?php foreach ($searchContent as $content): ?>
-                        <?php $postType = "post-" . $content['category_name']; ?>
+                        <?php $postType = isset($content['category_name']) ? "post-" . $content['category_name'] : ''; ?>
                         <article class="search__post post <?= $postType ?>">
                             <header class="post__header post__author">
-                                <a class="post__author-link" href="profile.php?profile_id=<?= $content['user_id'] ?>" title="Автор">
+                                <a class="post__author-link" href="profile.php?profile_id=<?= $content['user_id'] ?? '' ?>" title="Автор">
                                     <div class="post__avatar-wrapper">
                                         <?php if (!empty($content['avatar'])): ?>
                                             <img class="post__author-avatar" src="<?= $content['avatar'] ?>" alt="Аватар пользователя" width="60" height="60">
                                         <?php endif; ?>
                                     </div>
                                     <div class="post__info">
-                                        <b class="post__author-name"><?= htmlspecialchars($content['login']) ?></b>
-                                        <?php $postDate = showDate($content['date_add']); ?>
-                                        <span class="post__time" title=" <?= $postDate['title'] ?>" datetime="<?= $postDate['datetime'] ?>">
-                                        <?= $postDate['relative_time'] . ' назад' ?>
-                                    </span>
+                                        <b class="post__author-name"><?= htmlspecialchars($content['login']) ?? '' ?></b>
+                                        <?php $postDate = isset($content['date_add']) ? showDate($content['date_add']) : ''; ?>
+                                        <span class="post__time" title=" <?= $postDate['title'] ?? '' ?>" datetime="<?= $postDate['datetime'] ?? '' ?>">
+                                            <?= isset($postDate['relative_time']) ? $postDate['relative_time'] . ' назад' : '' ?>
+                                        </span>
                                     </div>
                                 </a>
                             </header>
                             <div class="post__main">
-                                <h2><a href="post.php?post_id=<?= $content['post_id'] ?>"><?= htmlspecialchars($content['title']) ?></a></h2>
+                                <h2><a href="post.php?post_id=<?= $content['post_id'] ?? '' ?>"><?= htmlspecialchars($content['title']) ?? '' ?></a></h2>
                                 <?php if ($postType === 'post-quote'): ?>
                                     <blockquote>
                                         <p>
-                                            <?= htmlspecialchars($content['content']) ?>
+                                            <?= htmlspecialchars($content['content']) ?? '' ?>
                                         </p>
                                         <cite>
                                             <?php

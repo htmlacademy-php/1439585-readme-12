@@ -10,7 +10,7 @@
                     $tabItemActive = "";
                     $messageNew = "";
 
-                    if ($dialog['dialog_with_id'] === $messagesUserId) {
+                    if (isset($dialog['dialog_with_id']) && $dialog['dialog_with_id'] === $messagesUserId) {
                         $messageTabActive = "messages__contacts-tab--active";
                         $tabItemActive = "tabs__item--active";
                     }
@@ -20,7 +20,7 @@
                     } ?>
                     <li class="messages__contacts-item <?= $messageNew ?>">
                         <a class="messages__contacts-tab <?= $messageTabActive ?> tabs__item <?= $tabItemActive ?>"
-                           href="messages.php?user_id=<?= $dialog['dialog_with_id'] ?>">
+                           href="messages.php?user_id=<?= $dialog['dialog_with_id'] ?? '' ?>">
                             <?php if (empty($dialog['sender_id'])): ?>
                                 <div class="messages__avatar-wrapper">
                                     <?php if (!empty($dialog['avatar'])): ?>
@@ -30,7 +30,7 @@
                                 </div>
                                 <div class="messages__info">
                                     <span class="messages__contact-name">
-                                        <?= htmlspecialchars($dialog['login']) ?>
+                                        <?= htmlspecialchars($dialog['login'] ?? '') ?>
                                      </span>
                                 </div>
                             <?php else: ?>
@@ -45,15 +45,18 @@
                                 </div>
                                 <div class="messages__info">
                                 <span class="messages__contact-name">
-                                    <?= htmlspecialchars($dialog['login']) ?>
+                                    <?= htmlspecialchars($dialog['login'] ?? '') ?>
                                  </span>
                                     <div class="messages__preview">
                                         <p class="messages__preview-text">
-                                            <?php if ($dialog['sender_id'] === $userData['id']) echo 'Вы: ' ?>
-                                            <?= htmlspecialchars($dialog['content']) ?>
+                                            <?php
+                                            if (isset($userData['id']) && $dialog['sender_id'] === $userData['id']) {
+                                                echo 'Вы: ';
+                                            } ?>
+                                            <?= htmlspecialchars($dialog['content'] ?? '') ?>
                                         </p>
-                                        <time class="messages__preview-time" datetime="<?= $dialog['date_send'] ?>">
-                                            <?= showMessagePreviewDate($dialog['date_send']) ?>
+                                        <time class="messages__preview-time" datetime="<?= $dialog['date_send'] ?? '' ?>">
+                                            <?= isset($dialog['date_send']) ? showMessagePreviewDate($dialog['date_send']) : '' ?>
                                         </time>
                                     </div>
                                 </div>
@@ -75,7 +78,7 @@
                         <?php foreach ($messagesHistory as $message): ?>
                             <?php
                             $messageItem = "";
-                            if ($message['sender_id'] === $userData['id']) {
+                            if (isset($message['sender_id']) && isset($userData['id']) && $message['sender_id'] === $userData['id']) {
                                 $messageItem = "messages__item--my";
                             }
                             ?>
@@ -83,7 +86,7 @@
                                 <div class="messages__info-wrapper">
                                     <div class="messages__item-avatar">
                                         <a class="messages__author-link"
-                                           href="profile.php?profile_id=<?= $message['sender_id'] ?>">
+                                           href="profile.php?profile_id=<?= $message['sender_id'] ?? '' ?>">
                                             <?php if (!empty($message['avatar'])): ?>
                                                 <img class="messages__avatar" src="<?= $message['avatar'] ?>"
                                                      alt="Аватар пользователя">
@@ -92,17 +95,17 @@
                                     </div>
                                     <div class="messages__item-info">
                                         <a class="messages__author"
-                                           href="profile.php?profile_id=<?= $message['sender_id'] ?>">
-                                            <?= htmlspecialchars($message['login']) ?>
+                                           href="profile.php?profile_id=<?= $message['sender_id'] ?? '' ?>">
+                                            <?= htmlspecialchars($message['login'] ?? '') ?>
                                         </a>
-                                        <?php $messageDate = showDate($message['date_send']); ?>
-                                        <time class="messages__time" datetime="<?= $message['date_send'] ?>">
-                                            <?= $messageDate['relative_time'] . ' назад' ?>
+                                        <?php $messageDate = isset($message['date_send']) ? showDate($message['date_send']) : ''; ?>
+                                        <time class="messages__time" datetime="<?= $message['date_send'] ?? '' ?>">
+                                            <?= isset($messageDate['relative_time']) ? $messageDate['relative_time'] . ' назад' : '' ?>
                                         </time>
                                     </div>
                                 </div>
                                 <p class="messages__text">
-                                    <?= htmlspecialchars($message['content']) ?>
+                                    <?= htmlspecialchars($message['content'] ?? '') ?>
                                 </p>
                             </li>
                         <?php endforeach; ?>

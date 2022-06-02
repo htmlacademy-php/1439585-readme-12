@@ -11,7 +11,7 @@ if (!empty($errorFields)) {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $titleName ?></title>
+    <title><?= htmlspecialchars($titleName) ?></title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 
@@ -84,7 +84,7 @@ if (!empty($errorFields)) {
                     </svg>
                     <label class="visually-hidden">Пароль</label>
                     </div>
-                    <span class="form__error-label"><?= $errorFields['authorization'] ?></span>
+                    <span class="form__error-label"><?= $errorFields['authorization'] ?? '' ?></span>
                 </div>
                 <a class="authorization__recovery" href="#">Восстановить пароль</a>
                 <button class="authorization__submit button button--main" type="submit">Войти</button>

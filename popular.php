@@ -53,6 +53,7 @@ if (empty($currentPage) || ($currentPage === 1)) {
 $limit = 6;
 $offset = $limit * ($currentPage - 1);
 
+$cards = [];
 if (!empty($categoryId)) {
     $countPosts = countPostsByCategory($connect, $categoryId);
     $cards = getCardsByCategory($connect, $categoryId, $limit, $offset, $sortByParam, $sortOrderParam);
@@ -74,10 +75,6 @@ if ($currentPage < $countPages) {
     $nextPage = $currentPage + 1;
 } else {
     $nextPage = $currentPage;
-}
-
-if (empty($cards)) {
-    redirectOnPage('nothing-to-show.php');
 }
 
 $pageContent = include_template('main.php', [

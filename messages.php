@@ -11,73 +11,83 @@ isUserLoggedIn();
 
 $userData = userInitialization($connect);
 
-$newDialogUserData = [];
-$messagesHistory = [];
-$dialogId = '';
-$validationError = '';
+if (!empty($userData)) {
+    $newDialogUserData = [];
+    $messagesHistory = [];
+    $dialogId = '';
+    $validationError = '';
 
-// Был ли выбран диалог с каким-либо пользователем
-$messagesUserId = (int)filter_input(INPUT_GET, 'user_id', FILTER_SANITIZE_NUMBER_INT);
+    // Был ли выбран диалог с каким-либо пользователем
+    $messagesUserId = (int)filter_input(INPUT_GET, 'user_id', FILTER_SANITIZE_NUMBER_INT);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Проверка адресата
-    $recipientId = (int)filter_input(INPUT_POST, 'recipient_user_id', FILTER_SANITIZE_NUMBER_INT);
-    if ((isUserExists($connect, $recipientId) === false) || ($recipientId === $userData['id'])) {
-        redirectOnPage('nothing-to-show');
-    }
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Проверка адресата
+        $recipientId = (int)filter_input(INPUT_POST, 'recipient_user_id', FILTER_SANITIZE_NUMBER_INT);
+        if ((isUserExists($connect, $recipientId) === false) || ($recipientId === $userData['id'])) {
+            pageNotFound($userData);
+        }
 
-    // Проверка самого сообщения, не должно быть пустым
-    if (validateEmptyMessage($_POST['message_content']) === false) {
-        $validationError = 'Это поле обязательно к заполнению';
-        $messagesUserId = $recipientId;
-    } else {
-        $messageData = [$userData['id'], $recipientId, $_POST['dialog_id'], trim($_POST['message_content'])];
-        addMessage($connect, $messageData, (int)$_POST['dialog_id']);
-        redirectOnPage('messages.php?user_id=' . $recipientId);
-    }
-}
-
-
-// Получаем список, с кем есть диалоги
-$contactsList = getMessagesContactsList($connect, $userData['id']);
-
-// Если выбран диалог или мы перешли с профиля пользователя нажав на кнопку "сообщение", то надо получить переписку с ним в хронологическом порядке от обратного
-if (!empty($messagesUserId)) {
-    if (isDialogExists($connect, $userData['id'], $messagesUserId) === true) {
-        // Если переписка с пользователем уже велась, то надо достать dialog_id
-        $dialogId = getDialogId($connect, $userData['id'], $messagesUserId);
-        $messagesHistory = getMessages($connect, $userData['id'], $messagesUserId);
-
-        // После того как получили список сообщений с пользователем, отмечаем все сообщения прочитанными
-        foreach ($messagesHistory as $message) {
-            if (($message['is_new'] === 1) && ($message['sender_id'] !== $userData['id'])) {
-                markMessageAsRead($connect, $message['id']);
+        // Проверка самого сообщения, не должно быть пустым
+        if (isset($_POST['message_content']) && isset($_POST['dialog_id'])) {
+            if (validateEmptyMessage($_POST['message_content']) === false) {
+                $validationError = 'Это поле обязательно к заполнению';
+                $messagesUserId = $recipientId;
+            } else {
+                $messageData = [$userData['id'], $recipientId, $_POST['dialog_id'], trim($_POST['message_content'])];
+                addMessage($connect, $messageData, (int)$_POST['dialog_id']);
+                redirectOnPage('messages.php?user_id=' . $recipientId);
             }
         }
-    } else {
-        // Если переписки нет, надо сгенерировать dialog_id и получить данные по пользователю для добавления в начало массива $contactsList, чтобы показать диалог выше всех
-        $dialogId = generateNewDialogId($connect);
-        $newDialogUserData = getUserDataForContactList($connect, $messagesUserId);
-        array_unshift($contactsList, $newDialogUserData);
     }
+
+
+    // Получаем список, с кем есть диалоги
+    $contactsList = getMessagesContactsList($connect, $userData['id']);
+
+    // Если выбран диалог или мы перешли с профиля пользователя нажав на кнопку "сообщение", то надо получить
+    // переписку с ним в хронологическом порядке от обратного
+    if (!empty($messagesUserId)) {
+        if (isDialogExists($connect, $userData['id'], $messagesUserId) === true) {
+            // Если переписка с пользователем уже велась, то надо достать dialog_id
+            $dialogId = getDialogId($connect, $userData['id'], $messagesUserId);
+            $messagesHistory = getMessages($connect, $userData['id'], $messagesUserId);
+
+            // После того как получили список сообщений с пользователем, отмечаем все сообщения прочитанными
+            foreach ($messagesHistory as $message) {
+                if (($message['is_new'] === 1) && ($message['sender_id'] !== $userData['id'])) {
+                    markMessageAsRead($connect, $message['id']);
+                }
+            }
+        } else {
+            // Если переписки нет, надо сгенерировать dialog_id и получить данные по пользователю для добавления в начало
+            // массива $contactsList, чтобы показать диалог выше всех
+            $dialogId = generateNewDialogId($connect);
+            $newDialogUserData = getUserDataForContactList($connect, $messagesUserId);
+            array_unshift($contactsList, $newDialogUserData);
+        }
+    }
+
+    $pageContent = include_template('messages-details.php',
+        [
+            'userData' => $userData,
+            'messagesUserId' => $messagesUserId,
+            'contactsList' => $contactsList,
+            'newDialogUserData' => $newDialogUserData,
+            'messagesHistory' => $messagesHistory,
+            'dialogId' => $dialogId,
+            'validationError' => $validationError
+        ]);
+    $feedPage = include_template('layout.php',
+        [
+            'pageContent' => $pageContent,
+            'titleName' => 'readme: личные сообщения',
+            'userData' => $userData,
+            'is_auth' => AUTH
+        ]);
+
+    print_r($feedPage);
+} else {
+    /* Если по каким-то причинам массив $userData не заполнен, то принудительно разлогиневаем пользователя,
+    чтобы он не получил просто белый экран, а смог авторизоваться еще раз; так как первым делом в скрипте функцией isUserLoggedIn() проверяется, есть ли у пользователя доступ к странице, то есть залогинен ли он*/
+    redirectOnPage('logout.php');
 }
-
-$pageContent = include_template('messages-details.php',
-    [
-        'userData' => $userData,
-        'messagesUserId' => $messagesUserId,
-        'contactsList' => $contactsList,
-        'newDialogUserData' => $newDialogUserData,
-        'messagesHistory' => $messagesHistory,
-        'dialogId' => $dialogId,
-        'validationError' => $validationError
-    ]);
-$feedPage = include_template('layout.php',
-    [
-        'pageContent' => $pageContent,
-        'titleName' => 'readme: личные сообщения',
-        'userData' => $userData,
-        'is_auth' => AUTH
-    ]);
-
-print_r($feedPage);

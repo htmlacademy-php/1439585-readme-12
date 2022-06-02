@@ -8,8 +8,8 @@ if (!empty($errorFields)) {
 <div class="form__invalid-block <?= $visualHidden ?>">
     <b class="form__invalid-slogan">Пожалуйста, исправьте следующие ошибки:</b>
     <ul class="form__invalid-list">
-        <?php foreach ($errorFields as $key => $error): ?>
-            <li class="form__invalid-item"><?= $errorFields[$key] ?></li>
+        <?php foreach ($errorFields as $error): ?>
+            <li class="form__invalid-item"><?= htmlspecialchars($error) ?></li>
         <?php endforeach; ?>
     </ul>
 </div>

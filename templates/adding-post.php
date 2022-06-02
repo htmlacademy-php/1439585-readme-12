@@ -12,7 +12,7 @@
                                 <?php
                                 $contentCategory = filter_input(INPUT_GET, 'category_name', FILTER_SANITIZE_SPECIAL_CHARS);
 
-                                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post-type'])) {
                                     //условие на активность таба после сабмита
                                     $compareType = $_POST['post-type'];
                                 } elseif ((!empty($contentCategory))) {
@@ -29,11 +29,11 @@
                                     $activeTab = '';
                                 }
                                 ?>
-                                <a class="adding-post__tabs-link filters__button filters__button--<?= $category['class_name'] ?> <?= $activeButton ?> tabs__item <?= $activeTab ?> button" href="add.php?category_name=<?= $category['class_name'] ?>">
+                                <a class="adding-post__tabs-link filters__button filters__button--<?= $category['class_name'] ?? '' ?> <?= $activeButton ?> tabs__item <?= $activeTab ?> button" href="add.php?category_name=<?= $category['class_name'] ?? '' ?>">
                                     <svg class="filters__icon" width="22" height="18">
-                                        <use xlink:href="#icon-filter-<?= $category['class_name'] ?>"></use>
+                                        <use xlink:href="#icon-filter-<?= $category['class_name'] ?? '' ?>"></use>
                                     </svg>
-                                    <span><?= $category['name'] ?></span>
+                                    <span><?= $category['name'] ?? '' ?></span>
                                 </a>
                             </li>
                         </ul>
@@ -41,7 +41,7 @@
                 </div>
                 <div class="adding-post__tab-content">
                     <?php
-                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post-type'])) {
                         $contentCategory = $_POST['post-type'];
                         $filePath = "templates/adding-post/adding-post-" . $contentCategory . ".php";
                     } else {
@@ -55,7 +55,7 @@
                     if (file_exists($filePath)) {
                         require_once($filePath);
                     } else {
-                        echo "Sorry, there is some mistake.  There is nothing you want :(";
+                        echo "Sorry, there is some mistake. There is nothing you want :(";
                     }
                     ?>
                 </div>
