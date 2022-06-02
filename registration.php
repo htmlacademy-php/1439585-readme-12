@@ -1,7 +1,6 @@
 <?php
 
 declare(strict_types=1);
-
 require_once('config/db_connect.php');
 require_once('config/site_config.php');
 require_once('functions.php');
@@ -20,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errorFields = validateEmptyField($_POST, $requiredFields);
 
+    // Строкой выше есть проверка validateEmptyField, в которой проверяется, не пусты ли указанные используемые далее поля массива $_POST,
     //Валидация email
     if (checkEmailExists($connect, $_POST['email']) !== false) {
         $errorFields = array_merge(['email' => 'Пользователь с таким email, ' . $_POST['email'] . ', уже зарегистрирован.'],

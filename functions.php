@@ -28,10 +28,14 @@ function isUserLoggedIn()
  */
 function userInitialization($connect): array
 {
-    $userData['id'] = $_SESSION['user']['id'];
-    $userData['login'] = $_SESSION['user']['login'];
-    $userData['avatar'] = $_SESSION['user']['avatar'];
-    $userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
+    $userData = [];
+
+    if (isset($_SESSION['user']['id']) && isset($_SESSION['user']['login']) && isset($_SESSION['user']['avatar'])) {
+        $userData['id'] = $_SESSION['user']['id'];
+        $userData['login'] = $_SESSION['user']['login'];
+        $userData['avatar'] = $_SESSION['user']['avatar'];
+        $userData['all_new_messages'] = countAllNewMessages($connect, $userData['id']);
+    }
 
     return $userData;
 }
@@ -241,11 +245,26 @@ function executePrepareStmt($connect, string $sqlQuery, array $data)
  */
 function prepareData(array $fields): array
 {
-    $resultData = [];
+    $resultData = [
+        'heading' => '',
+        'post-text' => '',
+        'cite-text' => '',
+        'quote-author' => '',
+        'video-url' => '',
+        'post-link' => ''
+    ];
 
-    foreach ($_POST as $key => $data) {
-        if (array_key_exists($key, $fields)) {
-            $resultData[$key] .= filter_var(trim($data), FILTER_UNSAFE_RAW);
+    foreach ($_POST as $postKey => $postValue) {
+        foreach ($resultData as $resultDataKey => $data) {
+            if (array_key_exists($postKey, $fields) && ($postKey === $resultDataKey)) {
+                $resultData[$postKey] .= filter_var(trim($postValue), FILTER_UNSAFE_RAW);
+            }
+        }
+    }
+
+    foreach ($resultData as $resultDataKey => $data) {
+        if (empty(($data))) {
+            unset($resultData[$resultDataKey]);
         }
     }
 
@@ -264,9 +283,9 @@ function validateEmptyField(array $allFields, array $requiredFields): array
     $errors = [];
 
     foreach ($allFields as $keyAllField => $field) {
-        $trimField = trim($_POST[$keyAllField]);
+        $trimField = trim($field);
         $isKeyExist = array_key_exists($keyAllField, $requiredFields);
-        if (empty($trimField) && ($isKeyExist == true)) {
+        if (empty($trimField) && ($isKeyExist === true)) {
             $errors[$keyAllField] = $requiredFields[$keyAllField] . " Это поле должно быть заполнено.";
         }
     }
@@ -282,7 +301,7 @@ function validateEmptyField(array $allFields, array $requiredFields): array
 function prepareTags(string $hashtags): array
 {
     $tags = [];
-    $trimHashtags = trim($_POST[$hashtags]);
+    $trimHashtags = trim($hashtags);
 
     if (!empty($trimHashtags)) {
         $tags = explode(' ', $trimHashtags);
@@ -306,6 +325,11 @@ function validateVideo(string $videoLink)
     $error = null;
 
     $filteredVideoLink = filter_var($videoLink, FILTER_VALIDATE_URL);
+
+    // Проверяем, что указанное вообще является ссылкой, а не просто набором букв
+    if (validateUrl($videoLink) === false) {
+        return 'Указана не корректная ссылка';
+    }
 
     if (check_youtube_url($filteredVideoLink) == 0) {
         $error = check_youtube_url($filteredVideoLink);
@@ -334,14 +358,16 @@ function validateEmptyPicture(): bool
  */
 function validatePictureFromUser(string $keyName): bool
 {
-    $tmpName = $_FILES[$keyName]['tmp_name'];
+    if (isset($_FILES[$keyName]['tmp_name'])) {
+        $tmpName = $_FILES[$keyName]['tmp_name'];
 
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $fileType = finfo_file($finfo, $tmpName);
-    finfo_close($finfo);
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $fileType = finfo_file($finfo, $tmpName);
+        finfo_close($finfo);
 
-    if (in_array($fileType, ALLOWED_MIME_TYPES)) {
-        return true;
+        if (in_array($fileType, ALLOWED_MIME_TYPES)) {
+            return true;
+        }
     }
 
     return false;
@@ -350,37 +376,45 @@ function validatePictureFromUser(string $keyName): bool
 /**
  * Сохранение картинки, загруженной юзером.
  * @param string $keyName Ключ для обращения к элементам массива $_FILES
- * @return string Имя сохраненного файла
+ * @return string|false Имя сохраненного файла, иначе false в случае отсутствия файла в $_FILES
  */
-function savePictureFromUser(string $keyName): string
+function savePictureFromUser(string $keyName)
 {
-    $filePath = __DIR__ . DIRECTORY_SEPARATOR . "uploads" . DIRECTORY_SEPARATOR;
-    $tmpName = $_FILES[$keyName]['tmp_name'];
-    $fileName = $_FILES[$keyName]['name'];
-    $newFileName = uniqid() . $fileName;
+    if (isset($_FILES[$keyName])) {
+        $filePath = __DIR__ . DIRECTORY_SEPARATOR . "uploads" . DIRECTORY_SEPARATOR;
+        $tmpName = $_FILES[$keyName]['tmp_name'];
+        $fileName = $_FILES[$keyName]['name'];
+        $newFileName = uniqid() . $fileName;
 
-    move_uploaded_file($tmpName, $filePath . $newFileName);
+        move_uploaded_file($tmpName, $filePath . $newFileName);
 
-    return $newFileName;
+        return $newFileName;
+    }
+    return false;
 }
 
 /**
  * Валидация картинки по URL.
  * Пример ссылки url корректного формата: https://pbs.twimg.com/media/EP63Du7X4AE7c3B.jpg
- * @param string $keyName Ключ для обращения к элементам массиву $_POST
+ * @param string $pictureSiteLink Url страницы с картинкой
  * @return bool Возвращает false, если не корректны ссылка или mime-тип
  */
-function validatePictureUrl(string $keyName): bool
+function validatePictureUrl(string $pictureSiteLink): bool
 {
-    $siteUrl = filter_var($_POST[$keyName], FILTER_VALIDATE_URL);
+    $siteUrl = filter_var($pictureSiteLink, FILTER_VALIDATE_URL);
 
     // Если ссылка не прошла FILTER_VALIDATE_URL, return false
     if ($siteUrl == false) {
         return false;
     }
 
-    // Если заголовок не содержит content-type соответсвующий формату image, return false
+    if (!get_headers($siteUrl)) {
+        return false;
+    }
+
     $siteHeaders = get_headers($siteUrl);
+
+    // Если заголовок не содержит content-type соответсвующий формату image, return false
     if (strstr(implode($siteHeaders), 'Content-Type: image')) {
         $imageType = exif_imagetype($siteUrl);
     } else {
@@ -397,18 +431,32 @@ function validatePictureUrl(string $keyName): bool
 
 /**
  * Сохранение картинки по указанному URL.
- * @param string $keyName Ключ для обращения к элементам массиву $_POST
- * @return string Имя сохраненного файла
+ * @param string $pictureSiteLink Url страницы с картинкой
+ * @return string|false  Имя сохраненного файла, false в случае ошибки сохранения
  */
-function savePictureByUrl(string $keyName): string
+function savePictureByUrl(string $pictureSiteLink)
 {
     $filePath = __DIR__ . DIRECTORY_SEPARATOR . "uploads" . DIRECTORY_SEPARATOR;
-    $siteUrl = $_POST[$keyName];
-    $imageUrl = file_get_contents($siteUrl);
+    $siteUrl = $pictureSiteLink;
 
+    if (file_get_contents($siteUrl) === false) {
+        return false;
+    }
+
+    $imageUrl = file_get_contents($siteUrl);
     $type = pathinfo($siteUrl, PATHINFO_EXTENSION);
     $name = pathinfo($siteUrl, PATHINFO_FILENAME);
+
+    if (empty($type) && $name) {
+        return false;
+    }
+
     $newFileName = uniqid() . $name . '.' . $type;
+
+    if (file_put_contents($filePath . $newFileName, $imageUrl) === false) {
+        return false;
+    }
+
     file_put_contents($filePath . $newFileName, $imageUrl);
 
     return $newFileName;
@@ -703,6 +751,29 @@ function redirectOnPage(string $page)
 }
 
 /**
+ * Если параметр запроса страницы отсутствует, либо если по этому ID не нашли ни одной записи,
+ * то вместо содержимого страницы возвращать код ответа 404.
+ * @param array $userData Данные авторизованного пользователя
+ * @return void
+ */
+function pageNotFound(array $userData)
+{
+    http_response_code(404);
+
+    $pageContent = include_template('no-content.php');
+    $nothingShowPage = include_template('layout.php',
+        [
+            'pageContent' => $pageContent,
+            'titleName' => 'readme: страница не найдена',
+            'userData' => $userData,
+            'is_auth' => AUTH
+        ]);
+
+    print_r($nothingShowPage);
+    die();
+}
+
+/**
  * Проверка существования email'а пользователя в БД.
  * @param $connect mysqli Ресурс соединения
  * @param string $userEmail Email нового пользователя
@@ -727,7 +798,7 @@ function checkEmailExists($connect, string $userEmail): bool
  */
 function validateEmail(string $userEmail): bool
 {
-    if (filter_var($userEmail, FILTER_VALIDATE_EMAIL) == false) {
+    if (filter_var($userEmail, FILTER_VALIDATE_EMAIL) === false) {
         return false;
     }
 
@@ -1013,7 +1084,7 @@ function getContentDataForPostPage($connect, int $postId, int $authorizedUserId)
 function getPostComments($connect, int $postId): array
 {
     $sql = "SELECT posts.id AS 'posts_id',
-                   users.id AS 'comment_author',
+                   users.id AS 'comment_author_id',
                    login,
                    avatar,
                    comments.date_add AS 'comment_date',
@@ -1277,6 +1348,7 @@ function getLikesForUserProfilePage($connect, int $userId): array
                     likes.id AS 'like_id',
                     posts.category_id,
                     categories.name AS 'category_name',
+                    categories.class_name AS 'category_class_name',
                     image_path,
                     video_link,
                     users.login,
@@ -1560,7 +1632,7 @@ function generateNewDialogId($connect): int
 {
     $sqlIsTableEmpty = "SELECT COUNT(id) FROM messages_log;";
 
-    if (fetchResult($connect, $sqlIsTableEmpty)['COUNT(id)'] == 0) {
+    if ((int)fetchResult($connect, $sqlIsTableEmpty)['COUNT(id)'] === 0) {
         //Если в таблице еще нет записей, возвращаем 1 в качестве нового dialog_id
         return 1;
     } else {
@@ -1754,22 +1826,23 @@ function getUserDataForMailer($connect, int $userId): array
 /**
  * Определение, какое содержимое и тема письма будут отправлены пользователю в зависимости от используемого сценария.
  * @param string $recipientLogin Логин получателя
- * @param array $senderData Логин и id отправителя
+ * @param string $senderLogin Логин отправителя
+ * @param int $senderId Id отправителя
  * @param string $messageType Тип сообщения: add - уведомление о публикации нового поста, subscribe - уведомление о новом подписчике
  * @return array
  */
-function messageContent(string $recipientLogin, array $senderData, string $messageType): array
+function messageContent(string $recipientLogin, string $senderLogin, int $senderId, string $messageType): array
 {
     $message = [];
 
     switch ($messageType) {
         case ('add'):
-            $message['subject'] = "Новая публикация от пользователя " . $senderData['login'];
-            $message['body'] = "Здравствуйте, " . $recipientLogin . ". Пользователь " . $senderData['login'] . " только что опубликовал новую запись „" . htmlspecialchars($_POST['heading']) . "“. Посмотрите её на странице пользователя: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $senderData['id'];
+            $message['subject'] = "Новая публикация от пользователя " . $senderLogin;
+            $message['body'] = "Здравствуйте, " . $recipientLogin . ". Пользователь " . $senderLogin . " только что опубликовал новую запись „" . htmlspecialchars($_POST['heading']) . "“. Посмотрите её на странице пользователя: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $senderId;
             break;
         case ('subscribe'):
             $message['subject'] = "У вас новый подписчик";
-            $message['body'] = "Здравствуйте, " . $recipientLogin . ". На вас подписался новый пользователь " . $senderData['login'] . ". Вот ссылка на его профиль: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $senderData['id'];
+            $message['body'] = "Здравствуйте, " . $recipientLogin . ". На вас подписался новый пользователь " . $senderLogin . ". Вот ссылка на его профиль: " . $_SERVER['HTTP_HOST'] . "/profile.php?profile_id=" . $senderId;
             break;
     }
 
@@ -1780,16 +1853,17 @@ function messageContent(string $recipientLogin, array $senderData, string $messa
  * Отправка письма-уведомления на почту пользователя.
  * @param $transport Объект транспорта с настроенными параметрами подключения(/config/smtp_configuration.php)
  * @param string $recipientEmail Email получателя уведомления
- * @param array $messageContent Содержимое письма
+ * @param string $messageSubject Тема письма
+ * @param string $messageBody Содержимое письма
  * @return void
  */
-function sendMailNotification($transport, string $recipientEmail, array $messageContent)
+function sendMailNotification($transport, string $recipientEmail, string $messageSubject, string $messageBody)
 {
     $email = (new Email())
         ->from(SENDER_ADDRESS)
         ->to($recipientEmail)
-        ->subject($messageContent['subject'])
-        ->text($messageContent['body']);
+        ->subject($messageSubject)
+        ->text($messageBody);
 
     $mailer = new Mailer($transport);
     try {
